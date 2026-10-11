@@ -6,19 +6,29 @@ import { FLAVORS, WHATSAPP_URL, brl } from '@/data';
 const ORDER_TYPES = ['Delivery', 'Festa', 'Evento'] as const;
 type OrderType = (typeof ORDER_TYPES)[number];
 
+const PAYMENT_METHODS = ['Pix', 'Cartão Débito', 'Cartão Crédito'] as const;
+type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
 type Fields = {
   nome: string;
   tel: string;
   data: string;
   endereco: string;
+  referencia: string;
   convidados: string;
   obs: string;
 };
 
-const EMPTY_FIELDS: Fields = { nome: '', tel: '', data: '', endereco: '', convidados: '', obs: '' };
+const EMPTY_FIELDS: Fields = { nome: '', tel: '', data: '', endereco: '', referencia: '', convidados: '', obs: '' };
 const emptyQty = () => Object.fromEntries(FLAVORS.map((f) => [f.id, 0])) as Record<string, number>;
 
-function buildMessage(type: OrderType, f: Fields, qty: Record<string, number>, total: number) {
+function buildMessage(
+  type: OrderType,
+  payment: PaymentMethod,
+  f: Fields,
+  qty: Record<string, number>,
+  total: number,
+) {
   const items = FLAVORS.filter((x) => qty[x.id])
     .map((x) => `• ${qty[x.id]}x ${x.name} (${brl(x.price * qty[x.id])})`)
     .join('\n');
@@ -30,10 +40,12 @@ function buildMessage(type: OrderType, f: Fields, qty: Record<string, number>, t
     `WhatsApp: ${f.tel}`,
     f.data ? `Data: ${f.data.split('-').reverse().join('/')}` : null,
     f.endereco ? `Endereço: ${f.endereco}` : null,
+    f.referencia && type === 'Delivery' ? `Ponto de referência: ${f.referencia}` : null,
     f.convidados && type !== 'Delivery' ? `Convidados: ${f.convidados}` : null,
     '',
     items,
     `Total estimado: ${brl(total)}`,
+    `Pagamento: ${payment}`,
     f.obs ? `\nObs: ${f.obs}` : null,
   ];
   return lines.filter((l) => l !== null).join('\n');
@@ -43,7 +55,8 @@ export function OrderForm() {
   const [type, setType] = useState<OrderType>('Delivery');
   const [fields, setFields] = useState<Fields>(EMPTY_FIELDS);
   const [qty, setQty] = useState(emptyQty);
-  const [error, setError] = useState(false);
+  const [payment, setPayment] = useState<PaymentMethod | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
   const tubes = FLAVORS.reduce((a, x) => a + qty[x.id], 0);
@@ -56,17 +69,21 @@ export function OrderForm() {
   };
 
   const add = (id: string, d: number) => {
-    setError(false);
+    setError(null);
     setQty((s) => ({ ...s, [id]: Math.max(0, s[id] + d) }));
   };
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!tubes) {
-      setError(true);
+      setError('Adicione pelo menos um tubo ao pedido.');
       return;
     }
-    const msg = buildMessage(type, fields, qty, total);
+    if (!payment) {
+      setError('Escolha a forma de pagamento.');
+      return;
+    }
+    const msg = buildMessage(type, payment, fields, qty, total);
     window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
     setSent(true);
   };
@@ -75,6 +92,7 @@ export function OrderForm() {
     setSent(false);
     setQty(emptyQty());
     setFields(EMPTY_FIELDS);
+    setPayment(null);
   };
 
   if (sent) {
@@ -130,6 +148,13 @@ export function OrderForm() {
         </label>
       </div>
 
+      {!isEvent && (
+        <label className="field">
+          Ponto de referência
+          <input name="referencia" value={fields.referencia} onChange={onField} />
+        </label>
+      )}
+
       {isEvent && (
         <label className="field">
           Número de convidados
@@ -175,6 +200,26 @@ export function OrderForm() {
         </div>
       </div>
 
+      <div className="form__group">
+        <span className="form__group-label" id="payment-label">Forma de pagamento</span>
+        <div className="form__types" role="group" aria-labelledby="payment-label">
+          {PAYMENT_METHODS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              className="form__type"
+              aria-pressed={p === payment}
+              onClick={() => {
+                setError(null);
+                setPayment(p);
+              }}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <label className="field">
         Observações
         <textarea name="obs" rows={3} value={fields.obs} onChange={onField} />
@@ -182,7 +227,7 @@ export function OrderForm() {
 
       {error && (
         <div className="form__error" role="alert">
-          Adicione pelo menos um tubo ao pedido.
+          {error}
         </div>
       )}
 
