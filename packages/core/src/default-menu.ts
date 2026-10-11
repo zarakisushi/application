@@ -1,57 +1,42 @@
-import type { StaticImageData } from 'next/image';
-import roll1 from './assets/roll1-photo.jpg';
-import roll2 from './assets/roll2-photo.jpg';
-import roll3 from './assets/roll3-photo.jpg';
-import roll4 from './assets/roll4-photo.jpg';
-
-export const WHATSAPP_NUMBER = '5562981092799';
-export const WHATSAPP_LABEL = '(62) 98109-2799';
-export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
-export const SOCIAL_HANDLE = '@zarakisushigo';
-
-export type Flavor = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: StaticImageData;
-  special?: boolean;
-};
-
-export const FLAVORS: Flavor[] = [
+/**
+ * Cardápio inicial da Zaraki. Fonte única para o seed do banco e para o modo de contingência
+ * do site (quando o banco está fora do ar). Os preços válidos são sempre os do banco.
+ */
+export const DEFAULT_MENU = [
   {
-    id: 's1',
+    slug: 'uramaki-salmao-cream-cheese',
     name: 'Uramaki de salmão e cream cheese',
     description:
       'Uma camada de gergelim torrado envolve a combinação perfeita de arroz temperado e alga crocante, abraçando o frescor incomparável do nosso salmão selecionado e a cremosidade aveludada do cream cheese.',
-    price: 50,
-    image: roll1,
+    priceCents: 5000,
+    imageUrl: '/menu/roll1-photo.jpg',
+    isSpecial: false,
   },
   {
-    id: 's2',
+    slug: 'uramaki-salmao-manga',
     name: 'Uramaki de Salmão e Manga',
     description:
       'Uma camada de gergelim torrado envolve a combinação perfeita de arroz temperado e alga crocante, abraçando o frescor incomparável do nosso salmão selecionado e a doçura suculenta da manga bem fresca.',
-    price: 50,
-    image: roll2,
+    priceCents: 5000,
+    imageUrl: '/menu/roll2-photo.jpg',
+    isSpecial: false,
   },
   {
-    id: 's3',
+    slug: 'uramaki-camarao-cream-cheese',
     name: 'Uramaki de Camarão e Cream cheese',
     description:
       'Uma camada de gergelim torrado envolve a combinação perfeita de arroz temperado e alga crocante, abraçando o frescor incomparável do nosso camarão selecionado e a cremosidade aveludada do cream cheese.',
-    price: 50,
-    image: roll3,
+    priceCents: 5000,
+    imageUrl: '/menu/roll3-photo.jpg',
+    isSpecial: false,
   },
   {
-    id: 's4',
+    slug: 'uramaki-especial-salmao-camarao',
     name: 'Uramaki Especial Salmão e Camarão',
     description:
       'A junção especial do salmão fresco e do camarão selecionado, unidos para formar um sushi de excelência e qualidade, envolvidos pela combinação perfeita de arroz temperado, alga crocante e uma camada de gergelim torrado.',
-    price: 60,
-    image: roll4,
-    special: true,
+    priceCents: 6000,
+    imageUrl: '/menu/roll4-photo.jpg',
+    isSpecial: true,
   },
-];
-
-export const brl = (n: number) => 'R$ ' + n.toFixed(2).replace('.', ',');
+] as const;

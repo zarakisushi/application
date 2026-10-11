@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import symbol from '../assets/symbol.png';
+import symbol from '../../assets/symbol.png';
 
 export function Nav() {
   return (

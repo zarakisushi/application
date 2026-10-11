@@ -1,0 +1,46 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "DATABASE_URL_MIGRATIONS",
+    "APP_DB_PASSWORD",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "WHATSAPP_NUMBER",
+    "DEFAULT_TENANT_SLUG",
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL",
+    "GOOGLE_SERVICE_ACCOUNT_KEY",
+    "GOOGLE_CALENDAR_ID",
+    "CALENDAR_DRIVER",
+    "CRON_SECRET",
+    "BLOB_READ_WRITE_TOKEN",
+    "VERCEL",
+    "VERCEL_ENV"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^typecheck"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

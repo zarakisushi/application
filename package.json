@@ -1,0 +1,24 @@
+{
+  "name": "zaraki",
+  "private": true,
+  "packageManager": "pnpm@12.11.2",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:start": "pnpm --filter @zaraki/db start",
+    "db:generate": "pnpm --filter @zaraki/db generate",
+    "db:migrate": "pnpm --filter @zaraki/db migrate",
+    "db:seed": "pnpm --filter @zaraki/db seed",
+    "test:e2e": "pnpm --filter @zaraki/web test:e2e",
+    "admin:create": "pnpm --filter @zaraki/web create-user",
+    "db:seed-demo": "pnpm --filter @zaraki/db seed-demo"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.7"
+  }
+}

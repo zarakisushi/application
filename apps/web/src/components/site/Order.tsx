@@ -1,5 +1,5 @@
 import { whatsappUrl } from '@zaraki/core';
-import { OrderForm, type OrderFormProduct } from '@/components/OrderForm';
+import { OrderForm, type OrderFormProduct } from '@/components/site/OrderForm';
 
 type Props = {
   products: OrderFormProduct[];

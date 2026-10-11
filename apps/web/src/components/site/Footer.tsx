@@ -1,5 +1,7 @@
+import { Lock } from 'lucide-react';
 import Image from 'next/image';
-import symbol from '../assets/symbol.png';
+import Link from 'next/link';
+import symbol from '../../assets/symbol.png';
 import { whatsappUrl } from '@zaraki/core';
 
 const SOCIAL_HANDLE = '@zarakisushigo';
@@ -30,6 +32,10 @@ export function Footer({ whatsapp }: { whatsapp: { number: string; label: string
           <a href={whatsappUrl(whatsapp.number)} target="_blank" rel="noopener noreferrer">
             {whatsapp.label}
           </a>
+          <Link href="/admin" rel="nofollow" className="footer__admin">
+            <Lock size={14} aria-hidden="true" />
+            Área administrativa
+          </Link>
         </div>
       </div>
     </footer>

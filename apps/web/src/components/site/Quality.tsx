@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import banner from '../assets/banner.jpg';
+import banner from '../../assets/banner.jpg';
 
 const PILLARS = [
   { num: '壱', title: 'Produtos frescos', text: 'Peixes e frutos do mar selecionados, recebidos e preparados no mesmo dia.' },

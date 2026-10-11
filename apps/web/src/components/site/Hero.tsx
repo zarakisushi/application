@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import tumbler from '../assets/tumbler.jpg';
+import tumbler from '../../assets/tumbler.jpg';
 
 export function Hero() {
   return (

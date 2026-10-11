@@ -9,7 +9,6 @@ import {
   priceOrder,
   whatsappUrl,
   type OrderType,
-  type PublicOrderInput,
 } from '@zaraki/core';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { submitOrder } from '@/app/(site)/actions';
@@ -86,7 +85,7 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
     setQty((s) => ({ ...s, [id]: Math.max(0, (s[id] ?? 0) + d) }));
   };
 
-  const payload = (): PublicOrderInput => ({
+  const payload = () => ({
     type,
     name: fields.name,
     phone: fields.phone,

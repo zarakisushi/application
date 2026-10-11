@@ -1,6 +1,6 @@
 import Image from 'next/image';
-import tubes from '../assets/oque-tubos.webp';
-import steps from '../assets/passos-v9.png';
+import tubes from '../../assets/oque-tubos.webp';
+import steps from '../../assets/passos-v9.png';
 
 export function About() {
   return (

@@ -1,9 +1,16 @@
 node_modules
 .next
+.turbo
 out
+dist
 next-env.d.ts
 *.tsbuildinfo
 *.local
+.env
 .env*.local
 .DS_Store
 *-handoff.zip
+.data
+test-results
+playwright-report
+apps/web/public/uploads

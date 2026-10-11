@@ -1,0 +1,53 @@
+# Backup diário do banco de produção (Neon) para o Cloudflare R2, fora do provedor do banco.
+# Restauração: docs/deploy.md → "Backup e restauração".
+name: Backup do banco
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # 03:00 em Goiânia
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Instalar cliente do Postgres 18
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-18
+
+      - name: Gerar o dump
+        env:
+          DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          # O RLS é forçado até para o dono das tabelas: o dump lê com o acesso da Matriz.
+          PGOPTIONS: -c app.platform_admin=on
+        run: |
+          FILE="zaraki-$(date -u +%Y-%m-%dT%H%MZ).dump"
+          /usr/lib/postgresql/18/bin/pg_dump --format=custom --no-owner --enable-row-security \
+            --dbname "$DATABASE_URL" --file "$FILE"
+          sha256sum "$FILE" > "$FILE.sha256"
+          test -s "$FILE"
+          echo "FILE=$FILE" >> "$GITHUB_ENV"
+
+      - name: Enviar para o Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: |
+          # diario/ é apagado pelo R2 após 30 dias; mensal/ (dia 1) após 12 meses (regras de ciclo de vida do bucket).
+          for prefix in diario $( [ "$(date -u +%d)" = "01" ] && echo mensal ); do
+            aws s3 cp "$FILE" "s3://$R2_BUCKET/$prefix/$FILE" --endpoint-url "$R2_ENDPOINT" --only-show-errors
+            aws s3 cp "$FILE.sha256" "s3://$R2_BUCKET/$prefix/$FILE.sha256" --endpoint-url "$R2_ENDPOINT" --only-show-errors
+          done
+          echo "Backup enviado: $FILE ($(du -h "$FILE" | cut -f1))"
