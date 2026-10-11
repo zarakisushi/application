@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import { FLAVORS } from '@/data';
+import type { MenuItem } from '@/server/site';
 
-export function Menu() {
+export function Menu({ items }: { items: MenuItem[] }) {
   return (
     <section id="cardapio" className="menu">
       <div className="container">
@@ -14,11 +14,13 @@ export function Menu() {
         </div>
 
         <div className="menu__grid">
-          {FLAVORS.map((f) => (
-            <article key={f.id} className={f.special ? 'card card--special' : 'card'}>
-              {f.special && <span className="card__tag">ESPECIAL</span>}
+          {items.map((f) => (
+            <article key={f.id} className={f.isSpecial ? 'card card--special' : 'card'}>
+              {f.isSpecial && <span className="card__tag">ESPECIAL</span>}
               <div className="card__media">
-                <Image src={f.image} alt={f.name} fill sizes="(max-width: 600px) 100vw, (max-width: 1240px) 50vw, 300px" />
+                {f.imageUrl && (
+                  <Image src={f.imageUrl} alt={f.name} fill sizes="(max-width: 600px) 100vw, (max-width: 1240px) 50vw, 300px" />
+                )}
               </div>
               <div className="card__body">
                 <h3>{f.name}</h3>

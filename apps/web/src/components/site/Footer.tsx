@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import symbol from '../assets/symbol.png';
-import { SOCIAL_HANDLE, WHATSAPP_LABEL, WHATSAPP_URL } from '@/data';
+import { whatsappUrl } from '@zaraki/core';
 
-export function Footer() {
+const SOCIAL_HANDLE = '@zarakisushigo';
+
+export function Footer({ whatsapp }: { whatsapp: { number: string; label: string } }) {
   return (
     <footer className="footer">
       <div className="container">
@@ -25,7 +27,9 @@ export function Footer() {
             <span className="social-icon social-icon--tt" aria-hidden="true">♪</span>
             {SOCIAL_HANDLE}
           </a>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">{WHATSAPP_LABEL}</a>
+          <a href={whatsappUrl(whatsapp.number)} target="_blank" rel="noopener noreferrer">
+            {whatsapp.label}
+          </a>
         </div>
       </div>
     </footer>

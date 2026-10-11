@@ -1,7 +1,14 @@
-import { WHATSAPP_LABEL, WHATSAPP_URL } from '@/data';
-import { OrderForm } from '@/components/OrderForm';
+import { whatsappUrl } from '@zaraki/core';
+import { OrderForm, type OrderFormProduct } from '@/components/OrderForm';
 
-export function Order() {
+type Props = {
+  products: OrderFormProduct[];
+  whatsapp: { number: string; label: string };
+  minDate: string;
+  offline: boolean;
+};
+
+export function Order({ products, whatsapp, minDate, offline }: Props) {
   return (
     <section id="encomendas" className="order">
       <div className="container">
@@ -12,13 +19,13 @@ export function Order() {
             Preencha o formulário e enviamos a confirmação pelo WhatsApp. Para festas e eventos, informe a data e a
             quantidade estimada de convidados.
           </p>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="order__wa">
+          <a href={whatsappUrl(whatsapp.number)} target="_blank" rel="noopener noreferrer" className="order__wa">
             <span aria-hidden="true">WA</span>
-            {WHATSAPP_LABEL}
+            {whatsapp.label}
           </a>
           <div className="order__city">Goiânia · Goiás</div>
         </div>
-        <OrderForm />
+        <OrderForm products={products} whatsappNumber={whatsapp.number} minDate={minDate} offline={offline} />
       </div>
     </section>
   );
