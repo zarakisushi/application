@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Cinzel } from 'next/font/google';
 import localFont from 'next/font/local';
+import Script from 'next/script';
 import './globals.css';
 
 const cinzel = Cinzel({
@@ -39,6 +40,8 @@ const shipporiKanji = localFont({
   display: 'swap',
 });
 
+const GA_ID = 'G-J9M66XFMY8';
+
 export const metadata: Metadata = {
   title: 'Push-Pop Sushi · Zaraki Sushi Goiânia',
   description:
@@ -52,7 +55,16 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${cinzel.variable} ${shippori.variable} ${shipporiKanji.variable} ${zenKaku.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_ID}');`}
+        </Script>
+      </body>
     </html>
   );
 }
