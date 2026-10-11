@@ -40,7 +40,7 @@ function buildMessage(
     `WhatsApp: ${f.tel}`,
     f.data ? `Data: ${f.data.split('-').reverse().join('/')}` : null,
     f.endereco ? `Endereço: ${f.endereco}` : null,
-    f.referencia && type === 'Delivery' ? `Ponto de referência: ${f.referencia}` : null,
+    f.referencia ? `Ponto de referência: ${f.referencia}` : null,
     f.convidados && type !== 'Delivery' ? `Convidados: ${f.convidados}` : null,
     '',
     items,
@@ -148,12 +148,10 @@ export function OrderForm() {
         </label>
       </div>
 
-      {!isEvent && (
-        <label className="field">
-          Ponto de referência
-          <input name="referencia" value={fields.referencia} onChange={onField} />
-        </label>
-      )}
+      <label className="field">
+        Ponto de referência
+        <input name="referencia" value={fields.referencia} onChange={onField} />
+      </label>
 
       {isEvent && (
         <label className="field">
