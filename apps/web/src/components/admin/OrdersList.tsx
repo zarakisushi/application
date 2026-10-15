@@ -22,9 +22,9 @@ const COPY = {
     newLabel: 'Novo pedido',
   },
   encomendas: {
-    title: 'Encomendas',
-    description: 'Encomendas e festas agendadas, sincronizadas com a Google Agenda.',
-    newLabel: 'Nova encomenda',
+    title: 'Festas e eventos',
+    description: 'Festas e eventos agendados, sincronizados com a Google Agenda.',
+    newLabel: 'Nova festa ou evento',
   },
 } as const;
 
@@ -162,7 +162,7 @@ export async function OrdersList({ ctx, kind, searchParams }: { ctx: AdminContex
             ))}
             {!page.rows.length && (
               <EmptyRow colSpan={scheduled ? 8 : 7}>
-                {scheduled ? 'Nenhuma encomenda neste filtro.' : 'Nenhum pedido neste filtro.'}
+                {scheduled ? 'Nenhuma festa ou evento neste filtro.' : 'Nenhum pedido neste filtro.'}
               </EmptyRow>
             )}
           </TableBody>

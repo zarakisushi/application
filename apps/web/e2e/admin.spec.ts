@@ -93,7 +93,7 @@ test('menu lateral alterna entre "ícones + textos" e "apenas ícones" e lembra 
 test('atendente não vê a gestão e é barrado ao acessar pela URL', async ({ page }) => {
   await firstAccess(page, 'atendente@zaraki.test');
   const nav = page.locator('[data-slot="sidebar"]');
-  for (const visible of ['Início', 'Pedidos', 'Encomendas', 'Clientes', 'Cardápio']) {
+  for (const visible of ['Início', 'Pedidos', 'Festas e eventos', 'Clientes', 'Cardápio']) {
     await expect(nav.getByRole('link', { name: visible })).toBeVisible();
   }
   for (const hidden of ['Relatórios', 'Usuários', 'Auditoria', 'Unidades']) {

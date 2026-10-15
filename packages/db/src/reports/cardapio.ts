@@ -119,7 +119,7 @@ const mix: ReportDefinition = {
   slug: 'mix-por-tipo',
   group: 'Cardápio',
   title: 'Mix de sabores por tipo de pedido',
-  description: 'Quantos tubos de cada sabor saem no delivery, nas encomendas e nas festas.',
+  description: 'Quantos tubos de cada sabor saem no delivery, nas festas e nos eventos.',
   permission: 'reports:read',
   async run(tx, p) {
     const raw = await query<{ sabor: string; tipo: string; tubos: number }>(

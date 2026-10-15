@@ -1,6 +1,6 @@
 # Ligar a Google Agenda
 
-Encomendas e festas entram sozinhas na agenda de **zarakisushigo@gmail.com**: criar, mudar data ou
+Festas e eventos entram sozinhos na agenda de **zarakisushigo@gmail.com**: criar, mudar data ou
 itens, cancelar, excluir e restaurar um pedido atualiza o evento correspondente. Para isso o sistema
 usa uma **conta de serviço** do Google — uma "conta-robô" que só tem acesso à agenda que você
 compartilhar com ela. Não há senha pessoal envolvida nem login que expire.
@@ -54,7 +54,7 @@ a Google Calendar API não ativada no projeto.
 
 ## Como funciona (para quem mantém o sistema)
 
-- Toda alteração de encomenda/festa grava um pedido de sincronização na fila (`calendar_sync_jobs`),
+- Toda alteração de festa ou evento grava um pedido de sincronização na fila (`calendar_sync_jobs`),
   na mesma transação do pedido — nada se perde se o Google estiver fora do ar.
 - A fila é processada logo após a resposta (`after()` do Next) e de hora em hora pelo cron da Vercel (que reenvia o que falhou)
   (`/api/cron/calendar`, configurado em `apps/web/vercel.json`).

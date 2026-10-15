@@ -64,7 +64,7 @@ export function StageControls({ orderId, stage, payment }: { orderId: string; st
           icon={<Ban />}
           variant="destructive"
           title="Cancelar este pedido?"
-          description="O cancelamento fica registrado no histórico. Encomendas e festas saem da Google Agenda."
+          description="O cancelamento fica registrado no histórico. Festas e eventos saem da Google Agenda."
           reasonLabel="Motivo do cancelamento"
           confirmLabel="Cancelar pedido"
           action={(reason) => changeStageAction(orderId, 'CANCELADO', reason)}

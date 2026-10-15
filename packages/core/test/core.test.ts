@@ -60,7 +60,7 @@ describe('validação do pedido do site', () => {
     expect(r.error!.issues.map((i) => i.path[0])).toEqual(['neighborhood', 'address']);
   });
 
-  it('encomenda exige data e horário; festa também exige convidados', () => {
+  it('evento exige data e horário; festa também exige convidados', () => {
     const enc = publicOrderSchema.safeParse({ ...base, type: 'ENCOMENDA' });
     expect(enc.error!.issues.map((i) => i.path[0])).toEqual(['date', 'time']);
 
@@ -114,6 +114,14 @@ describe('cálculo do pedido', () => {
 });
 
 describe('mensagem do WhatsApp', () => {
+  it('evento: diz que é para um evento e mostra convidados só quando informados', () => {
+    const base = { type: 'ENCOMENDA' as const, name: 'Ana', phone: '+5562981092799', date: '2026-10-20', time: '19:00', lines: [], totalCents: 0 };
+    expect(buildOrderMessage(base)).toContain('Quero fazer um pedido de Push Pop Sushi para um evento.');
+    expect(buildOrderMessage(base)).not.toContain('Convidados');
+    expect(buildOrderMessage({ ...base, guests: 40 })).toContain('Convidados: 40');
+    expect(buildOrderMessage({ ...base, type: 'DELIVERY' })).toContain('Quero fazer um pedido de Push Pop Sushi.');
+  });
+
   it('inclui o ponto de referência e a forma de pagamento escolhidos no site', () => {
     const text = buildOrderMessage({
       type: 'DELIVERY',
@@ -146,7 +154,7 @@ describe('mensagem do WhatsApp', () => {
     });
     expect(text).toBe(
       [
-        'Olá, Zaraki Sushi! Quero fazer uma encomenda de Push Pop Sushi.',
+        'Olá, Zaraki Sushi! Quero fazer um pedido de Push Pop Sushi para uma festa.',
         'Pedido: ZK-000042',
         '',
         'Tipo: Festa',

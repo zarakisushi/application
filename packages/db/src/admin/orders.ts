@@ -228,7 +228,7 @@ export async function updateOrder(tx: Tx, tenant: TenantRef, id: string, input: 
     .set({
       type: input.type,
       scheduledAt,
-      guests: input.type === 'FESTA' ? (input.guests ?? null) : null,
+      guests: isScheduled(input.type) ? (input.guests ?? null) : null,
       neighborhood: input.neighborhood || null,
       address: input.address || null,
       addressReference: input.addressReference || null,

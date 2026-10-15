@@ -25,9 +25,9 @@ export type OrderMessage = {
 
 /** Mensagem que o cliente envia para a Zaraki pelo WhatsApp. */
 export function buildOrderMessage(o: OrderMessage): string {
-  const kind = o.type === 'DELIVERY' ? 'um pedido' : 'uma encomenda';
+  const para = o.type === 'FESTA' ? ' para uma festa' : o.type === 'ENCOMENDA' ? ' para um evento' : '';
   const lines: (string | null)[] = [
-    `Olá, Zaraki Sushi! Quero fazer ${kind} de Push Pop Sushi.`,
+    `Olá, Zaraki Sushi! Quero fazer um pedido de Push Pop Sushi${para}.`,
     o.code ? `Pedido: ${o.code}` : null,
     '',
     `Tipo: ${ORDER_TYPE_LABEL[o.type]}`,
@@ -37,7 +37,7 @@ export function buildOrderMessage(o: OrderMessage): string {
     o.neighborhood ? `Bairro: ${o.neighborhood}` : null,
     o.address ? `Endereço: ${o.address}` : null,
     o.addressReference ? `Ponto de referência: ${o.addressReference}` : null,
-    o.type === 'FESTA' && o.guests ? `Convidados: ${o.guests}` : null,
+    isScheduled(o.type) && o.guests ? `Convidados: ${o.guests}` : null,
     '',
     ...o.lines.map((l) => `• ${l.qty}x ${l.productName} (${formatCents(l.lineTotalCents)})`),
     o.couponCode && o.discountCents ? `Cupom ${o.couponCode}: − ${formatCents(o.discountCents)}` : null,

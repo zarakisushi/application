@@ -58,10 +58,10 @@ const faturamento: ReportDefinition = {
         { label: 'Pedidos entregues', value: now.pedidos, previous: before.pedidos, format: 'int' },
         { label: 'Ticket médio', value: ticket(now), previous: ticket(before), format: 'money' },
         {
-          label: 'Carteira (encomendas futuras)',
+          label: 'Carteira (festas e eventos futuros)',
           value: carteira?.total ?? 0,
           format: 'money',
-          hint: `${carteira?.pedidos ?? 0} encomendas e festas ainda não entregues`,
+          hint: `${carteira?.pedidos ?? 0} festas e eventos ainda não entregues`,
         },
       ],
       chart: { type: 'line', x: 'periodo', xFormat, series: [{ key: 'faturamento', label: 'Faturamento' }], format: 'money' },
@@ -106,7 +106,7 @@ const porTipo: ReportDefinition = {
   slug: 'vendas-por-tipo',
   group: 'Vendas',
   title: 'Vendas por tipo',
-  description: 'Delivery, encomendas e festas: quanto cada tipo vende e o ticket médio de cada um.',
+  description: 'Delivery, festas e eventos: quanto cada tipo vende e o ticket médio de cada um.',
   permission: 'reports:read',
   async run(tx, p) {
     const rows = await salesBy(tx, p, sql`o.type::text`, ORDER_TYPE_LABEL);

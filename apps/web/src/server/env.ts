@@ -61,13 +61,13 @@ export const ENV_CATALOG: EnvVar[] = [
   {
     name: 'GOOGLE_SERVICE_ACCOUNT_EMAIL',
     required: false,
-    purpose: 'conta de serviço do Google Agenda. Sem ela, encomendas e festas ficam "Agenda: pendente".',
+    purpose: 'conta de serviço do Google Agenda. Sem ela, festas e eventos ficam "Agenda: pendente".',
     howTo: 'campo "client_email" do JSON da conta de serviço (passo a passo em docs/google-agenda.md)',
   },
   {
     name: 'GOOGLE_SERVICE_ACCOUNT_KEY',
     required: false,
-    purpose: 'chave privada da conta de serviço do Google Agenda. Sem ela, encomendas e festas ficam "Agenda: pendente".',
+    purpose: 'chave privada da conta de serviço do Google Agenda. Sem ela, festas e eventos ficam "Agenda: pendente".',
     howTo: 'campo "private_key" do JSON da conta de serviço, com \\n literais (docs/google-agenda.md)',
   },
   {
