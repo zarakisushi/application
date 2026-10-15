@@ -1,0 +1,146 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Admin da Zaraki: paleta da marca (tinta, papel, dourado, vermelho) nos tokens do shadcn/ui. */
+
+:root {
+  --radius: 0.625rem;
+
+  --background: #f7f3ec;
+  --foreground: #1a1612;
+  --card: #ffffff;
+  --card-foreground: #1a1612;
+  --popover: #ffffff;
+  --popover-foreground: #1a1612;
+  --primary: #1a1612;
+  --primary-foreground: #f4efe6;
+  --secondary: #efe7da;
+  --secondary-foreground: #1a1612;
+  --muted: #efe7da;
+  --muted-foreground: #6b5f52;
+  --accent: #f3e8d1;
+  --accent-foreground: #1a1612;
+  --destructive: #b4442a;
+  --border: #e3d9c8;
+  --input: #d6cbb8;
+  --ring: #c9a45c;
+
+  --brand-gold: #c9a45c;
+  --brand-gold-light: #d9b76e;
+  --brand-red: #b4442a;
+  --brand-ink: #0d0b09;
+
+  /* Paleta categórica dos gráficos (validada: separação para daltonismo, visão normal e contraste
+     sobre o cartão branco). Ordem fixa: a cor segue a série, nunca a posição no ranking. */
+  --chart-1: #a8432a;
+  --chart-2: #b98a2f;
+  --chart-3: #1f6fb0;
+  --chart-4: #2e8a57;
+  --chart-5: #8a3f9e;
+  /* Escala sequencial (mapa de calor): um único tom, do claro ao escuro. */
+  --chart-seq: #a8432a;
+
+  --sidebar: #0d0b09;
+  --sidebar-foreground: #e8e0d2;
+  --sidebar-primary: #c9a45c;
+  --sidebar-primary-foreground: #0d0b09;
+  --sidebar-accent: rgba(201, 164, 92, 0.14);
+  --sidebar-accent-foreground: #f4efe6;
+  --sidebar-border: rgba(201, 164, 92, 0.22);
+  --sidebar-ring: #c9a45c;
+}
+
+@theme inline {
+  --font-sans: var(--font-zen-kaku), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cinzel), serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-light: var(--brand-gold-light);
+  --color-brand-red: var(--brand-red);
+  --color-brand-ink: var(--brand-ink);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+/*
+ * Menu lateral: barras de rolagem no tema escuro, finas e discretas. O trilho é transparente e o
+ * indicador (dourado suave) só aparece com o mouse sobre o menu ou ao navegar pelo teclado.
+ */
+[data-sidebar='sidebar'] {
+  color-scheme: dark;
+}
+[data-sidebar='content'] {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  overscroll-behavior: contain;
+  /* Os itens somem suavemente nas bordas ao rolar, em vez de serem cortados secos. */
+  padding-block: 0.375rem;
+  mask-image: linear-gradient(to bottom, transparent, #000 0.75rem, #000 calc(100% - 0.75rem), transparent);
+}
+[data-sidebar='footer'] {
+  border-top: 1px solid var(--sidebar-border);
+}
+[data-sidebar='content']:hover,
+[data-sidebar='content']:focus-within {
+  scrollbar-color: rgb(201 164 92 / 0.4) transparent;
+}
+/* Navegadores sem scrollbar-color (Safari antigo). */
+[data-sidebar='content']::-webkit-scrollbar {
+  width: 6px;
+}
+[data-sidebar='content']::-webkit-scrollbar-track {
+  background: transparent;
+}
+[data-sidebar='content']::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+}
+[data-sidebar='content']:hover::-webkit-scrollbar-thumb {
+  background: rgb(201 164 92 / 0.4);
+}

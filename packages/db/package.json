@@ -1,0 +1,37 @@
+{
+  "name": "@zaraki/db",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "scripts": {
+    "dev": "tsx scripts/pg.ts",
+    "start": "tsx scripts/pg.ts",
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx scripts/migrate.ts",
+    "seed": "tsx scripts/seed.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "seed-demo": "tsx scripts/seed-demo.ts"
+  },
+  "dependencies": {
+    "@vercel/functions": "^3.9.11",
+    "@zaraki/core": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@types/pg": "^8.23.1",
+    "@zaraki/tsconfig": "workspace:*",
+    "drizzle-kit": "^0.31.11",
+    "embedded-postgres": "18.4.0-beta.17",
+    "tsx": "^4.23.15",
+    "typescript": "^5.6.3",
+    "vitest": "^5.0.3"
+  }
+}

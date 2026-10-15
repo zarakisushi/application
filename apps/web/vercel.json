@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm db:migrate && pnpm turbo run build --filter=@zaraki/web",
+  "crons": [
+    {
+      "path": "/api/cron/calendar",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/finance",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}

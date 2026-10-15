@@ -1,0 +1,13 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Pacotes autorizados a rodar scripts de instalação (binários nativos).
+allowBuilds:
+  '@embedded-postgres/darwin-arm64': true
+  '@embedded-postgres/linux-x64': true
+  esbuild: true
+
+# Correção de segurança (GHSA-67mh-4wv8-2f99): esbuild antigo trazido pelo drizzle-kit.
+overrides:
+  '@esbuild-kit/core-utils>esbuild': ^0.25.12
