@@ -29,7 +29,7 @@ export async function runCalendarSync() {
   const client = calendarClient();
   if (!client) {
     if (!globalForCalendar.__zarakiCalendarWarned) {
-      console.warn('[agenda] Google Agenda não configurada: encomendas ficam pendentes (veja docs/google-agenda.md)');
+      console.warn('[agenda] Google Agenda não configurada: festas e eventos ficam pendentes (veja docs/google-agenda.md)');
       globalForCalendar.__zarakiCalendarWarned = true;
     }
     return null;

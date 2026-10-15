@@ -85,7 +85,7 @@ const mixUnidades: ReportDefinition = {
   slug: 'mix-unidades',
   group: 'Franquia',
   title: 'Comparativo entre unidades',
-  description: 'Participação de delivery, encomendas e festas no faturamento de cada unidade, ticket médio e sabor mais vendido.',
+  description: 'Participação de delivery, festas e eventos no faturamento de cada unidade, ticket médio e sabor mais vendido.',
   permission: 'tenants:manage',
   network: true,
   async run(tx, p) {

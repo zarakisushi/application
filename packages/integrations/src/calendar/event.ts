@@ -6,7 +6,7 @@ export const eventIdForOrder = (orderId: string) => orderId.replace(/-/g, '').to
 
 /** Duração padrão do evento na agenda. */
 const DURATION_MINUTES: Record<Exclude<OrderType, 'DELIVERY'>, number> = { FESTA: 120, ENCOMENDA: 30 };
-/** Cores do Google Agenda: 5 = amarelo (festa), 9 = azul (encomenda). */
+/** Cores do Google Agenda: 5 = amarelo (festa), 9 = azul (evento). */
 const COLOR: Record<Exclude<OrderType, 'DELIVERY'>, string> = { FESTA: '5', ENCOMENDA: '9' };
 
 export type CalendarOrder = {

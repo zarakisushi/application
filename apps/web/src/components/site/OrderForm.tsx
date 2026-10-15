@@ -21,7 +21,7 @@ export type OrderFormProduct = { id: string; name: string; priceCents: number };
 type Props = {
   products: OrderFormProduct[];
   whatsappNumber: string;
-  /** Data mínima para encomendas/festas ("hoje" no fuso da unidade). */
+  /** Data mínima para festas e eventos ("hoje" no fuso da unidade). */
   minDate: string;
   /** Banco indisponível: o pedido vai direto para o WhatsApp, sem ser gravado. */
   offline: boolean;
@@ -143,7 +143,7 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
     neighborhood: fields.neighborhood,
     address: fields.address,
     addressReference: fields.addressReference,
-    guests: type === 'FESTA' && fields.guests ? Number(fields.guests) : undefined,
+    guests: scheduled && fields.guests ? Number(fields.guests) : undefined,
     notes: fields.notes,
     items,
     couponCode: coupon?.code ?? '',
@@ -227,7 +227,7 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
           </div>
         )}
         <p>
-          Abrimos o WhatsApp com o resumo da sua encomenda. Nossa equipe confirma disponibilidade e entrega em seguida.
+          Abrimos o WhatsApp com o resumo do seu pedido. Nossa equipe confirma disponibilidade e entrega em seguida.
         </p>
         <div className="sent__actions">
           <a className="sent__wa" href={sent.url} target="_blank" rel="noopener noreferrer">
@@ -307,7 +307,7 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
           {fieldError('neighborhood')}
         </label>
         <label className="field">
-          {delivery ? 'Endereço' : type === 'FESTA' ? 'Endereço da festa (opcional)' : 'Endereço (opcional)'}
+          {delivery ? 'Endereço' : type === 'FESTA' ? 'Endereço da festa (opcional)' : 'Endereço do evento (opcional)'}
           <input {...inputProps('address')} required={delivery} autoComplete="street-address" />
           {fieldError('address')}
         </label>
@@ -319,10 +319,10 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
         {fieldError('addressReference')}
       </label>
 
-      {type === 'FESTA' && (
+      {scheduled && (
         <label className="field">
-          Número de convidados
-          <input {...inputProps('guests')} type="number" min={1} required inputMode="numeric" />
+          {type === 'FESTA' ? 'Número de convidados' : 'Número de convidados (opcional)'}
+          <input {...inputProps('guests')} type="number" min={1} required={type === 'FESTA'} inputMode="numeric" />
           {fieldError('guests')}
         </label>
       )}

@@ -13,7 +13,7 @@ export function Order({ products, whatsapp, minDate, offline }: Props) {
     <section id="encomendas" className="order">
       <div className="container">
         <div className="order__info">
-          <div className="eyebrow">肆 · ENCOMENDAS</div>
+          <div className="eyebrow">肆 · PEDIDOS</div>
           <h2 className="section-title">Delivery, festas e eventos</h2>
           <p className="lead">
             Preencha o formulário e enviamos a confirmação pelo WhatsApp. Para festas e eventos, informe a data e a

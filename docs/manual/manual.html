@@ -120,7 +120,7 @@
     <li><span class="n">3</span><span>O site e os pedidos online</span><span class="d">Cardápio, formulário, WhatsApp, cupom, contingência</span></li>
     <li><span class="n">4</span><span>Página inicial do painel</span><span class="d">Resumo do dia, indicadores e atalhos</span></li>
     <li><span class="n">5</span><span>Pedidos (delivery)</span><span class="d">Lançar, etapas, pagamento, cancelamento</span></li>
-    <li><span class="n">6</span><span>Encomendas, festas e Google Agenda</span><span class="d">Lista, calendário e sincronização</span></li>
+    <li><span class="n">6</span><span>Festas, eventos e Google Agenda</span><span class="d">Lista, calendário e sincronização</span></li>
     <li><span class="n">7</span><span>Clientes</span><span class="d">Cadastro automático e histórico</span></li>
     <li><span class="n">8</span><span>Cardápio</span><span class="d">Sabores, preço, custo e fotos</span></li>
     <li><span class="n">9</span><span>Cupons de desconto</span><span class="d">Porcentagem, valor, limites, exclusivos</span></li>
@@ -139,11 +139,11 @@
 <section class="chapter">
   <div class="kicker">Capítulo 1</div>
   <h1>Visão geral do sistema</h1>
-  <p class="lead">O sistema da Zaraki reúne em um só lugar o <strong>site</strong> onde o cliente faz o pedido e o <strong>painel administrativo</strong> onde a equipe acompanha pedidos, encomendas, clientes, cardápio, cupons, dinheiro e relatórios. Foi desenhado desde o início para uma <strong>rede de franquias</strong>: a Matriz e cada franqueado operam no mesmo sistema, cada um com seus próprios dados.</p>
+  <p class="lead">O sistema da Zaraki reúne em um só lugar o <strong>site</strong> onde o cliente faz o pedido e o <strong>painel administrativo</strong> onde a equipe acompanha pedidos, festas e eventos, clientes, cardápio, cupons, dinheiro e relatórios. Foi desenhado desde o início para uma <strong>rede de franquias</strong>: a Matriz e cada franqueado operam no mesmo sistema, cada um com seus próprios dados.</p>
 
   <h2>Como está organizado</h2>
   <div class="grid2">
-    <div class="card"><h3>Site (público)</h3><p>Página da marca, cardápio e formulário de pedido (delivery, encomenda ou festa). O pedido é gravado no sistema e enviado ao WhatsApp da unidade.</p></div>
+    <div class="card"><h3>Site (público)</h3><p>Página da marca, cardápio e formulário de pedido (delivery, festa ou evento). O pedido é gravado no sistema e enviado ao WhatsApp da unidade.</p></div>
     <div class="card"><h3>Painel (/admin)</h3><p>Área restrita, com login. O menu lateral tem três grupos: <strong>Operação</strong>, <strong>Financeiro</strong> e <strong>Gestão</strong>. Cada pessoa vê só o que o seu papel permite.</p></div>
   </div>
 
@@ -183,7 +183,7 @@
   <p>Cada pessoa tem um papel em cada unidade em que trabalha. A <strong>administração da rede</strong> é um acesso especial da Matriz, com visão de todas as unidades.</p>
   <table>
     <tr><th>O que a pessoa pode fazer</th><th class="c">Atendente</th><th class="c">Gerente</th><th class="c">Administrador</th><th class="c">Adm. da rede</th></tr>
-    <tr><td>Ver e lançar pedidos e encomendas; cadastrar clientes</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Ver e lançar pedidos, festas e eventos; cadastrar clientes</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Ver o cardápio</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Excluir pedidos e clientes; editar o cardápio</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Criar e editar cupons</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
@@ -213,14 +213,14 @@
   <div class="kicker">Capítulo 3</div>
   <h1>O site e os pedidos online</h1>
   <figure><img src="img/01-site.jpg" alt="" /><figcaption>Página inicial do site da Zaraki.</figcaption></figure>
-  <p>O site apresenta a marca e o cardápio, que vem do próprio painel: preços e fotos alterados em <strong>Cardápio</strong> aparecem no site. O formulário de pedido fica na seção <strong>Encomendas</strong>.</p>
+  <p>O site apresenta a marca e o cardápio, que vem do próprio painel: preços e fotos alterados em <strong>Cardápio</strong> aparecem no site. O formulário de pedido fica na seção <strong>Pedidos</strong> ("Delivery, festas e eventos").</p>
 
   <div class="grid2">
     <figure style="margin-top:0"><img src="img/02-site-pedido.jpg" alt="" /><figcaption>Formulário de pedido com cupom de desconto.</figcaption></figure>
     <div>
       <h3 style="margin-top:0">Como o pedido funciona</h3>
       <ol>
-        <li>O cliente escolhe <strong>Delivery</strong>, <strong>Encomenda</strong> ou <strong>Festa</strong>. Encomenda e festa pedem data e horário; festa pede também o número de convidados.</li>
+        <li>O cliente escolhe <strong>Delivery</strong>, <strong>Festa</strong> ou <strong>Evento</strong>. Festa e evento pedem data e horário; a festa exige o número de convidados e, no evento, ele é opcional. O formulário pede também o <strong>ponto de referência</strong> (opcional) e a <strong>forma de pagamento</strong> (Pix, cartão de débito ou de crédito), que vão na mensagem do WhatsApp e ficam gravados no pedido.</li>
         <li>Escolhe os sabores (tubos de 10 peças) e, se tiver, aplica um <strong>cupom</strong>.</li>
         <li>Ao enviar, o pedido é <strong>gravado no sistema</strong> com um código (ex.: ZK-000123) e o WhatsApp da unidade abre com a mensagem pronta.</li>
         <li>O pedido aparece no painel como <strong>Novo</strong>, esperando confirmação.</li>
@@ -243,11 +243,11 @@
   <h1>Página inicial do painel</h1>
   <figure class="tall"><img src="img/04-inicio.jpg" alt="" /><figcaption>Página inicial: resumo do dia, financeiro e indicadores do mês.</figcaption></figure>
   <ul>
-    <li><strong>Resumo do dia:</strong> pedidos de hoje, pedidos aguardando confirmação e encomendas/festas dos próximos 7 dias. Cada número leva à lista correspondente.</li>
+    <li><strong>Resumo do dia:</strong> pedidos de hoje, pedidos aguardando confirmação e festas e eventos dos próximos 7 dias. Cada número leva à lista correspondente.</li>
     <li><strong>Financeiro</strong> (para quem tem acesso): saldo em caixa, contas vencidas e o que vence em 7 dias.</li>
     <li><strong>Indicadores do mês:</strong> faturamento, pedidos entregues, ticket médio e clientes novos, comparados ao mesmo período do mês passado.</li>
     <li><strong>Gráficos:</strong> faturamento dos últimos 30 dias, vendas por tipo e sabores mais vendidos.</li>
-    <li><strong>Próximas encomendas e festas</strong> e atalhos para todas as telas.</li>
+    <li><strong>Próximas festas e eventos</strong> e atalhos para todas as telas.</li>
     <li>Na Matriz, o botão <strong>"Ver toda a rede"</strong> soma os indicadores de todas as unidades.</li>
   </ul>
 </section>
@@ -272,15 +272,15 @@
 <!-- ============================== 6 ============================== -->
 <section class="chapter">
   <div class="kicker">Capítulo 6</div>
-  <h1>Encomendas, festas e Google Agenda</h1>
-  <figure><img src="img/07-encomendas-calendario.jpg" alt="" /><figcaption>Encomendas e festas na visão de calendário.</figcaption></figure>
+  <h1>Festas, eventos e Google Agenda</h1>
+  <figure><img src="img/07-encomendas-calendario.jpg" alt="" /><figcaption>Festas e eventos na visão de calendário.</figcaption></figure>
   <ul>
-    <li><strong>Encomendas</strong> reúne as encomendas e as festas, que têm data marcada. A visão em <strong>lista</strong> separa as próximas das passadas; a visão de <strong>calendário</strong> mostra o mês.</li>
-    <li>Toda encomenda ou festa é <strong>enviada à Google Agenda</strong> da Zaraki (zarakisushigo@gmail.com) e atualizada quando muda. Se for cancelada, sai da agenda.</li>
+    <li><strong>Festas e eventos</strong> reúne os pedidos com data marcada: as <strong>festas</strong> (com número de convidados) e os <strong>eventos</strong> (convidados opcionais). A visão em <strong>lista</strong> separa as próximas das passadas; a visão de <strong>calendário</strong> mostra o mês.</li>
+    <li>Toda festa ou evento é <strong>enviado à Google Agenda</strong> da Zaraki (zarakisushigo@gmail.com) e atualizada quando muda. Se for cancelada, sai da agenda.</li>
     <li>Cada pedido mostra a situação da agenda: <span class="pill g">Na agenda</span>, <span class="pill a">Agenda: pendente</span> ou <span class="pill r">Agenda: falhou</span>. Há o botão <strong>"Sincronizar agora"</strong> para tentar de novo.</li>
     <li>Cada franquia pode ter a <strong>própria agenda</strong>, informada no cadastro da unidade.</li>
   </ul>
-  <div class="box warn"><span class="t">Depende de configuração</span><p>Para a sincronização funcionar no site publicado, é preciso criar a conta de serviço do Google e compartilhar a agenda com ela (passo a passo em <em>docs/google-agenda.md</em>). Enquanto isso não for feito, as encomendas ficam como "Agenda: pendente", sem perder nada.</p></div>
+  <div class="box warn"><span class="t">Depende de configuração</span><p>Para a sincronização funcionar no site publicado, é preciso criar a conta de serviço do Google e compartilhar a agenda com ela (passo a passo em <em>docs/google-agenda.md</em>). Enquanto isso não for feito, as festas e eventos ficam como "Agenda: pendente", sem perder nada.</p></div>
 </section>
 
 <!-- ============================== 7 e 8 ============================== -->
@@ -396,12 +396,12 @@
     <tr><td><strong>Vendas</strong></td><td>Faturamento · Vendas por tipo · Vendas por origem · Dias e horários de pico (mapa de calor) · Sazonalidade e comparativo anual · Cupons de desconto</td></tr>
     <tr><td><strong>Cardápio</strong></td><td>Ranking de sabores e curva ABC · Margem e CMV por sabor · Mix de sabores por tipo de pedido · Histórico de preços e custos</td></tr>
     <tr><td><strong>Clientes</strong></td><td>Clientes novos × recorrentes · Recompra e frequência · Segmentação RFM (campanhas) · Melhores clientes (LTV) · Aniversariantes do mês · Vendas por bairro</td></tr>
-    <tr><td><strong>Operação</strong></td><td>Funil e tempo por etapa · Cancelamentos · Pedidos do site não confirmados · Previsão de produção (tubos por dia nas encomendas) · Festas</td></tr>
+    <tr><td><strong>Operação</strong></td><td>Funil e tempo por etapa · Cancelamentos · Pedidos do site não confirmados · Previsão de produção (tubos por dia nas festas e eventos) · Festas</td></tr>
     <tr><td><strong>Financeiro</strong></td><td>DRE gerencial · Fluxo de caixa · Despesas por categoria · Gastos por fornecedor · Contas a pagar e a receber por atraso</td></tr>
     <tr><td><strong>Franquia</strong> (Matriz)</td><td>Ranking de unidades · Royalties estimados · Comparativo entre unidades · Financeiro da rede</td></tr>
     <tr><td><strong>Governança</strong></td><td>Atividade por usuário · Exclusões e restaurações</td></tr>
   </table>
-  <p class="muted">Faturamento realizado = pedidos entregues, pela data do pedido (ou da encomenda/festa).</p>
+  <p class="muted">Faturamento realizado = pedidos entregues, pela data do pedido (ou da festa/evento).</p>
 </section>
 
 <!-- ============================== 12 ============================== -->
@@ -446,7 +446,7 @@
   <p class="lead">A Matriz tem duas formas de olhar a rede. Ela pode <strong>entrar em uma unidade</strong> e ver exatamente o que o franqueado vê. Ou pode <strong>olhar todas juntas</strong>, lado a lado ou somadas. Tudo isso é feito com o acesso de <strong>administração da rede</strong>.</p>
 
   <h2>1. Entrar numa unidade (o "olhar do franqueado")</h2>
-  <p>No <strong>seletor de unidade</strong>, no topo do painel, escolha a franquia. A partir daí, todas as telas mostram os dados daquela unidade: pedidos do dia, encomendas, clientes, cardápio, cupons, lançamentos, contas, extratos, DRE e relatórios. É a forma de fazer uma <strong>visita virtual</strong> à unidade, sem pedir nada ao franqueado. Para voltar, escolha a Matriz no seletor.</p>
+  <p>No <strong>seletor de unidade</strong>, no topo do painel, escolha a franquia. A partir daí, todas as telas mostram os dados daquela unidade: pedidos do dia, festas e eventos, clientes, cardápio, cupons, lançamentos, contas, extratos, DRE e relatórios. É a forma de fazer uma <strong>visita virtual</strong> à unidade, sem pedir nada ao franqueado. Para voltar, escolha a Matriz no seletor.</p>
   <div class="box tip"><span class="t">Tudo registrado</span><p>O que a Matriz alterar dentro de uma franquia fica na auditoria daquela franquia, com o nome de quem alterou. A rede inteira tem o mesmo nível de rastreabilidade.</p></div>
 
   <h2>2. Ver a rede inteira</h2>
@@ -455,7 +455,7 @@
     <tr><td><strong>Início → "Ver toda a rede"</strong></td><td>Faturamento, pedidos entregues, ticket médio e clientes novos <strong>somados</strong> de todas as unidades, com os gráficos do mês.</td></tr>
     <tr><td><strong>Relatórios → "Todas as unidades"</strong></td><td>Qualquer relatório (vendas, cardápio, clientes, operação, financeiro) pode ser rodado para a rede toda, consolidando os números. Ex.: DRE da rede, previsão de produção de todas as unidades.</td></tr>
     <tr><td><strong>Ranking de unidades</strong></td><td>Faturamento, pedidos, ticket e clientes de cada unidade, com o <strong>crescimento</strong> sobre o período anterior.</td></tr>
-    <tr><td><strong>Comparativo entre unidades</strong></td><td>Participação de delivery, encomendas e festas em cada unidade, ticket médio e sabor mais vendido.</td></tr>
+    <tr><td><strong>Comparativo entre unidades</strong></td><td>Participação de delivery, festas e eventos em cada unidade, ticket médio e sabor mais vendido.</td></tr>
     <tr><td><strong>Financeiro da rede</strong></td><td>Receita, resultado operacional, margem, CMV, saldo em caixa e contas vencidas de cada unidade, <strong>lado a lado</strong>.</td></tr>
     <tr><td><strong>Royalties estimados</strong></td><td>O percentual de cada franquia aplicado ao faturamento de qualquer período, útil para projeções.</td></tr>
     <tr><td><strong>Atividade por usuário</strong> e <strong>Exclusões e restaurações</strong></td><td>Quem fez o quê em cada unidade, e tudo o que foi excluído e restaurado. Ajuda a perceber uso anormal.</td></tr>
@@ -494,7 +494,7 @@
       <ul class="check">
         <li>Início com "Ver toda a rede": vendas do dia e do mês.</li>
         <li>Relatório "Pedidos do site não confirmados", com todas as unidades: clientes esperando resposta.</li>
-        <li>Encomendas e festas dos próximos dias, unidade por unidade.</li>
+        <li>Festas e eventos dos próximos dias, unidade por unidade.</li>
       </ul></div>
     <div class="card"><h3>Toda semana</h3>
       <ul class="check">
@@ -525,7 +525,7 @@
   <h1>Rotinas automáticas</h1>
   <table>
     <tr><th style="width:28%">Rotina</th><th style="width:22%">Quando</th><th>O que faz</th></tr>
-    <tr><td>Google Agenda</td><td>Logo após cada mudança; o que falhar é reenviado de hora em hora</td><td>Envia, atualiza e remove encomendas e festas na agenda; tenta de novo o que falhou.</td></tr>
+    <tr><td>Google Agenda</td><td>Logo após cada mudança; o que falhar é reenviado de hora em hora</td><td>Envia, atualiza e remove festas e eventos na agenda; tenta de novo o que falhou.</td></tr>
     <tr><td>Royalties</td><td>Todo dia, às 6h (Brasília)</td><td>Gera as cobranças do mês anterior das franquias, sem duplicar.</td></tr>
     <tr><td>Vendas no caixa</td><td>Na hora</td><td>Pedido pago vira entrada no caixa; cancelado ou desmarcado é estornado.</td></tr>
     <tr><td>Backup do banco</td><td>Toda noite</td><td>Cópia completa do banco, incluindo comprovantes e extratos, em armazenamento externo (Cloudflare R2).</td></tr>

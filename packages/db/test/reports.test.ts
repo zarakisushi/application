@@ -146,7 +146,7 @@ describe('relatórios', () => {
     expect(summary(r, 'Faturamento')).toMatchObject({ value: 97000, previous: 5000 });
     expect(summary(r, 'Pedidos entregues')).toMatchObject({ value: 3, previous: 1 });
     expect(summary(r, 'Ticket médio').value).toBeCloseTo(97000 / 3);
-    expect(summary(r, 'Carteira (encomendas futuras)').value).toBe(20000);
+    expect(summary(r, 'Carteira (festas e eventos futuros)').value).toBe(20000);
     expect(r.rows).toHaveLength(30); // todos os dias do mês, inclusive sem venda
     expect(r.rows.find((x) => x.periodo === '2026-09-12')).toMatchObject({ faturamento: 80000, pedidos: 1 });
   });

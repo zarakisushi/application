@@ -121,6 +121,25 @@ test('delivery: exige endereço, recalcula o total no servidor e usa o mesmo cli
   expect(rows[0].n).toBe(1);
 });
 
+test('tipos no site: Delivery, Festa e Evento (evento com convidados opcionais)', async ({ page }) => {
+  await page.goto('/#encomendas');
+  const form = page.locator('form.form');
+  await expect(form.getByRole('group', { name: 'Tipo de pedido' }).getByRole('button')).toHaveText(['Delivery', 'Festa', 'Evento']);
+
+  await form.getByRole('button', { name: 'Evento', exact: true }).click();
+  await expect(form.getByLabel('Número de convidados (opcional)')).not.toHaveAttribute('required');
+  await form.getByLabel('Nome').fill('Empresa Teste');
+  await form.getByLabel('WhatsApp').fill('62988887777');
+  await form.getByLabel('Data').fill(inDays(10));
+  await form.getByLabel('Horário').fill('12:00');
+  await addTubes(page, 'Uramaki de Salmão e Manga', 3);
+  await form.getByRole('button', { name: 'Pix', exact: true }).click();
+  const wa = await submitAndReadWhatsapp(page);
+  expect(wa.text).toContain('Quero fazer um pedido de Push Pop Sushi para um evento.');
+  expect(wa.text).toContain('Tipo: Evento');
+  expect(wa.text).not.toContain('Convidados');
+});
+
 test('sem nenhum tubo, avisa e não abre o WhatsApp', async ({ page }) => {
   await page.goto('/#encomendas');
   const form = page.locator('form.form');

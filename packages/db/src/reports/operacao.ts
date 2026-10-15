@@ -147,7 +147,7 @@ const producao: ReportDefinition = {
   slug: 'previsao-producao',
   group: 'Operação',
   title: 'Previsão de produção',
-  description: 'Tubos de cada sabor por dia nas encomendas e festas já agendadas — base para comprar peixe e organizar a cozinha.',
+  description: 'Tubos de cada sabor por dia nas festas e eventos já agendados — base para comprar peixe e organizar a cozinha.',
   permission: 'reports:read',
   usesPeriod: false,
   extraParams: [
@@ -191,7 +191,7 @@ const producao: ReportDefinition = {
     return {
       summary: [
         { label: 'Tubos a produzir', value: totalTubes, format: 'int', hint: `${totalTubes * 10} peças` },
-        { label: 'Encomendas e festas', value: orders?.n ?? 0, format: 'int' },
+        { label: 'Festas e eventos', value: orders?.n ?? 0, format: 'int' },
         { label: 'Sabor mais pedido', value: top?.[0] ?? null, hint: top ? `${top[1]} tubos` : undefined },
       ],
       chart: {

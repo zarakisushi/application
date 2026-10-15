@@ -3,16 +3,20 @@ import { DomainError } from './domain';
 import { normalizeBrPhone } from './phone';
 import { normalizeCouponCode, parseMoneyToCents } from './text';
 
-export const ORDER_TYPES = ['DELIVERY', 'ENCOMENDA', 'FESTA'] as const;
+/**
+ * Tipos de pedido, na ordem em que aparecem no site. O código interno ENCOMENDA é exibido como "Evento"
+ * (pedido com data e horário marcados; convidados opcionais).
+ */
+export const ORDER_TYPES = ['DELIVERY', 'FESTA', 'ENCOMENDA'] as const;
 export type OrderType = (typeof ORDER_TYPES)[number];
 
 export const ORDER_TYPE_LABEL: Record<OrderType, string> = {
   DELIVERY: 'Delivery',
-  ENCOMENDA: 'Encomenda',
+  ENCOMENDA: 'Evento',
   FESTA: 'Festa',
 };
 
-/** Encomendas e festas têm data/horário marcados e vão para a Google Agenda. */
+/** Festas e eventos têm data/horário marcados e vão para a Google Agenda. */
 export const isScheduled = (type: OrderType) => type !== 'DELIVERY';
 
 /** Erro de regra de negócio do pedido, com mensagem pronta para mostrar ao cliente. */
@@ -96,7 +100,7 @@ const orderDetails = {
     .max(50),
 };
 
-/** Regras por tipo: delivery exige endereço; encomenda/festa exigem data e horário; festa exige convidados. */
+/** Regras por tipo: delivery exige endereço; festa e evento exigem data e horário; festa exige convidados. */
 function refineOrder(
   v: { type: OrderType; neighborhood: string; address: string; date: string; time: string; guests?: number },
   ctx: z.RefinementCtx,

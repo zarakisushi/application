@@ -105,7 +105,7 @@ auditoria continuou íntegra.
   (503 se o banco cair). Cadastre-o num monitor gratuito (UptimeRobot, Better Stack) com alerta no WhatsApp/e-mail,
   com intervalo de **15 minutos ou mais**: cada verificação acorda o banco (veja "Neon no plano gratuito" abaixo).
 - **Cron da agenda:** em **Vercel → Settings → Cron Jobs** aparece `/api/cron/calendar` de hora em hora. Cada
-  encomenda já vai para a agenda logo após ser salva; o cron só reenvia o que falhou (ex.: Google fora do ar).
+  festa ou evento já vai para a agenda logo após ser salvo; o cron só reenvia o que falhou (ex.: Google fora do ar).
 - **Cron do financeiro:** `/api/cron/finance` todo dia às 9h UTC (6h em Brasília). Gera os royalties do mês
   anterior de cada franquia com percentual cadastrado (sem duplicar). Falhas ficam na Auditoria como
   "Falha ao gerar royalties"; a Matriz também pode gerar à mão em **Financeiro → Royalties**.

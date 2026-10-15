@@ -173,9 +173,9 @@ export function OrderEditor({ mode, defaultType, products, order, orderId, actio
             </Field>
           </>
         )}
-        {type === 'FESTA' && (
-          <Field label="Convidados" htmlFor="guests" error={errors.guests}>
-            <Input id="guests" name="guests" type="number" min={1} defaultValue={order?.guests ?? ''} required aria-invalid={!!errors.guests} />
+        {type !== 'DELIVERY' && (
+          <Field label={type === 'FESTA' ? 'Convidados' : 'Convidados (opcional)'} htmlFor="guests" error={errors.guests}>
+            <Input id="guests" name="guests" type="number" min={1} defaultValue={order?.guests ?? ''} required={type === 'FESTA'} aria-invalid={!!errors.guests} />
           </Field>
         )}
         <Field label={delivery ? 'Bairro' : 'Bairro (opcional)'} htmlFor="neighborhood" error={errors.neighborhood}>

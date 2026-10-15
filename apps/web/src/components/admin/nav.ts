@@ -33,7 +33,7 @@ export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { href: '/admin', label: 'Início', icon: House },
       { href: '/admin/pedidos', label: 'Pedidos', icon: ClipboardList, permission: 'orders:read' },
-      { href: '/admin/encomendas', label: 'Encomendas', icon: CalendarDays, permission: 'orders:read' },
+      { href: '/admin/encomendas', label: 'Festas e eventos', icon: CalendarDays, permission: 'orders:read' },
       { href: '/admin/clientes', label: 'Clientes', icon: Users, permission: 'customers:read' },
       { href: '/admin/cardapio', label: 'Cardápio', icon: UtensilsCrossed, permission: 'products:read' },
       { href: '/admin/cupons', label: 'Cupons', icon: TicketPercent, permission: 'coupons:read' },

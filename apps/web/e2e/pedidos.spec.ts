@@ -92,14 +92,14 @@ test('festa: lança pelo painel, vai para a Google Agenda e aparece na lista e n
   expect(rows[0].ops).toEqual('{UPSERT,DELETE}');
 });
 
-test('mudar um delivery para encomenda move o pedido de seção', async ({ page }) => {
+test('mudar um delivery para evento move o pedido de seção', async ({ page }) => {
   await loginGestor(page);
   await page.goto('/admin/pedidos?q=Rafael&status=todos');
   await page.getByRole('link', { name: /^ZK-/ }).first().click();
   await pick(page, 'Mudar etapa', 'Confirmado'); // sai de "Cancelado"
   await expect(page.getByText('Etapa atualizada.')).toBeVisible();
 
-  await pick(page, 'Tipo', 'Encomenda');
+  await pick(page, 'Tipo', 'Evento');
   const date = new Date(Date.now() + 5 * 86_400_000).toISOString().slice(0, 10);
   await page.getByLabel('Data').fill(date);
   await page.getByLabel('Horário').fill('12:30');

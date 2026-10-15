@@ -33,7 +33,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const stats = operational && [
     { label: 'Pedidos hoje', value: operational.snapshot.ordersToday, icon: ClipboardList, href: '/admin/pedidos' },
     { label: 'Aguardando confirmação', value: operational.snapshot.awaitingConfirmation, icon: Hourglass, href: '/admin/pedidos?etapa=NOVO' },
-    { label: 'Encomendas e festas (7 dias)', value: operational.snapshot.upcomingScheduled, icon: CalendarDays, href: '/admin/encomendas' },
+    { label: 'Festas e eventos (7 dias)', value: operational.snapshot.upcomingScheduled, icon: CalendarDays, href: '/admin/encomendas' },
   ];
   // Resumo do caixa da unidade para quem vê o financeiro.
   const finance = ctx.can('finance:read')
@@ -173,7 +173,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <section className="grid gap-4 xl:grid-cols-2">
           <Card className="py-0">
             <CardHeader className="flex flex-row items-center justify-between pt-6">
-              <CardTitle>Próximas encomendas e festas</CardTitle>
+              <CardTitle>Próximas festas e eventos</CardTitle>
               <Link href="/admin/encomendas" className="text-sm underline">
                 Ver todas
               </Link>
@@ -191,7 +191,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   </span>
                 </Link>
               ))}
-              {!operational.upcoming.length && <p className="border-t px-6 py-6 text-sm text-muted-foreground">Nenhuma encomenda agendada.</p>}
+              {!operational.upcoming.length && <p className="border-t px-6 py-6 text-sm text-muted-foreground">Nenhuma festa ou evento agendado.</p>}
             </CardContent>
           </Card>
           <Card className="py-0">
@@ -202,7 +202,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   Pedidos
                 </Link>
                 <Link href="/admin/encomendas?etapa=NOVO&periodo=todas" className="underline">
-                  Encomendas
+                  Festas e eventos
                 </Link>
               </span>
             </CardHeader>

@@ -11,7 +11,7 @@ test('dashboard mostra indicadores do mês e gráficos', async ({ page }) => {
     await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
   }
   await expect(page.locator('.recharts-surface').first()).toBeVisible();
-  await expect(page.getByText('Próximas encomendas e festas')).toBeVisible();
+  await expect(page.getByText('Próximas festas e eventos')).toBeVisible();
   await page.screenshot({ path: 'test-results/admin-dashboard.png', fullPage: true });
 
   await page.getByRole('link', { name: 'Ver toda a rede' }).click();
@@ -27,7 +27,7 @@ test('relatório de faturamento: filtros, rede e exportação CSV auditada', asy
 
   await page.getByRole('link', { name: /^Faturamento/ }).click();
   await expect(page.getByRole('heading', { name: 'Faturamento', exact: true })).toBeVisible();
-  await expect(page.getByText('Carteira (encomendas futuras)')).toBeVisible();
+  await expect(page.getByText('Carteira (festas e eventos futuros)')).toBeVisible();
   await expect(page.getByRole('row')).toHaveCount(31); // cabeçalho + 30 dias
   await page.screenshot({ path: 'test-results/admin-relatorio-faturamento.png', fullPage: true });
 
