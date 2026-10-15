@@ -146,7 +146,7 @@ describe('mensagem do WhatsApp', () => {
     });
     expect(text).toBe(
       [
-        'Olá, Zaraki Sushi! Quero fazer uma encomenda de Push-Pop Sushi.',
+        'Olá, Zaraki Sushi! Quero fazer uma encomenda de Push Pop Sushi.',
         'Pedido: ZK-000042',
         '',
         'Tipo: Festa',

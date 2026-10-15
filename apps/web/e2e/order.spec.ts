@@ -106,7 +106,7 @@ test('delivery: exige endereço, recalcula o total no servidor e usa o mesmo cli
   await expect(form.getByRole('button', { name: 'Cartão de débito', exact: true })).toHaveAttribute('aria-pressed', 'true');
 
   const wa = await submitAndReadWhatsapp(page);
-  expect(wa.text).toContain('Quero fazer um pedido de Push-Pop Sushi.');
+  expect(wa.text).toContain('Quero fazer um pedido de Push Pop Sushi.');
   expect(wa.text).toMatch(/Pedido: ZK-\d{6}/);
   expect(wa.text).toContain('Bairro: Setor Bueno');
   expect(wa.text).toContain('Total estimado: R$ 50,00');

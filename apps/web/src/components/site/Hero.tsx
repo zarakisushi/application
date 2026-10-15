@@ -7,7 +7,7 @@ export function Hero() {
       <Image
         className="hero__bg"
         src={tumbler}
-        alt="Push-Pop Sushi Zaraki no balcão de sushi"
+        alt="Push Pop Sushi Zaraki no balcão de sushi"
         fill
         priority
         sizes="100vw"
@@ -23,7 +23,7 @@ export function Hero() {
             Novidade em Goiânia
           </div>
           <h1 className="hero__title">
-            Push-Pop <span>Sushi</span>
+            Push Pop <span>Sushi</span>
           </h1>
           <p className="hero__text">
             Sushi no tubo. Abra, empurre e saboreie 10 peças frescas, sem hashi e sem bagunça. Onde você estiver.

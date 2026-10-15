@@ -27,7 +27,7 @@ export type OrderMessage = {
 export function buildOrderMessage(o: OrderMessage): string {
   const kind = o.type === 'DELIVERY' ? 'um pedido' : 'uma encomenda';
   const lines: (string | null)[] = [
-    `Olá, Zaraki Sushi! Quero fazer ${kind} de Push-Pop Sushi.`,
+    `Olá, Zaraki Sushi! Quero fazer ${kind} de Push Pop Sushi.`,
     o.code ? `Pedido: ${o.code}` : null,
     '',
     `Tipo: ${ORDER_TYPE_LABEL[o.type]}`,
