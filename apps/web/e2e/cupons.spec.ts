@@ -26,6 +26,7 @@ async function siteCart(page: Page, phone: string, tubes: number) {
   await form.getByLabel('Bairro').fill('Setor Oeste');
   await form.getByLabel('Endereço').fill('Rua 9, 50');
   for (let i = 0; i < tubes; i++) await page.getByRole('button', { name: 'Adicionar Uramaki de Salmão e Manga' }).click();
+  await form.getByRole('button', { name: 'Pix', exact: true }).click();
   return form;
 }
 

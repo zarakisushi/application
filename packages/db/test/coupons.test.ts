@@ -45,6 +45,7 @@ let phoneSeq = 0;
 function siteOrder(couponCode: string, tubes = 2, phone = `62 9${String(80000000 + ++phoneSeq)}`) {
   const input = publicOrderSchema.parse({
     type: 'DELIVERY',
+    paymentMethod: 'PIX',
     name: 'Cliente',
     phone,
     neighborhood: 'Centro',

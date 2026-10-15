@@ -71,6 +71,7 @@ const FIELD_LABEL: Record<string, string> = {
   birthday: 'Aniversário',
   neighborhood: 'Bairro',
   address: 'Endereço',
+  address_reference: 'Ponto de referência',
   notes: 'Observações',
   code: 'Código',
   type: 'Tipo',

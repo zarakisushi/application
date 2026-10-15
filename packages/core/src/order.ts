@@ -82,6 +82,7 @@ const orderDetails = {
   time: z.union([z.literal(''), z.string().regex(/^\d{2}:\d{2}$/, 'Horário inválido')]).default(''),
   neighborhood: optionalText(120),
   address: optionalText(300),
+  addressReference: optionalText(200),
   guests: z.preprocess(
     (v) => (v === '' || v === null || v === undefined ? undefined : Number(v)),
     z.number('Número de convidados inválido').int().min(1, 'Informe o número de convidados').max(10_000).optional(),
@@ -113,12 +114,17 @@ function refineOrder(
   if (v.type === 'FESTA') require('guests', v.guests, 'Informe o número de convidados');
 }
 
+/** Formas de pagamento que o cliente escolhe no site (dinheiro só pelo painel). */
+export const SITE_PAYMENT_METHODS = ['PIX', 'CARTAO_DEBITO', 'CARTAO_CREDITO'] as const;
+export type SitePaymentMethod = (typeof SITE_PAYMENT_METHODS)[number];
+
 /** Pedido enviado pelo formulário do site. Preços nunca vêm do navegador. */
 export const publicOrderSchema = z
   .object({
     ...orderDetails,
     name: z.string().trim().min(2, 'Informe seu nome').max(120),
     phone: phoneField,
+    paymentMethod: z.enum(SITE_PAYMENT_METHODS, 'Escolha a forma de pagamento.'),
     /** Campo isca invisível: só robôs preenchem. */
     website: z.string().default(''),
   })
@@ -167,7 +173,7 @@ export type AdminOrder = z.output<typeof adminOrderSchema>;
 /** Campos do pedido usados na criação (site e painel). */
 export type OrderInput = Pick<
   PublicOrder,
-  'type' | 'name' | 'phone' | 'date' | 'time' | 'neighborhood' | 'address' | 'guests' | 'notes' | 'items' | 'couponCode'
+  'type' | 'name' | 'phone' | 'date' | 'time' | 'neighborhood' | 'address' | 'addressReference' | 'guests' | 'notes' | 'items' | 'couponCode'
 >;
 
 export type PricedProduct = { id: string; name: string; priceCents: number; costCents?: number };

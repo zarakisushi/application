@@ -52,7 +52,7 @@ describe('fuso horário', () => {
 });
 
 describe('validação do pedido do site', () => {
-  const base = { name: 'Ana', phone: '(62) 98109-2799', items: [{ productId: P1, qty: 2 }] };
+  const base = { name: 'Ana', phone: '(62) 98109-2799', paymentMethod: 'PIX' as const, items: [{ productId: P1, qty: 2 }] };
 
   it('delivery exige bairro e endereço', () => {
     const r = publicOrderSchema.safeParse({ ...base, type: 'DELIVERY' });
@@ -79,6 +79,15 @@ describe('validação do pedido do site', () => {
     const r = publicOrderSchema.parse({ ...base, type: 'DELIVERY', neighborhood: 'Setor Bueno', address: 'Rua T-30, 100' });
     expect(r.phone).toBe('+5562981092799');
     expect(r.notes).toBe('');
+    expect(r.addressReference).toBe('');
+  });
+
+  it('o site exige a forma de pagamento (Pix ou cartão)', () => {
+    const delivery = { ...base, type: 'DELIVERY' as const, neighborhood: 'Centro', address: 'Rua 1' };
+    const { paymentMethod: _, ...semPagamento } = delivery;
+    expect(publicOrderSchema.safeParse(semPagamento).error!.issues.map((i) => i.message)).toEqual(['Escolha a forma de pagamento.']);
+    expect(publicOrderSchema.safeParse({ ...delivery, paymentMethod: 'DINHEIRO' }).success).toBe(false);
+    expect(publicOrderSchema.parse({ ...delivery, paymentMethod: 'CARTAO_CREDITO' }).paymentMethod).toBe('CARTAO_CREDITO');
   });
 });
 
@@ -105,6 +114,22 @@ describe('cálculo do pedido', () => {
 });
 
 describe('mensagem do WhatsApp', () => {
+  it('inclui o ponto de referência e a forma de pagamento escolhidos no site', () => {
+    const text = buildOrderMessage({
+      type: 'DELIVERY',
+      name: 'Ana',
+      phone: '+5562981092799',
+      neighborhood: 'Setor Bueno',
+      address: 'Rua T-30, 100',
+      addressReference: 'Portão azul',
+      paymentMethod: 'CARTAO_CREDITO',
+      lines: [{ productName: 'Salmão', qty: 1, lineTotalCents: 5000 }],
+      totalCents: 5000,
+    });
+    expect(text).toContain('Endereço: Rua T-30, 100\nPonto de referência: Portão azul');
+    expect(text).toContain('Total estimado: R$ 50,00\nPagamento: Cartão de crédito');
+  });
+
   it('monta a mensagem da festa com código, data e itens', () => {
     const text = buildOrderMessage({
       code: 'ZK-000042',

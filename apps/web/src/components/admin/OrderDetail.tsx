@@ -151,6 +151,7 @@ export async function OrderDetail({ ctx, id, section }: { ctx: AdminContext; id:
                       guests: order.guests,
                       neighborhood: order.neighborhood,
                       address: order.address,
+                      addressReference: order.addressReference,
                       notes: order.notes,
                       discountCents: order.discountCents,
                       deliveryFeeCents: order.deliveryFeeCents,
@@ -226,6 +227,7 @@ export async function OrderDetail({ ctx, id, section }: { ctx: AdminContext; id:
                   </>
                 )}
                 <div>{[order.neighborhood, order.address].filter(Boolean).join(' · ') || 'Sem endereço informado'}</div>
+                {order.addressReference && <div className="text-muted-foreground">Referência: {order.addressReference}</div>}
                 <div className="text-muted-foreground">
                   Pagamento: {order.paymentMethod ? PAYMENT_METHOD_LABEL[order.paymentMethod as PaymentMethod] : 'não informado'}
                   {order.paid ? ' · pago' : ' · em aberto'}

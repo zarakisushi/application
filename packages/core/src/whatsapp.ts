@@ -1,5 +1,5 @@
 import { formatCents } from './money';
-import { ORDER_TYPE_LABEL, isScheduled, type OrderLine, type OrderType } from './order';
+import { ORDER_TYPE_LABEL, PAYMENT_METHOD_LABEL, isScheduled, type OrderLine, type OrderType, type PaymentMethod } from './order';
 import { formatBrPhone, waDigits } from './phone';
 import { formatDateBr } from './time';
 
@@ -12,7 +12,9 @@ export type OrderMessage = {
   time?: string;
   neighborhood?: string;
   address?: string;
+  addressReference?: string;
   guests?: number;
+  paymentMethod?: PaymentMethod | null;
   notes?: string;
   lines: Pick<OrderLine, 'productName' | 'qty' | 'lineTotalCents'>[];
   /** Cupom aplicado e o desconto que ele deu. */
@@ -34,11 +36,13 @@ export function buildOrderMessage(o: OrderMessage): string {
     isScheduled(o.type) && o.date ? `Data: ${formatDateBr(o.date)}${o.time ? ` às ${o.time}` : ''}` : null,
     o.neighborhood ? `Bairro: ${o.neighborhood}` : null,
     o.address ? `Endereço: ${o.address}` : null,
+    o.addressReference ? `Ponto de referência: ${o.addressReference}` : null,
     o.type === 'FESTA' && o.guests ? `Convidados: ${o.guests}` : null,
     '',
     ...o.lines.map((l) => `• ${l.qty}x ${l.productName} (${formatCents(l.lineTotalCents)})`),
     o.couponCode && o.discountCents ? `Cupom ${o.couponCode}: − ${formatCents(o.discountCents)}` : null,
     `Total estimado: ${formatCents(o.totalCents)}`,
+    o.paymentMethod ? `Pagamento: ${PAYMENT_METHOD_LABEL[o.paymentMethod]}` : null,
     o.notes ? `\nObs: ${o.notes}` : null,
   ];
   return lines.filter((l) => l !== null).join('\n');

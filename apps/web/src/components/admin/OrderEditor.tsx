@@ -33,6 +33,7 @@ export type EditorOrder = {
   guests: number | null;
   neighborhood: string | null;
   address: string | null;
+  addressReference: string | null;
   notes: string | null;
   discountCents: number;
   deliveryFeeCents: number;
@@ -182,6 +183,9 @@ export function OrderEditor({ mode, defaultType, products, order, orderId, actio
         </Field>
         <Field label={delivery ? 'Endereço' : 'Endereço (opcional)'} htmlFor="address" error={errors.address} className="sm:col-span-2">
           <Input id="address" name="address" defaultValue={order?.address ?? ''} required={delivery} aria-invalid={!!errors.address} />
+        </Field>
+        <Field label="Ponto de referência (opcional)" htmlFor="addressReference" error={errors.addressReference} className="sm:col-span-2">
+          <Input id="addressReference" name="addressReference" defaultValue={order?.addressReference ?? ''} placeholder="Ex.: portão azul, ao lado da padaria" />
         </Field>
       </div>
 

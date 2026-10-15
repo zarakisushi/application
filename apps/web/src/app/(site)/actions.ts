@@ -100,7 +100,7 @@ export async function submitOrder(raw: PublicOrderInput): Promise<SubmitOrderRes
             'Recebemos vários pedidos seguidos deste aparelho. Aguarde alguns minutos ou fale com a gente direto pelo WhatsApp.',
           );
         }
-        return createOrder(tx, tenant, input, { source: 'SITE' });
+        return createOrder(tx, tenant, input, { source: 'SITE', paymentMethod: input.paymentMethod });
       });
     } catch (error) {
       // Cupom que deixou de valer entre a prévia e o envio: o pedido não é gravado e o cliente vê o motivo.

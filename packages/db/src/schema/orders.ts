@@ -34,6 +34,8 @@ export const orders = pgTable(
     guests: integer(),
     neighborhood: text(),
     address: text(),
+    /** Ponto de referência para a entrega (ex.: "portão azul, ao lado da padaria"). */
+    addressReference: text(),
     notes: text(),
     subtotalCents: integer().notNull(),
     discountCents: integer().notNull().default(0),

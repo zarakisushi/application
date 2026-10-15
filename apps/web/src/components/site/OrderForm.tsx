@@ -3,12 +3,15 @@
 import {
   ORDER_TYPES,
   ORDER_TYPE_LABEL,
+  PAYMENT_METHOD_LABEL,
+  SITE_PAYMENT_METHODS,
   buildOrderMessage,
   formatCents,
   isScheduled,
   priceOrder,
   whatsappUrl,
   type OrderType,
+  type SitePaymentMethod,
 } from '@zaraki/core';
 import { useEffect, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react';
 import { checkCoupon, submitOrder } from '@/app/(site)/actions';
@@ -31,6 +34,7 @@ type Fields = {
   time: string;
   neighborhood: string;
   address: string;
+  addressReference: string;
   guests: string;
   notes: string;
   website: string;
@@ -43,6 +47,7 @@ const EMPTY_FIELDS: Fields = {
   time: '',
   neighborhood: '',
   address: '',
+  addressReference: '',
   guests: '',
   notes: '',
   website: '',
@@ -69,6 +74,7 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
   const [sent, setSent] = useState<Sent | null>(null);
   const [couponInput, setCouponInput] = useState('');
   const [coupon, setCoupon] = useState<{ code: string; discountCents: number } | null>(null);
+  const [payment, setPayment] = useState<SitePaymentMethod | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponPending, setCouponPending] = useState(false);
 
@@ -136,10 +142,13 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
     time: scheduled ? fields.time : '',
     neighborhood: fields.neighborhood,
     address: fields.address,
+    addressReference: fields.addressReference,
     guests: type === 'FESTA' && fields.guests ? Number(fields.guests) : undefined,
     notes: fields.notes,
     items,
     couponCode: coupon?.code ?? '',
+    // Conferido em onSubmit antes de enviar (o servidor valida de novo).
+    paymentMethod: payment as SitePaymentMethod,
     website: fields.website,
   });
 
@@ -154,6 +163,10 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
     e.preventDefault();
     if (!priced.tubes) {
       setError('Adicione pelo menos um tubo ao pedido.');
+      return;
+    }
+    if (!payment) {
+      setError('Escolha a forma de pagamento.');
       return;
     }
     if (offline) {
@@ -200,6 +213,7 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
     setCoupon(null);
     setCouponInput('');
     setCouponError(null);
+    setPayment(null);
   };
 
   if (sent) {
@@ -298,6 +312,12 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
           {fieldError('address')}
         </label>
       </div>
+
+      <label className="field">
+        Ponto de referência
+        <input {...inputProps('addressReference')} placeholder="Ex.: portão azul, ao lado da padaria" />
+        {fieldError('addressReference')}
+      </label>
 
       {type === 'FESTA' && (
         <label className="field">
@@ -400,6 +420,28 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
           )}
         </div>
       )}
+
+      <div className="form__group">
+        <span className="form__group-label" id="payment-label">Forma de pagamento</span>
+        <div className="form__types" role="group" aria-labelledby="payment-label">
+          {SITE_PAYMENT_METHODS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              className="form__type"
+              aria-pressed={p === payment}
+              onClick={() => {
+                setError(null);
+                setFieldErrors(({ paymentMethod: _, ...rest }) => rest);
+                setPayment(p);
+              }}
+            >
+              {PAYMENT_METHOD_LABEL[p]}
+            </button>
+          ))}
+        </div>
+        {fieldError('paymentMethod')}
+      </div>
 
       <label className="field">
         Observações

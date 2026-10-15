@@ -47,6 +47,7 @@ const ctx = () => ({ tenantId: tenant.id, actorLabel: 'site', ip: '177.1.2.3' })
 function place(input: Partial<PublicOrderInput>) {
   const parsed = publicOrderSchema.parse({
     type: 'DELIVERY',
+    paymentMethod: 'PIX',
     name: 'Ana',
     phone: '(62) 98109-2799',
     neighborhood: 'Setor Bueno',
@@ -141,6 +142,7 @@ describe('pedido do site', () => {
     const before = await withContext(ctx(), (tx) => countRecentOrdersFromIp(tx, '177.1.2.3', 10), app);
     const panel = publicOrderSchema.parse({
       type: 'DELIVERY',
+      paymentMethod: 'PIX',
       name: 'Balcão',
       phone: '62 97777-5555',
       neighborhood: 'Centro',

@@ -42,6 +42,7 @@ test('festa: grava o pedido, abre o WhatsApp da env com o código e vai para a a
   await addTubes(page, 'Uramaki Especial Salmão e Camarão', 1);
   await expect(form.locator('.lines__total')).toContainText('3 tubos');
   await expect(form.locator('.lines__total')).toContainText('R$ 160,00');
+  await form.getByRole('button', { name: 'Pix', exact: true }).click();
 
   const wa = await submitAndReadWhatsapp(page);
   expect(wa.number).toBe('5562900000000');
@@ -51,6 +52,7 @@ test('festa: grava o pedido, abre o WhatsApp da env com o código e vai para a a
   expect(wa.text).toContain('Convidados: 30');
   expect(wa.text).toContain('• 2x Uramaki de salmão e cream cheese (R$ 100,00)');
   expect(wa.text).toContain('Total estimado: R$ 160,00');
+  expect(wa.text).toContain('Pagamento: Pix');
 
   await expect(page.getByRole('status')).toContainText(`Pedido ${code}`);
 
@@ -62,7 +64,7 @@ test('festa: grava o pedido, abre o WhatsApp da env com o código e vai para a a
     .toBe('SINCRONIZADO');
 
   const { rows } = await db.query(
-    `select o.type, o.total_cents, o.guests, o.scheduled_at, o.google_event_id, c.phone,
+    `select o.type, o.total_cents, o.guests, o.scheduled_at, o.google_event_id, o.payment_method, o.paid, c.phone,
             (select actor_label from audit_logs a where a.entity = 'orders' and a.entity_id = o.id::text and a.action = 'CREATE') as actor
        from orders o join customers c on c.id = o.customer_id where o.code = $1`,
     [code],
@@ -71,6 +73,8 @@ test('festa: grava o pedido, abre o WhatsApp da env com o código e vai para a a
     type: 'FESTA',
     total_cents: 16000,
     guests: 30,
+    payment_method: 'PIX',
+    paid: false,
     phone: '+5562988881234',
     actor: 'site',
   });
@@ -93,11 +97,25 @@ test('delivery: exige endereço, recalcula o total no servidor e usa o mesmo cli
 
   await form.getByLabel('Bairro').fill('Setor Bueno');
   await form.getByLabel('Endereço').fill('Rua T-30, 100');
+  await form.getByLabel('Ponto de referência').fill('Portão azul, ao lado da padaria');
+
+  // A forma de pagamento é obrigatória.
+  await page.getByRole('button', { name: 'Enviar pelo WhatsApp' }).click();
+  await expect(form.getByRole('alert')).toHaveText('Escolha a forma de pagamento.');
+  await form.getByRole('button', { name: 'Cartão de débito', exact: true }).click();
+  await expect(form.getByRole('button', { name: 'Cartão de débito', exact: true })).toHaveAttribute('aria-pressed', 'true');
+
   const wa = await submitAndReadWhatsapp(page);
   expect(wa.text).toContain('Quero fazer um pedido de Push-Pop Sushi.');
   expect(wa.text).toMatch(/Pedido: ZK-\d{6}/);
   expect(wa.text).toContain('Bairro: Setor Bueno');
   expect(wa.text).toContain('Total estimado: R$ 50,00');
+  expect(wa.text).toContain('Ponto de referência: Portão azul, ao lado da padaria');
+  expect(wa.text).toContain('Pagamento: Cartão de débito');
+
+  const code = wa.text.match(/Pedido: (ZK-\d{6})/)![1]!;
+  const { rows: order } = await db.query(`select payment_method, address_reference from orders where code = $1`, [code]);
+  expect(order[0]).toEqual({ payment_method: 'CARTAO_DEBITO', address_reference: 'Portão azul, ao lado da padaria' });
 
   const { rows } = await db.query(`select count(*)::int as n from customers where phone = '+5562988881234'`);
   expect(rows[0].n).toBe(1);
