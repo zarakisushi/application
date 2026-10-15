@@ -14,7 +14,7 @@ export function Footer({ whatsapp }: { whatsapp: { number: string; label: string
           <Image src={symbol} alt="Zaraki Sushi" width={60} height={56} />
           <div>
             <span className="footer__name">ZARAKI SUSHI</span>
-            <span className="footer__sub">Push-Pop Sushi · Goiânia, GO</span>
+            <span className="footer__sub">Push Pop Sushi · Goiânia, GO</span>
           </div>
         </div>
         <div className="footer__links">

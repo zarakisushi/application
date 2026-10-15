@@ -11,7 +11,7 @@ const GA_ID = 'G-J9M66XFMY8';
 const analytics = process.env.VERCEL_ENV === 'production';
 
 export const metadata: Metadata = {
-  title: 'Push-Pop Sushi · Zaraki Sushi Goiânia',
+  title: 'Push Pop Sushi · Zaraki Sushi Goiânia',
   description:
     'Sushi no tubo. Abra, empurre e saboreie 10 peças frescas, sem hashi e sem bagunça. Delivery, festas e eventos em Goiânia.',
 };

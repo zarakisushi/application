@@ -8,7 +8,7 @@ export function Menu({ items }: { items: MenuItem[] }) {
         <div className="menu__head">
           <div>
             <div className="eyebrow eyebrow--red">参 · CARDÁPIO</div>
-            <h2 className="section-title">Push-Pop Sushi</h2>
+            <h2 className="section-title">Push Pop Sushi</h2>
           </div>
           <div className="menu__badge">10 PEÇAS POR TUBO</div>
         </div>
