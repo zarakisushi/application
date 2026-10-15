@@ -1,6 +1,7 @@
 import { DomainError, type TenantInput } from '@zaraki/core';
 import { and, asc, eq, ilike, ne, or } from 'drizzle-orm';
 import type { Tx } from '../client';
+import { ensureFinanceDefaults } from '../finance/setup';
 import { products, tenants } from '../schema';
 import { contains, countWhere, paging, statusWhere, toPage, type ListParams } from './common';
 
@@ -62,6 +63,7 @@ export async function createTenant(tx: Tx, input: TenantInput, templateTenantId:
       })),
     );
   }
+  await ensureFinanceDefaults(tx, tenant!.id);
   return tenant!;
 }
 

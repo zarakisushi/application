@@ -92,6 +92,10 @@ export const tenantSchema = z.object({
     .trim()
     .toUpperCase()
     .regex(/^[A-Z]{2,4}$/, 'Use de 2 a 4 letras (ex.: ZK, ZKB)'),
+  royaltyDueDay: z.preprocess(
+    (v) => (v === '' || v === undefined || v === null ? 10 : Number(v)),
+    z.number('Informe um dia entre 1 e 28').int('Informe um dia entre 1 e 28').min(1, 'Informe um dia entre 1 e 28').max(28, 'Informe um dia entre 1 e 28'),
+  ),
 });
 export type TenantInput = z.output<typeof tenantSchema>;
 

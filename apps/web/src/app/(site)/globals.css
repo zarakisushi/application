@@ -522,6 +522,32 @@ input, select, textarea, button { font-family: inherit; }
 .lines__total > span:first-child { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
 .lines__total > span:first-child span { font-weight: 500; color: var(--muted-light); }
 .form__error { color: #a33a22; font-size: 15px; font-weight: 700; }
+.lines__discount {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px 0;
+  color: #2e7d4f;
+  font-weight: 700;
+}
+.coupon { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+.coupon__field { flex: 1; min-width: 180px; }
+.coupon__field input { text-transform: uppercase; letter-spacing: 0.08em; }
+.coupon__field input:disabled { background: #f4efe6; color: var(--text-dark); }
+.coupon__btn {
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: 1.5px solid var(--text-dark);
+  background: var(--text-dark);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.coupon__btn:disabled { opacity: 0.7; cursor: progress; }
+.coupon__btn--remove { background: transparent; color: var(--text-dark); }
+.coupon__msg { flex-basis: 100%; font-size: 14px; }
+.coupon__msg--ok { color: #2e7d4f; font-weight: 700; }
 .form__submit {
   border-radius: 8px;
   min-height: 56px;

@@ -4,6 +4,7 @@ import { DEFAULT_MENU } from '@zaraki/core';
 import { and, eq } from 'drizzle-orm';
 import { createDb } from '../src/client';
 import { withContext } from '../src/context';
+import { ensureFinanceDefaults } from '../src/finance';
 import { products, tenants } from '../src/schema';
 
 const db = createDb(requireEnv('DATABASE_URL'), 1);
@@ -31,6 +32,7 @@ await withContext({ platformAdmin: true, actorLabel: 'seed' }, async (tx) => {
     await tx.insert(products).values({ ...item, tenantId: tenant!.id, sortOrder: i + 1 });
     console.log(`Produto criado: ${item.name}`);
   }
+  await ensureFinanceDefaults(tx, tenant!.id);
 }, db);
 
 await db.$client.end();

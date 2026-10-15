@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>Zaraki Sushi — Manual do Sistema de Gestão</title>
+<style>
+  @font-face { font-family: 'Shippori'; src: url('../../apps/web/src/fonts/shippori-700.woff2') format('woff2'); font-weight: 700; }
+  @font-face { font-family: 'Shippori'; src: url('../../apps/web/src/fonts/shippori-800.woff2') format('woff2'); font-weight: 800; }
+  @font-face { font-family: 'ZenKaku'; src: url('../../apps/web/src/fonts/zen-kaku-400.woff2') format('woff2'); font-weight: 400; }
+  @font-face { font-family: 'ZenKaku'; src: url('../../apps/web/src/fonts/zen-kaku-500.woff2') format('woff2'); font-weight: 500; }
+  @font-face { font-family: 'ZenKaku'; src: url('../../apps/web/src/fonts/zen-kaku-700.woff2') format('woff2'); font-weight: 700; }
+
+  :root {
+    --ink: #0d0b09; --gold: #c9a45c; --gold-dark: #9a7a3a; --red: #b4442a; --paper: #f7f3ec;
+    --muted: #6b6257; --line: #e4dccf; --green: #2e7d4f; --amber: #b07a12;
+  }
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+    @bottom-left { content: 'Zaraki Sushi · Manual do Sistema de Gestão'; font: 7.5pt 'ZenKaku', Helvetica, sans-serif; color: #8a8073; }
+    @bottom-right { content: counter(page) ' / ' counter(pages); font: 7.5pt 'ZenKaku', Helvetica, sans-serif; color: #8a8073; }
+  }
+  /* Capa sem margem nem rodapé. */
+  @page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: 'ZenKaku', 'Helvetica Neue', Arial, sans-serif; font-size: 10.2pt; line-height: 1.55; color: #1f1a15; }
+  h1, h2, h3, .display { font-family: 'Shippori', Georgia, 'Times New Roman', serif; color: var(--ink); line-height: 1.2; }
+  h1 { font-size: 22pt; margin: 0 0 4mm; padding-bottom: 3mm; border-bottom: 2px solid var(--gold); break-after: avoid; }
+  h2 { font-size: 14pt; margin: 7mm 0 2.5mm; break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 5mm 0 2mm; break-after: avoid; }
+  p { margin: 0 0 2.6mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 5.5mm; }
+  li { margin-bottom: 1.2mm; }
+  strong { color: var(--ink); }
+  a { color: inherit; text-decoration: none; }
+  .chapter { break-before: page; }
+  .kicker { font-size: 8.5pt; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-dark); margin-bottom: 1mm; font-weight: 700; }
+  .lead { font-size: 11pt; color: #3a332b; }
+  .muted { color: var(--muted); }
+
+  /* Capa */
+  .cover { height: 297mm; width: 210mm; background: var(--ink); color: #f4efe6; position: relative; overflow: hidden; padding: 30mm 22mm; }
+  .cover .logo { width: 30mm; }
+  .cover .brand { font-family: 'Shippori', serif; letter-spacing: .5em; color: var(--gold); font-size: 13pt; margin-top: 6mm; }
+  .cover h1.title { color: #f4efe6; border: 0; font-size: 34pt; margin: 48mm 0 6mm; padding: 0; }
+  .cover .subtitle { font-size: 13pt; color: #cfc5b4; max-width: 140mm; }
+  .cover .rule { width: 40mm; height: 2px; background: var(--gold); margin: 10mm 0; }
+  .cover .meta { position: absolute; bottom: 26mm; left: 22mm; right: 22mm; font-size: 9.5pt; color: #a99f8f; display: flex; justify-content: space-between; }
+  .cover .kanji { position: absolute; right: -10mm; top: 60mm; font-family: 'Shippori', serif; font-size: 220pt; color: rgba(201,164,92,.07); font-weight: 800; }
+
+  /* Sumário */
+  .toc ol { list-style: none; padding: 0; columns: 1; }
+  .toc li { display: flex; gap: 3mm; padding: 1.6mm 0; border-bottom: 1px dotted var(--line); margin: 0; }
+  .toc .n { color: var(--gold-dark); font-weight: 700; width: 8mm; }
+  .toc .d { color: var(--muted); font-size: 9pt; margin-left: auto; text-align: right; max-width: 95mm; }
+
+  /* Figuras */
+  figure { margin: 3mm 0 5mm; break-inside: avoid; }
+  figure img { width: 100%; max-height: 190mm; object-fit: contain; object-position: top center; border: 1px solid var(--line); border-radius: 2.5mm; display: block; }
+  figure.tall img { width: auto; max-width: 100%; margin: 0 auto; }
+  figure.half img { width: 70%; margin: 0 auto; }
+  figcaption { font-size: 8.5pt; color: var(--muted); margin-top: 1.5mm; text-align: center; }
+
+  /* Caixas */
+  .box { border: 1px solid var(--line); border-left: 3px solid var(--gold); background: #fbf8f3; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0 4mm; break-inside: avoid; }
+  .box.tip { border-left-color: var(--green); background: #f3f8f4; }
+  .box.warn { border-left-color: var(--amber); background: #fbf6ea; }
+  .box.red { border-left-color: var(--red); background: #fbf1ee; }
+  .box .t { font-weight: 700; color: var(--ink); display: block; margin-bottom: 1mm; }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 5mm; font-size: 9pt; break-inside: auto; }
+  th { text-align: left; background: var(--ink); color: #f4efe6; font-weight: 500; padding: 1.8mm 2.2mm; }
+  td { padding: 1.6mm 2.2mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr { break-inside: avoid; }
+  td.c, th.c { text-align: center; }
+  .yes { color: var(--green); font-weight: 700; }
+  .no { color: #b9b0a3; }
+  .pill { display: inline-block; font-size: 8pt; padding: .2mm 2mm; border-radius: 10mm; border: 1px solid var(--line); background: #fff; }
+  .pill.g { color: var(--green); border-color: #b7d8c3; background: #eef7f1; }
+  .pill.a { color: var(--amber); border-color: #ecd9a8; background: #fbf4e2; }
+  .pill.r { color: var(--red); border-color: #ebc1b5; background: #fbefeb; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .card { border: 1px solid var(--line); border-radius: 2mm; padding: 3mm 4mm; break-inside: avoid; background: #fff; }
+  .card h3 { margin-top: 0; }
+
+  .flow { display: flex; align-items: stretch; gap: 2mm; margin: 3mm 0 5mm; break-inside: avoid; }
+  .flow .step { flex: 1; border: 1px solid var(--line); border-radius: 2mm; padding: 2.5mm 3mm; background: #fff; font-size: 8.8pt; }
+  .flow .step b { display: block; font-family: 'Shippori', serif; font-size: 10pt; margin-bottom: 1mm; color: var(--ink); }
+  .flow .arrow { align-self: center; color: var(--gold-dark); font-weight: 700; }
+
+  .check li { list-style: none; position: relative; padding-left: 5mm; }
+  .check li::before { content: '☐'; position: absolute; left: 0; color: var(--gold-dark); }
+  .check { padding-left: 0; }
+</style>
+</head>
+<body>
+
+<!-- ============================== CAPA ============================== -->
+<section class="cover">
+  <div class="kanji">士</div>
+  <img class="logo" src="../../apps/web/src/assets/symbol.png" alt="" />
+  <div class="brand">ZARAKI</div>
+  <h1 class="title">Manual do Sistema<br />de Gestão</h1>
+  <div class="subtitle">Site, painel administrativo, financeiro e acompanhamento da rede: tudo o que o sistema da Zaraki Sushi faz até agora, explicado para quem usa no dia a dia.</div>
+  <div class="rule"></div>
+  <div class="subtitle" style="font-size:10.5pt">Matriz · Franquias · Equipe</div>
+  <div class="meta"><span>Zaraki Sushi — Goiânia</span><span>Versão de 15 de outubro de 2026</span></div>
+</section>
+
+<!-- ============================== SUMÁRIO ============================== -->
+<section class="toc chapter">
+  <div class="kicker">Conteúdo</div>
+  <h1>Sumário</h1>
+  <ol>
+    <li><span class="n">1</span><span>Visão geral do sistema</span><span class="d">O que é, como está organizado, garantias de segurança</span></li>
+    <li><span class="n">2</span><span>Acesso, perfis e navegação</span><span class="d">Login, senhas, papéis, seletor de unidade, menu</span></li>
+    <li><span class="n">3</span><span>O site e os pedidos online</span><span class="d">Cardápio, formulário, WhatsApp, cupom, contingência</span></li>
+    <li><span class="n">4</span><span>Página inicial do painel</span><span class="d">Resumo do dia, indicadores e atalhos</span></li>
+    <li><span class="n">5</span><span>Pedidos (delivery)</span><span class="d">Lançar, etapas, pagamento, cancelamento</span></li>
+    <li><span class="n">6</span><span>Encomendas, festas e Google Agenda</span><span class="d">Lista, calendário e sincronização</span></li>
+    <li><span class="n">7</span><span>Clientes</span><span class="d">Cadastro automático e histórico</span></li>
+    <li><span class="n">8</span><span>Cardápio</span><span class="d">Sabores, preço, custo e fotos</span></li>
+    <li><span class="n">9</span><span>Cupons de desconto</span><span class="d">Porcentagem, valor, limites, exclusivos</span></li>
+    <li><span class="n">10</span><span>Financeiro</span><span class="d">Fluxo de caixa, contas, DRE, saúde financeira, extratos</span></li>
+    <li><span class="n">11</span><span>Relatórios</span><span class="d">32 relatórios com exportação CSV</span></li>
+    <li><span class="n">12</span><span>Usuários e unidades</span><span class="d">Equipe e cadastro de franquias</span></li>
+    <li><span class="n">13</span><span>Auditoria</span><span class="d">Histórico à prova de adulteração</span></li>
+    <li><span class="n">14</span><span>Como a Matriz acompanha as unidades</span><span class="d">Ferramentas da rede e rotina sugerida</span></li>
+    <li><span class="n">15</span><span>Rotinas automáticas</span><span class="d">O que o sistema faz sozinho</span></li>
+    <li><span class="n">16</span><span>Situação atual e próximos passos</span><span class="d">O que falta para publicar</span></li>
+    <li><span class="n">17</span><span>Glossário</span><span class="d">Termos usados no sistema</span></li>
+  </ol>
+</section>
+
+<!-- ============================== 1 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 1</div>
+  <h1>Visão geral do sistema</h1>
+  <p class="lead">O sistema da Zaraki reúne em um só lugar o <strong>site</strong> onde o cliente faz o pedido e o <strong>painel administrativo</strong> onde a equipe acompanha pedidos, encomendas, clientes, cardápio, cupons, dinheiro e relatórios. Foi desenhado desde o início para uma <strong>rede de franquias</strong>: a Matriz e cada franqueado operam no mesmo sistema, cada um com seus próprios dados.</p>
+
+  <h2>Como está organizado</h2>
+  <div class="grid2">
+    <div class="card"><h3>Site (público)</h3><p>Página da marca, cardápio e formulário de pedido (delivery, encomenda ou festa). O pedido é gravado no sistema e enviado ao WhatsApp da unidade.</p></div>
+    <div class="card"><h3>Painel (/admin)</h3><p>Área restrita, com login. O menu lateral tem três grupos: <strong>Operação</strong>, <strong>Financeiro</strong> e <strong>Gestão</strong>. Cada pessoa vê só o que o seu papel permite.</p></div>
+  </div>
+
+  <h2>Unidades: Matriz e franquias</h2>
+  <p>Cada unidade (a Matriz e cada franquia) tem <strong>dados próprios e separados</strong>: pedidos, clientes, cardápio, cupons, financeiro e equipe. A pessoa que trabalha numa franquia só enxerga aquela franquia. A administração da Matriz pode alternar entre as unidades e ver a rede inteira (capítulo 14).</p>
+
+  <h2>Garantias de segurança e histórico</h2>
+  <p>Como a Zaraki pretende crescer como franquia, preservar a história e ter controle sobre cada mudança é fundamental. Por isso três regras são garantidas pelo <strong>próprio banco de dados</strong>, e não só pelas telas:</p>
+  <table>
+    <tr><th style="width:32%">Regra</th><th>O que significa na prática</th></tr>
+    <tr><td><strong>Nada é apagado de verdade</strong></td><td>"Excluir" sempre deixa o registro <em>inativo</em> (exclusão lógica). Pedidos, clientes, sabores, cupons, lançamentos, usuários e unidades podem ser restaurados. O banco recusa qualquer tentativa de apagar dados definitivamente.</td></tr>
+    <tr><td><strong>Toda mudança fica registrada</strong></td><td>Cada criação, alteração, exclusão e restauração vai para a <strong>Auditoria</strong> com quem fez, quando, de onde e o que mudou, campo a campo. Os registros formam uma corrente verificável: qualquer adulteração é detectada.</td></tr>
+    <tr><td><strong>Isolamento entre unidades</strong></td><td>O banco só entrega a cada pessoa os dados da unidade em que ela está trabalhando. Mesmo um erro de programação não faria uma franquia ver os dados de outra.</td></tr>
+  </table>
+  <div class="box tip"><span class="t">Em resumo</span><p>Você pode usar "Excluir" sem medo: tudo pode ser restaurado e tudo fica registrado.</p></div>
+</section>
+
+<!-- ============================== 2 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 2</div>
+  <h1>Acesso, perfis e navegação</h1>
+
+  <div class="grid2">
+    <div>
+      <h2 style="margin-top:0">Entrar no painel</h2>
+      <ul>
+        <li>O acesso é por <strong>e-mail e senha</strong>, em <strong>/admin</strong>. O rodapé do site tem o link "Área administrativa".</li>
+        <li>Novos usuários recebem uma <strong>senha provisória</strong> e são obrigados a criar a própria senha no primeiro acesso.</li>
+        <li>Depois de <strong>5 tentativas erradas em 15 minutos</strong>, o login daquele e-mail fica bloqueado por um tempo. O mesmo vale para muitas tentativas vindas do mesmo aparelho. Isso protege contra quem tenta adivinhar senhas.</li>
+        <li>Todo login, saída, senha errada e bloqueio fica registrado na Auditoria.</li>
+      </ul>
+    </div>
+    <figure class="half" style="margin-top:0"><img src="img/03-login.jpg" alt="" /><figcaption>Tela de login do painel.</figcaption></figure>
+  </div>
+
+  <h2>Papéis e permissões</h2>
+  <p>Cada pessoa tem um papel em cada unidade em que trabalha. A <strong>administração da rede</strong> é um acesso especial da Matriz, com visão de todas as unidades.</p>
+  <table>
+    <tr><th>O que a pessoa pode fazer</th><th class="c">Atendente</th><th class="c">Gerente</th><th class="c">Administrador</th><th class="c">Adm. da rede</th></tr>
+    <tr><td>Ver e lançar pedidos e encomendas; cadastrar clientes</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Ver o cardápio</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Excluir pedidos e clientes; editar o cardápio</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Criar e editar cupons</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Financeiro: ver e lançar entradas e saídas</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Financeiro: contas, categorias, excluir, fechar mês, conferir saldo</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Relatórios da unidade</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Excluir sabores e cupons; usuários; auditoria</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Unidades, relatórios da rede, gerar royalties</td><td class="c no">—</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+  </table>
+  <p class="muted">Quem tenta abrir uma tela sem permissão vê um aviso, e a tentativa fica registrada na Auditoria.</p>
+
+  <h2>Seletor de unidade e menu</h2>
+  <div class="grid2">
+    <figure style="margin-top:0"><img src="img/26-seletor-unidade.jpg" alt="" /><figcaption>Seletor de unidade, no topo do painel.</figcaption></figure>
+    <div>
+      <ul>
+        <li>Quem trabalha em mais de uma unidade troca de unidade no <strong>seletor no topo da tela</strong>. Ao trocar, <strong>todo o painel</strong> passa a mostrar os dados da unidade escolhida: pedidos, financeiro, relatórios etc.</li>
+        <li>O menu lateral pode ser recolhido para mostrar <strong>apenas ícones</strong>, com o botão no rodapé do menu. A preferência fica salva no aparelho.</li>
+        <li>No celular, o menu abre pelo botão no canto superior esquerdo.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 3 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 3</div>
+  <h1>O site e os pedidos online</h1>
+  <figure><img src="img/01-site.jpg" alt="" /><figcaption>Página inicial do site da Zaraki.</figcaption></figure>
+  <p>O site apresenta a marca e o cardápio, que vem do próprio painel: preços e fotos alterados em <strong>Cardápio</strong> aparecem no site. O formulário de pedido fica na seção <strong>Encomendas</strong>.</p>
+
+  <div class="grid2">
+    <figure style="margin-top:0"><img src="img/02-site-pedido.jpg" alt="" /><figcaption>Formulário de pedido com cupom de desconto.</figcaption></figure>
+    <div>
+      <h3 style="margin-top:0">Como o pedido funciona</h3>
+      <ol>
+        <li>O cliente escolhe <strong>Delivery</strong>, <strong>Encomenda</strong> ou <strong>Festa</strong>. Encomenda e festa pedem data e horário; festa pede também o número de convidados.</li>
+        <li>Escolhe os sabores (tubos de 10 peças) e, se tiver, aplica um <strong>cupom</strong>.</li>
+        <li>Ao enviar, o pedido é <strong>gravado no sistema</strong> com um código (ex.: ZK-000123) e o WhatsApp da unidade abre com a mensagem pronta.</li>
+        <li>O pedido aparece no painel como <strong>Novo</strong>, esperando confirmação.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h2>Proteções do site</h2>
+  <ul>
+    <li><strong>Preço sempre do sistema:</strong> o total é recalculado no servidor com o preço do cardápio, então ninguém consegue mudar o preço pelo navegador.</li>
+    <li><strong>Modo de contingência:</strong> se o banco de dados estiver fora do ar, o site continua aceitando pedidos. Eles vão direto pelo WhatsApp e nenhuma venda se perde.</li>
+    <li><strong>Anti-abuso:</strong> o site aceita no máximo 5 pedidos a cada 10 minutos do mesmo aparelho. Também bloqueia temporariamente quem erra 10 códigos de cupom em 10 minutos.</li>
+    <li><strong>Cliente identificado pelo WhatsApp:</strong> quem já comprou é reconhecido pelo telefone e o cadastro é atualizado sozinho.</li>
+  </ul>
+</section>
+
+<!-- ============================== 4 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 4</div>
+  <h1>Página inicial do painel</h1>
+  <figure class="tall"><img src="img/04-inicio.jpg" alt="" /><figcaption>Página inicial: resumo do dia, financeiro e indicadores do mês.</figcaption></figure>
+  <ul>
+    <li><strong>Resumo do dia:</strong> pedidos de hoje, pedidos aguardando confirmação e encomendas/festas dos próximos 7 dias. Cada número leva à lista correspondente.</li>
+    <li><strong>Financeiro</strong> (para quem tem acesso): saldo em caixa, contas vencidas e o que vence em 7 dias.</li>
+    <li><strong>Indicadores do mês:</strong> faturamento, pedidos entregues, ticket médio e clientes novos, comparados ao mesmo período do mês passado.</li>
+    <li><strong>Gráficos:</strong> faturamento dos últimos 30 dias, vendas por tipo e sabores mais vendidos.</li>
+    <li><strong>Próximas encomendas e festas</strong> e atalhos para todas as telas.</li>
+    <li>Na Matriz, o botão <strong>"Ver toda a rede"</strong> soma os indicadores de todas as unidades.</li>
+  </ul>
+</section>
+
+<!-- ============================== 5 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 5</div>
+  <h1>Pedidos (delivery)</h1>
+  <figure><img src="img/05-pedidos.jpg" alt="" /><figcaption>Lista de pedidos com busca e filtros.</figcaption></figure>
+  <ul>
+    <li><strong>Lista</strong> com busca por código, nome ou telefone e filtros por etapa e situação. Os pedidos do site chegam sozinhos.</li>
+    <li><strong>Lançar pedido</strong> recebido por WhatsApp, telefone ou balcão, com taxa de entrega, desconto ou cupom, e forma de pagamento.</li>
+    <li><strong>Etapas:</strong> Novo → Confirmado → Em preparo → Pronto → Saiu para entrega → Entregue. Cancelar exige o motivo. Cada mudança fica no histórico do pedido, com quem fez e quando.</li>
+    <li><strong>Editar</strong> itens, endereço e valores. Os itens que já estavam no pedido mantêm o preço da época, então mudar o cardápio não altera pedidos antigos.</li>
+  </ul>
+  <figure><img src="img/06-pedido-ficha.jpg" alt="" /><figcaption>Ficha do pedido: itens, valores, etapas, cliente, pagamento e histórico.</figcaption></figure>
+  <div class="box"><span class="t">Pagamento e caixa</span>
+    <p>Quando o pedido é marcado como <strong>pago</strong> (botão "Registrar pagamento" ou ao lançar), a venda <strong>entra sozinha no caixa</strong>, na conta da forma de pagamento: dinheiro vai para o Caixa da loja; Pix e cartão, para a Conta bancária.</p>
+    <p>Ao passar um pedido não pago para <strong>Entregue</strong>, o sistema pergunta <strong>"Pagamento recebido?"</strong>. Se a resposta for "ainda não", o pedido aparece em <strong>A receber</strong> no Financeiro. Cancelar um pedido pago estorna a entrada no caixa.</p></div>
+</section>
+
+<!-- ============================== 6 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 6</div>
+  <h1>Encomendas, festas e Google Agenda</h1>
+  <figure><img src="img/07-encomendas-calendario.jpg" alt="" /><figcaption>Encomendas e festas na visão de calendário.</figcaption></figure>
+  <ul>
+    <li><strong>Encomendas</strong> reúne as encomendas e as festas, que têm data marcada. A visão em <strong>lista</strong> separa as próximas das passadas; a visão de <strong>calendário</strong> mostra o mês.</li>
+    <li>Toda encomenda ou festa é <strong>enviada à Google Agenda</strong> da Zaraki (zarakisushigo@gmail.com) e atualizada quando muda. Se for cancelada, sai da agenda.</li>
+    <li>Cada pedido mostra a situação da agenda: <span class="pill g">Na agenda</span>, <span class="pill a">Agenda: pendente</span> ou <span class="pill r">Agenda: falhou</span>. Há o botão <strong>"Sincronizar agora"</strong> para tentar de novo.</li>
+    <li>Cada franquia pode ter a <strong>própria agenda</strong>, informada no cadastro da unidade.</li>
+  </ul>
+  <div class="box warn"><span class="t">Depende de configuração</span><p>Para a sincronização funcionar no site publicado, é preciso criar a conta de serviço do Google e compartilhar a agenda com ela (passo a passo em <em>docs/google-agenda.md</em>). Enquanto isso não for feito, as encomendas ficam como "Agenda: pendente", sem perder nada.</p></div>
+</section>
+
+<!-- ============================== 7 e 8 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulos 7 e 8</div>
+  <h1>Clientes e Cardápio</h1>
+  <h2>Clientes</h2>
+  <figure><img src="img/08-clientes.jpg" alt="" /><figcaption>Lista de clientes.</figcaption></figure>
+  <ul>
+    <li>Clientes do site são <strong>cadastrados automaticamente</strong> pelo WhatsApp; os demais podem ser cadastrados à mão.</li>
+    <li>A ficha guarda nome, telefone, bairro, endereço, aniversário, observações, os pedidos do cliente e o histórico de alterações.</li>
+    <li>Os relatórios de clientes usam esses dados: recompra, melhores clientes, aniversariantes, bairros e segmentação para campanhas.</li>
+  </ul>
+  <h2>Cardápio</h2>
+  <figure><img src="img/09-cardapio.jpg" alt="" /><figcaption>Sabores do cardápio, com preço e custo.</figcaption></figure>
+  <ul>
+    <li>Cada sabor tem <strong>preço de venda</strong>, <strong>custo</strong> (base do CMV e da margem), foto, descrição, marcação de "especial" e ordem de exibição.</li>
+    <li>A <strong>foto</strong> é enviada pelo próprio painel. Fotos grandes de celular são reduzidas automaticamente antes do envio.</li>
+    <li>Excluir um sabor tira-o do site, sem afetar pedidos antigos, e ele pode ser restaurado. Mudanças de preço e custo ficam no relatório "Histórico de preços e custos".</li>
+  </ul>
+</section>
+
+<!-- ============================== 9 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 9</div>
+  <h1>Cupons de desconto</h1>
+  <div class="grid2">
+    <figure style="margin-top:0"><img src="img/10-cupom.jpg" alt="" /><figcaption>Cadastro de cupom com o resumo em português.</figcaption></figure>
+    <div>
+      <ul>
+        <li><strong>Dois tipos:</strong> porcentagem sobre os produtos (ex.: 10%) ou valor em reais (ex.: R$ 20). A taxa de entrega nunca tem desconto e o total nunca fica negativo.</li>
+        <li><strong>Mínimo opcional:</strong> a partir de X tubos e/ou de R$ X em produtos.</li>
+        <li><strong>Validade opcional</strong> (de/até) e <strong>limite de usos</strong>. Pedido cancelado devolve o uso.</li>
+        <li><strong>Cupom exclusivo:</strong> preso ao WhatsApp de um cliente, de uso único.</li>
+        <li>A chave <strong>Ativo</strong> liga e desliga o cupom na hora, direto da lista.</li>
+        <li>Funciona no <strong>site</strong> e nos pedidos lançados no <strong>painel</strong>. O resumo ao lado do cadastro explica, em português, como o cupom vai funcionar.</li>
+      </ul>
+    </div>
+  </div>
+  <p>A lista mostra a situação de cada cupom agora (<span class="pill g">Válido</span>, Desativado, Esgotado, Expirado, Agendado) e quantas vezes foi usado. A ficha mostra os pedidos que usaram o cupom, o desconto concedido e quanto ele trouxe em vendas.</p>
+</section>
+
+<!-- ============================== 10 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 10</div>
+  <h1>Financeiro</h1>
+  <p class="lead">O Financeiro registra <strong>tudo o que entra e sai</strong> de cada unidade e mostra a <strong>saúde financeira</strong> do negócio. Cada unidade tem o seu: ao trocar de unidade no seletor, todo o financeiro muda junto.</p>
+
+  <h2>Visão geral e semáforo de saúde</h2>
+  <figure class="tall"><img src="img/11-fin-visao-geral.jpg" alt="" /><figcaption>Visão geral: números do mês, semáforo de saúde financeira e gráficos.</figcaption></figure>
+  <p>Cada indicador aparece em <span class="pill g">verde</span> (tudo bem), <span class="pill a">amarelo</span> (atenção) ou <span class="pill r">vermelho</span> (agir logo), com uma frase explicando o número.</p>
+  <table>
+    <tr><th style="width:24%">Indicador</th><th>O que mede</th><th style="width:30%">Referência</th></tr>
+    <tr><td>Fôlego de caixa</td><td>Quantos meses de despesas o saldo atual cobre</td><td>verde a partir de 3 meses; vermelho abaixo de 1</td></tr>
+    <tr><td>Saldo previsto (90 dias)</td><td>Saldo de hoje + contas a receber − contas a pagar + vendas estimadas pela média dos últimos 28 dias</td><td>vermelho se ficar negativo em algum dia</td></tr>
+    <tr><td>Margem operacional</td><td>Quanto sobra de lucro da operação a cada R$ 100 vendidos</td><td>verde a partir de 10%; vermelho se negativa</td></tr>
+    <tr><td>CMV</td><td>Compras de insumos ÷ vendas, comparado ao custo pelas fichas do cardápio (diferença grande indica desperdício)</td><td>verde até 35%; vermelho acima de 40%</td></tr>
+    <tr><td>Ponto de equilíbrio</td><td>Quanto é preciso vender para pagar as despesas fixas</td><td>verde se as vendas cobriram</td></tr>
+    <tr><td>Contas vencidas</td><td>Contas a pagar em atraso</td><td>verde se nenhuma</td></tr>
+    <tr><td>Conferência bancária</td><td>Se há extrato recente da conta bancária e se ele bate com o sistema</td><td>amarelo sem extrato há mais de 31 dias ou com diferença</td></tr>
+  </table>
+  <div class="box"><span class="t">Mês em andamento</span><p>No meio do mês, o aluguel e a folha já venceram, mas as vendas ainda estão entrando. Por isso margem, CMV e ponto de equilíbrio usam o <strong>último mês fechado</strong>, e o indicador diz qual mês é.</p></div>
+
+  <h2>Lançamentos</h2>
+  <figure><img src="img/12-fin-lancamentos.jpg" alt="" /><figcaption>Lançamentos com filtros e totais do período.</figcaption></figure>
+  <ul>
+    <li>Lista de todas as entradas e saídas, filtrável por período, tipo, situação (pago, em aberto, vencido), categoria, conta e origem, com os <strong>totais de entradas, saídas e resultado</strong> do filtro.</li>
+    <li><strong>Origens automáticas:</strong> vendas de pedidos pagos, royalties, ajustes de conferência e transferências entre contas. Esses lançamentos são protegidos: a correção é feita na origem (no pedido, por exemplo).</li>
+  </ul>
+  <figure><img src="img/13-fin-nova-saida.jpg" alt="" /><figcaption>Nova saída: categoria, fornecedor, vencimento, competência, pagamento, repetição e comprovante.</figcaption></figure>
+  <ul>
+    <li><strong>Vencimento × competência:</strong> o vencimento diz quando pagar; a competência diz a que mês a conta se refere (a conta de luz de setembro, paga em outubro, é despesa de setembro na DRE).</li>
+    <li><strong>Repetir:</strong> "todo mês por N meses" (ex.: aluguel) ou "parcelado em N vezes" (ex.: um freezer). Ao editar uma conta de uma série, dá para mudar só ela ou ela e as próximas em aberto.</li>
+    <li><strong>Comprovante:</strong> foto ou PDF da nota, boleto ou recibo. Os arquivos são <strong>privados</strong>: ficam no banco da unidade, só abrem para quem tem acesso ao financeiro e entram no backup.</li>
+  </ul>
+
+  <h2>A pagar e receber</h2>
+  <figure><img src="img/14-fin-agenda.jpg" alt="" /><figcaption>Agenda de vencimentos.</figcaption></figure>
+  <p>Mostra as contas em aberto até 30 dias, separadas em <strong>Vencidos</strong>, <strong>Vencem hoje</strong>, <strong>Próximos 7 dias</strong> e <strong>Até 30 dias</strong>, com o botão Pagar/Receber em cada uma. Em "A receber" aparecem também os <strong>pedidos entregues sem pagamento registrado</strong>.</p>
+
+  <h2>Fluxo de caixa e DRE</h2>
+  <figure><img src="img/15-fin-dre.jpg" alt="" /><figcaption>DRE gerencial do ano, mês a mês.</figcaption></figure>
+  <ul>
+    <li><strong>Fluxo de caixa:</strong> saldo inicial, o que entrou e saiu das contas e o saldo final de cada mês do ano. Do mês atual em diante, soma também o que está a pagar e a receber.</li>
+    <li><strong>DRE gerencial:</strong> Receita − Custos variáveis = Margem de contribuição − Despesas fixas − Impostos ± Royalties = <strong>Resultado operacional</strong>; depois Financeiro, Investimentos e Outros, até o Resultado do período.</li>
+  </ul>
+
+  <h2>Royalties</h2>
+  <figure><img src="img/16-fin-royalties.jpg" alt="" /><figcaption>Royalties na visão da Matriz.</figcaption></figure>
+  <p>Todo dia, às 6h, o sistema gera a cobrança do <strong>mês anterior</strong> de cada franquia que tem percentual cadastrado: percentual × faturamento entregue no mês, com vencimento no dia definido no cadastro da unidade. Cada cobrança vira uma <strong>saída na franquia</strong> ("Royalties à Matriz") e uma <strong>entrada a receber na Matriz</strong>. Detalhes no capítulo 14.</p>
+
+  <h2>Contas, categorias, fechamento e extratos</h2>
+  <figure><img src="img/17-fin-contas.jpg" alt="" /><figcaption>Contas da unidade com saldo, último extrato e ações.</figcaption></figure>
+  <ul>
+    <li><strong>Contas:</strong> onde o dinheiro fica (Caixa da loja, Conta bancária...), com saldo inicial e quais formas de pagamento cada conta recebe.</li>
+    <li><strong>Transferir entre contas:</strong> por exemplo, depositar o dinheiro do caixa no banco. Não conta como entrada nem saída da empresa.</li>
+    <li><strong>Conferir saldo:</strong> você informa o saldo real (extrato ou dinheiro contado) e o sistema lança a diferença como ajuste.</li>
+    <li><strong>Categorias:</strong> plano de contas pensado para restaurante japonês (insumos de peixe, arroz e nori, embalagens, aluguel, folha, impostos...). As categorias de compra de mercadoria são marcadas como <strong>CMV</strong>.</li>
+    <li><strong>Fechamento do mês:</strong> depois de fechado, nada daquele mês muda, nem por edição de pedido. Contas de competência fechada podem ser pagas em mês aberto. Reabrir fica registrado na auditoria.</li>
+  </ul>
+  <figure><img src="img/18-fin-extratos.jpg" alt="" /><figcaption>Extratos da conta: imagem do extrato, saldo informado e comparação com o sistema.</figcaption></figure>
+  <p><strong>Extratos bancários:</strong> em cada conta, o botão <strong>"Extratos"</strong> abre o histórico fotográfico da conta. Envie fotos ou PDF do extrato com a data e o saldo mostrado. O sistema compara com o saldo calculado naquela data: <span class="pill g">Confere</span> ou <span class="pill a">Diferença de R$ X</span>. Se houver diferença, depois de procurar o que faltou lançar, o administrador pode lançar o ajuste na data do extrato.</p>
+</section>
+
+<!-- ============================== 11 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 11</div>
+  <h1>Relatórios</h1>
+  <p>São <strong>32 relatórios</strong>, todos com filtro de período, gráfico, tabela e <strong>exportação em CSV</strong> (que abre no Excel). Cada exportação fica registrada na auditoria.</p>
+  <figure><img src="img/22-relatorio-faturamento.jpg" alt="" /><figcaption>Exemplo: relatório de faturamento, com comparação ao período anterior.</figcaption></figure>
+  <table>
+    <tr><th style="width:18%">Grupo</th><th>Relatórios</th></tr>
+    <tr><td><strong>Vendas</strong></td><td>Faturamento · Vendas por tipo · Vendas por origem · Dias e horários de pico (mapa de calor) · Sazonalidade e comparativo anual · Cupons de desconto</td></tr>
+    <tr><td><strong>Cardápio</strong></td><td>Ranking de sabores e curva ABC · Margem e CMV por sabor · Mix de sabores por tipo de pedido · Histórico de preços e custos</td></tr>
+    <tr><td><strong>Clientes</strong></td><td>Clientes novos × recorrentes · Recompra e frequência · Segmentação RFM (campanhas) · Melhores clientes (LTV) · Aniversariantes do mês · Vendas por bairro</td></tr>
+    <tr><td><strong>Operação</strong></td><td>Funil e tempo por etapa · Cancelamentos · Pedidos do site não confirmados · Previsão de produção (tubos por dia nas encomendas) · Festas</td></tr>
+    <tr><td><strong>Financeiro</strong></td><td>DRE gerencial · Fluxo de caixa · Despesas por categoria · Gastos por fornecedor · Contas a pagar e a receber por atraso</td></tr>
+    <tr><td><strong>Franquia</strong> (Matriz)</td><td>Ranking de unidades · Royalties estimados · Comparativo entre unidades · Financeiro da rede</td></tr>
+    <tr><td><strong>Governança</strong></td><td>Atividade por usuário · Exclusões e restaurações</td></tr>
+  </table>
+  <p class="muted">Faturamento realizado = pedidos entregues, pela data do pedido (ou da encomenda/festa).</p>
+</section>
+
+<!-- ============================== 12 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 12</div>
+  <h1>Usuários e unidades</h1>
+  <h2>Usuários</h2>
+  <figure><img src="img/23-usuarios.jpg" alt="" /><figcaption>Equipe com acesso à unidade.</figcaption></figure>
+  <ul>
+    <li>Criar usuário com nome, e-mail e papel na unidade. Uma <strong>senha provisória</strong> é gerada e mostrada uma única vez.</li>
+    <li><strong>Redefinir senha</strong> gera nova senha provisória e encerra as sessões abertas.</li>
+    <li><strong>Remover acesso</strong> encerra as sessões na hora. O histórico do que a pessoa fez continua na auditoria.</li>
+    <li>A pessoa não consegue alterar o próprio papel nem remover o próprio acesso.</li>
+  </ul>
+  <h2>Unidades</h2>
+  <figure><img src="img/24-unidades.jpg" alt="" /><figcaption>Matriz e franquias da rede.</figcaption></figure>
+  <ul>
+    <li><strong>Nova unidade:</strong> a franquia nasce com uma <strong>cópia do cardápio atual da Matriz</strong> (que depois pode ser ajustada) e com o financeiro pronto (contas e categorias).</li>
+    <li>No cadastro: nome, identificador, CNPJ, cidade, WhatsApp que recebe os pedidos, Google Agenda, domínio próprio (futuro), <strong>percentual de royalties</strong>, <strong>dia de vencimento dos royalties</strong> e <strong>prefixo dos pedidos</strong> (ex.: ZKB-000001).</li>
+    <li><strong>Desativar</strong> uma unidade tira-a do seletor; todos os dados continuam guardados. A Matriz não pode ser desativada.</li>
+  </ul>
+</section>
+
+<!-- ============================== 13 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 13</div>
+  <h1>Auditoria</h1>
+  <figure><img src="img/25-auditoria.jpg" alt="" /><figcaption>Auditoria com verificação de integridade.</figcaption></figure>
+  <ul>
+    <li>Registro <strong>somente leitura</strong> de tudo o que foi criado, alterado, excluído e restaurado, e de logins, acessos negados, exportações e falhas, com <strong>quem fez, quando e de onde</strong>.</li>
+    <li>Filtros por período, tipo de ação, tipo de registro e pessoa. Cada linha abre o detalhe <strong>campo a campo</strong>: como era e como ficou.</li>
+    <li>As fichas (pedido, cliente, sabor, cupom, lançamento, usuário, unidade) têm a aba <strong>Histórico</strong> com a auditoria daquele registro.</li>
+    <li><strong>Verificar integridade:</strong> confere a corrente de registros. Se alguém alterasse ou apagasse um registro diretamente no banco, a verificação acusaria.</li>
+    <li>Senhas e chaves nunca são gravadas na auditoria. Os arquivos (comprovantes e extratos) também não: a auditoria registra só quais arquivos foram ligados a cada registro.</li>
+  </ul>
+</section>
+
+<!-- ============================== 14 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 14 · Para a Matriz</div>
+  <h1>Como a Matriz acompanha as unidades</h1>
+  <p class="lead">A Matriz tem duas formas de olhar a rede. Ela pode <strong>entrar em uma unidade</strong> e ver exatamente o que o franqueado vê. Ou pode <strong>olhar todas juntas</strong>, lado a lado ou somadas. Tudo isso é feito com o acesso de <strong>administração da rede</strong>.</p>
+
+  <h2>1. Entrar numa unidade (o "olhar do franqueado")</h2>
+  <p>No <strong>seletor de unidade</strong>, no topo do painel, escolha a franquia. A partir daí, todas as telas mostram os dados daquela unidade: pedidos do dia, encomendas, clientes, cardápio, cupons, lançamentos, contas, extratos, DRE e relatórios. É a forma de fazer uma <strong>visita virtual</strong> à unidade, sem pedir nada ao franqueado. Para voltar, escolha a Matriz no seletor.</p>
+  <div class="box tip"><span class="t">Tudo registrado</span><p>O que a Matriz alterar dentro de uma franquia fica na auditoria daquela franquia, com o nome de quem alterou. A rede inteira tem o mesmo nível de rastreabilidade.</p></div>
+
+  <h2>2. Ver a rede inteira</h2>
+  <table>
+    <tr><th style="width:30%">Onde</th><th>O que a Matriz vê</th></tr>
+    <tr><td><strong>Início → "Ver toda a rede"</strong></td><td>Faturamento, pedidos entregues, ticket médio e clientes novos <strong>somados</strong> de todas as unidades, com os gráficos do mês.</td></tr>
+    <tr><td><strong>Relatórios → "Todas as unidades"</strong></td><td>Qualquer relatório (vendas, cardápio, clientes, operação, financeiro) pode ser rodado para a rede toda, consolidando os números. Ex.: DRE da rede, previsão de produção de todas as unidades.</td></tr>
+    <tr><td><strong>Ranking de unidades</strong></td><td>Faturamento, pedidos, ticket e clientes de cada unidade, com o <strong>crescimento</strong> sobre o período anterior.</td></tr>
+    <tr><td><strong>Comparativo entre unidades</strong></td><td>Participação de delivery, encomendas e festas em cada unidade, ticket médio e sabor mais vendido.</td></tr>
+    <tr><td><strong>Financeiro da rede</strong></td><td>Receita, resultado operacional, margem, CMV, saldo em caixa e contas vencidas de cada unidade, <strong>lado a lado</strong>.</td></tr>
+    <tr><td><strong>Royalties estimados</strong></td><td>O percentual de cada franquia aplicado ao faturamento de qualquer período, útil para projeções.</td></tr>
+    <tr><td><strong>Atividade por usuário</strong> e <strong>Exclusões e restaurações</strong></td><td>Quem fez o quê em cada unidade, e tudo o que foi excluído e restaurado. Ajuda a perceber uso anormal.</td></tr>
+    <tr><td><strong>Auditoria</strong></td><td>Entrando na unidade pelo seletor, a Matriz consulta a auditoria daquela unidade. O escopo <strong>"Rede: logins e acessos"</strong> mostra os acessos de toda a rede, e "Verificar integridade" confere a trilha.</td></tr>
+  </table>
+  <figure><img src="img/21-rede-financeiro.jpg" alt="" /><figcaption>Financeiro da rede: cada unidade lado a lado.</figcaption></figure>
+  <figure><img src="img/20-rede-ranking.jpg" alt="" /><figcaption>Ranking de unidades, com crescimento sobre o período anterior.</figcaption></figure>
+
+  <h2>3. Royalties: do faturamento ao recebimento</h2>
+  <div class="flow">
+    <div class="step"><b>1. Mês fecha</b>A franquia vende; os pedidos entregues formam o faturamento do mês.</div>
+    <div class="arrow">→</div>
+    <div class="step"><b>2. Cobrança gerada</b>No dia seguinte, às 6h, o sistema calcula percentual × faturamento. Também dá para gerar à mão.</div>
+    <div class="arrow">→</div>
+    <div class="step"><b>3. Dois lançamentos</b>Saída "Royalties à Matriz" na franquia; entrada a receber na Matriz, com o vencimento do cadastro.</div>
+    <div class="arrow">→</div>
+    <div class="step"><b>4. Pagamento</b>A franquia registra o pagamento; a Matriz registra o recebimento em "A pagar e receber".</div>
+  </div>
+  <ul>
+    <li>A tela <strong>Royalties</strong> da Matriz mostra cada cobrança: faturamento, percentual, valor, vencimento e situação (<span class="pill">Em aberto</span>, <span class="pill r">Vencido</span>, <span class="pill a">Franquia pagou: registrar o recebimento</span>, <span class="pill g">Pago e recebido</span>).</li>
+    <li><strong>Recalcular</strong>, enquanto nada foi pago, refaz o valor com o faturamento atual (útil se pedidos do mês foram corrigidos depois).</li>
+    <li>A cobrança nunca é gerada em dobro. Se a geração falhar em alguma franquia (por exemplo, mês fechado), a falha fica registrada na auditoria e as demais seguem normalmente.</li>
+    <li>A franquia vê, na mesma tela, só o que ela deve à Matriz.</li>
+  </ul>
+
+  <h2>4. O que cada franqueado vê</h2>
+  <ul>
+    <li>Só os dados da própria unidade. Ele não vê outras franquias nem os números da Matriz, e o banco garante isso.</li>
+    <li>O seu cardápio, que nasceu da Matriz e pode ser ajustado, os seus cupons, a sua equipe e o seu financeiro.</li>
+    <li>As cobranças de royalties que deve, com valor e vencimento.</li>
+  </ul>
+
+  <h2>5. Rotina sugerida para a Matriz</h2>
+  <div class="grid2">
+    <div class="card"><h3>Todo dia (5 minutos)</h3>
+      <ul class="check">
+        <li>Início com "Ver toda a rede": vendas do dia e do mês.</li>
+        <li>Relatório "Pedidos do site não confirmados", com todas as unidades: clientes esperando resposta.</li>
+        <li>Encomendas e festas dos próximos dias, unidade por unidade.</li>
+      </ul></div>
+    <div class="card"><h3>Toda semana</h3>
+      <ul class="check">
+        <li>Ranking de unidades (últimos 7 dias): quem cresceu e quem caiu.</li>
+        <li>Financeiro da rede: contas vencidas e saldo de cada unidade.</li>
+        <li>Cancelamentos e motivos, por unidade.</li>
+        <li>Previsão de produção: compra de peixe da rede.</li>
+      </ul></div>
+    <div class="card"><h3>Todo início de mês</h3>
+      <ul class="check">
+        <li>Royalties: conferir as cobranças geradas e os pagamentos do mês anterior.</li>
+        <li>Financeiro da rede e DRE (todas as unidades) do mês fechado: margem e CMV de cada unidade.</li>
+        <li>Pedir a cada unidade o extrato bancário e o fechamento do mês.</li>
+        <li>Margem e CMV por sabor: ajustes de preço e de ficha.</li>
+      </ul></div>
+    <div class="card"><h3>Sempre que necessário</h3>
+      <ul class="check">
+        <li>Entrar na unidade pelo seletor para entender um número fora do padrão.</li>
+        <li>Auditoria: o que mudou, quem mudou e quando.</li>
+        <li>Atividade por usuário e Exclusões: comportamento fora do comum.</li>
+      </ul></div>
+  </div>
+</section>
+
+<!-- ============================== 15 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 15</div>
+  <h1>Rotinas automáticas</h1>
+  <table>
+    <tr><th style="width:28%">Rotina</th><th style="width:22%">Quando</th><th>O que faz</th></tr>
+    <tr><td>Google Agenda</td><td>Logo após cada mudança; o que falhar é reenviado de hora em hora</td><td>Envia, atualiza e remove encomendas e festas na agenda; tenta de novo o que falhou.</td></tr>
+    <tr><td>Royalties</td><td>Todo dia, às 6h (Brasília)</td><td>Gera as cobranças do mês anterior das franquias, sem duplicar.</td></tr>
+    <tr><td>Vendas no caixa</td><td>Na hora</td><td>Pedido pago vira entrada no caixa; cancelado ou desmarcado é estornado.</td></tr>
+    <tr><td>Backup do banco</td><td>Toda noite</td><td>Cópia completa do banco, incluindo comprovantes e extratos, em armazenamento externo (Cloudflare R2).</td></tr>
+    <tr><td>Verificação de configuração</td><td>Ao iniciar o sistema</td><td>Lista no registro do servidor as configurações que faltam e impede a publicação com configuração inválida.</td></tr>
+    <tr><td>Saúde do sistema</td><td>Sob demanda</td><td>Endereço /api/health, para um monitor externo avisar se o site ou o banco caírem.</td></tr>
+  </table>
+</section>
+
+<!-- ============================== 16 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 16</div>
+  <h1>Situação atual e próximos passos</h1>
+  <p>Todas as funcionalidades deste manual estão prontas e testadas: 52 testes automáticos simulam o uso real do site e do painel, e 198 testes conferem as regras de negócio e o banco de dados. O sistema roda hoje no ambiente local. Para colocá-lo no ar, faltam itens que dependem da Zaraki:</p>
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:35%">Item</th><th>O que é preciso</th></tr>
+    <tr><td>1</td><td>Guardar a versão atual</td><td>Autorizar o registro (commit) de todo o trabalho no repositório.</td></tr>
+    <tr><td>2</td><td>Hospedagem e banco</td><td>Contas na Vercel (plano Pro) e no Neon (Postgres). Passo a passo em <em>docs/deploy.md</em>.</td></tr>
+    <tr><td>3</td><td>Domínio</td><td>Endereço do site (ex.: zarakisushi.com.br).</td></tr>
+    <tr><td>4</td><td>Google Agenda</td><td>Conta de serviço com acesso à agenda zarakisushigo@gmail.com (<em>docs/google-agenda.md</em>).</td></tr>
+    <tr><td>5</td><td>Backup</td><td>Bucket no Cloudflare R2 e segredos no GitHub.</td></tr>
+    <tr><td>6</td><td>Dados reais</td><td>Custo de cada sabor; saldos iniciais reais das contas; percentual e vencimento dos royalties de cada franquia; primeiro administrador e usuários da equipe.</td></tr>
+    <tr><td>7</td><td>Opcional</td><td>Ajustar as faixas do semáforo financeiro (CMV, margem, reserva) à realidade da Zaraki.</td></tr>
+  </table>
+</section>
+
+<!-- ============================== 17 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 17</div>
+  <h1>Glossário</h1>
+  <table>
+    <tr><th style="width:26%">Termo</th><th>Significado</th></tr>
+    <tr><td>Exclusão lógica</td><td>"Excluir" deixa o registro inativo, sem apagá-lo. Pode ser restaurado.</td></tr>
+    <tr><td>Auditoria</td><td>Registro permanente de todas as mudanças: quem, quando, de onde e o quê.</td></tr>
+    <tr><td>Unidade</td><td>A Matriz ou uma franquia. Cada uma tem dados próprios.</td></tr>
+    <tr><td>Administração da rede</td><td>Acesso da Matriz que enxerga todas as unidades.</td></tr>
+    <tr><td>Faturamento realizado</td><td>Soma dos pedidos entregues no período.</td></tr>
+    <tr><td>Ticket médio</td><td>Faturamento ÷ número de pedidos.</td></tr>
+    <tr><td>Regime de caixa</td><td>Conta quando o dinheiro entra ou sai da conta (base do fluxo de caixa).</td></tr>
+    <tr><td>Competência</td><td>Mês a que a receita ou despesa se refere, independentemente de quando foi paga (base da DRE).</td></tr>
+    <tr><td>DRE</td><td>Demonstração do Resultado: mostra se a operação deu lucro ou prejuízo no período.</td></tr>
+    <tr><td>CMV</td><td>Custo da Mercadoria Vendida: quanto as compras de insumos representam das vendas.</td></tr>
+    <tr><td>Margem de contribuição</td><td>O que sobra das vendas depois dos custos variáveis, para pagar as despesas fixas.</td></tr>
+    <tr><td>Ponto de equilíbrio</td><td>Vendas necessárias para cobrir as despesas fixas (lucro zero).</td></tr>
+    <tr><td>Fôlego de caixa</td><td>Quantos meses de despesas o saldo atual consegue pagar.</td></tr>
+    <tr><td>Curva ABC</td><td>Classificação dos sabores: A = 80% do faturamento, B = os 15% seguintes, C = o restante.</td></tr>
+    <tr><td>RFM</td><td>Segmentação de clientes por Recência, Frequência e Valor, útil para campanhas.</td></tr>
+    <tr><td>Royalties</td><td>Percentual do faturamento que a franquia paga à Matriz.</td></tr>
+    <tr><td>Fechamento do mês</td><td>Trava que impede mudar os números de um mês já conferido.</td></tr>
+  </table>
+  <p class="muted" style="margin-top:8mm">Manual gerado a partir do próprio sistema. As telas mostram dados de demonstração. Para atualizar este documento, veja <em>docs/manual/LEIA-ME.md</em>.</p>
+</section>
+
+</body>
+</html>

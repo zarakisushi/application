@@ -21,6 +21,8 @@ export const tenants = pgTable(
     city: text(),
     timezone: text().notNull().default('America/Sao_Paulo'),
     royaltyPct: numeric({ precision: 5, scale: 2 }).notNull().default('0'),
+    /** Dia do mês em que vencem os royalties do mês anterior. */
+    royaltyDueDay: integer().notNull().default(10),
     orderCodePrefix: text().notNull().default('ZK'),
     ...baseColumns(),
   },

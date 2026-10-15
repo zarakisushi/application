@@ -239,4 +239,42 @@ const sazonalidade: ReportDefinition = {
   },
 };
 
-export const vendasReports = [faturamento, porTipo, porOrigem, horarios, sazonalidade];
+const cupons: ReportDefinition = {
+  slug: 'cupons',
+  group: 'Vendas',
+  title: 'Cupons de desconto',
+  description: 'Quanto cada cupom foi usado, o desconto concedido e o valor dos pedidos que ele trouxe (pedidos não cancelados).',
+  permission: 'reports:read',
+  async run(tx, p) {
+    const rows = await query<{ cupom: string; usos: number; desconto: number; valor: number }>(
+      tx,
+      sql`select o.coupon_code as cupom, count(*)::int as usos, sum(o.discount_cents)::float8 as desconto,
+                 sum(o.total_cents)::float8 as valor
+            from orders o where ${scope(p)} and o.coupon_id is not null and o.stage <> 'CANCELADO' and ${inPeriod(p)}
+           group by o.coupon_code order by usos desc, valor desc`,
+    );
+    const [all] = await query<{ pedidos: number }>(
+      tx,
+      sql`select count(*)::int as pedidos from orders o where ${scope(p)} and o.stage <> 'CANCELADO' and ${inPeriod(p)}`,
+    );
+    const usos = rows.reduce((s, r) => s + r.usos, 0);
+    return {
+      summary: [
+        { label: 'Pedidos com cupom', value: usos, format: 'int', hint: `${pct(usos, all?.pedidos ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% dos pedidos do período` },
+        { label: 'Desconto concedido', value: rows.reduce((s, r) => s + r.desconto, 0), format: 'money' },
+        { label: 'Valor dos pedidos com cupom', value: rows.reduce((s, r) => s + r.valor, 0), format: 'money' },
+      ],
+      chart: { type: 'bar', x: 'cupom', series: [{ key: 'usos', label: 'Usos' }], format: 'int', horizontal: true, data: rows.slice(0, 10) },
+      columns: [
+        { key: 'cupom', label: 'Cupom' },
+        { key: 'usos', label: 'Usos', format: 'int' },
+        { key: 'desconto', label: 'Desconto concedido', format: 'money' },
+        { key: 'valor', label: 'Valor dos pedidos', format: 'money' },
+        { key: 'ticket', label: 'Ticket médio', format: 'money' },
+      ],
+      rows: rows.map((r) => ({ ...r, ticket: r.valor / r.usos })),
+    };
+  },
+};
+
+export const vendasReports = [faturamento, porTipo, porOrigem, horarios, sazonalidade, cupons];

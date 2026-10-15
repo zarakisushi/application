@@ -1,15 +1,18 @@
 import {
   DomainError,
+  evaluateCoupon,
   isScheduled,
   zonedTimeToUtc,
   type OrderStage,
   type OrderType,
   type OrderUpdate,
+  type PaymentMethod,
 } from '@zaraki/core';
 import { and, asc, desc, eq, gte, ilike, inArray, lt, ne, or, sql, type SQL } from 'drizzle-orm';
 import type { Tx } from '../client';
-import { enqueueCalendarSync, orderTotal, type TenantRef } from '../orders';
-import { customers, orderItems, orders, orderStageHistory, products, users } from '../schema';
+import { syncOrderFinance } from '../finance/orders';
+import { applyCoupon, enqueueCalendarSync, orderTotal, type TenantRef } from '../orders';
+import { coupons, customers, orderItems, orders, orderStageHistory, products, users } from '../schema';
 import { contains, paging, statusWhere, toPage, type ListParams } from './common';
 
 /** Pedidos = delivery; encomendas = encomendas e festas; todos = os dois (painel inicial). */
@@ -213,6 +216,10 @@ export async function updateOrder(tx: Tx, tenant: TenantRef, id: string, input: 
     subtotal = lines.reduce((s, l) => s + l.lineTotalCents, 0);
   }
 
+  const tubes = input.items.reduce((s, i) => s + i.qty, 0);
+  const coupon = await recomputeCoupon(tx, tenant, order, input, { subtotalCents: subtotal, tubes });
+  const discount = coupon ? coupon.discountCents : input.discount;
+
   const scheduled = isScheduled(input.type);
   const scheduledAt = scheduled ? zonedTimeToUtc(input.date, input.time, tenant.timezone) : null;
 
@@ -226,11 +233,14 @@ export async function updateOrder(tx: Tx, tenant: TenantRef, id: string, input: 
       address: input.address || null,
       notes: input.notes || null,
       subtotalCents: subtotal,
-      discountCents: input.discount,
+      discountCents: discount,
+      couponId: coupon?.couponId ?? null,
+      couponCode: coupon?.couponCode ?? null,
       deliveryFeeCents: input.deliveryFee,
-      totalCents: orderTotal(subtotal, input.discount, input.deliveryFee),
+      totalCents: orderTotal(subtotal, discount, input.deliveryFee),
       paymentMethod: input.paymentMethod,
       paid: input.paid,
+      paidAt: input.paid ? (order.paidAt ?? new Date()) : null,
       calendarSyncState: scheduled ? order.calendarSyncState : 'NAO_APLICA',
     })
     .where(eq(orders.id, id))
@@ -240,7 +250,38 @@ export async function updateOrder(tx: Tx, tenant: TenantRef, id: string, input: 
     if (scheduled) await enqueueCalendarSync(tx, updated!, 'UPSERT');
     else if (isScheduled(order.type)) await enqueueCalendarSync(tx, updated!, 'DELETE');
   }
+  await syncOrderFinance(tx, id);
   return updated!;
+}
+
+/**
+ * Cupom do pedido em edição:
+ * - mesmo cupom de antes → continua valendo mesmo que a campanha tenha acabado ou o cupom tenha sido
+ *   desativado; só os mínimos (tubos/valor) são conferidos e o desconto é recalculado;
+ * - cupom novo → validação completa (o próprio pedido não conta como uso);
+ * - sem cupom → remove.
+ */
+async function recomputeCoupon(
+  tx: Tx,
+  tenant: TenantRef,
+  order: typeof orders.$inferSelect,
+  input: OrderUpdate,
+  totals: { subtotalCents: number; tubes: number },
+) {
+  if (!input.couponCode) return null;
+  if (input.couponCode === order.couponCode && order.couponId) {
+    const [c] = await tx.select().from(coupons).where(eq(coupons.id, order.couponId));
+    const check = evaluateCoupon(
+      c ? { ...c, active: true, status: true, startsAt: null, endsAt: null, maxUses: null, phone: null } : null,
+      { ...totals, phone: null, usesSoFar: 0, today: '' },
+    );
+    if (!check.ok) {
+      throw new DomainError(`O pedido não atende mais ao cupom ${order.couponCode}: ${check.message} Ajuste os itens ou remova o cupom.`);
+    }
+    return { couponId: order.couponId, couponCode: order.couponCode, discountCents: check.discountCents };
+  }
+  const [customer] = await tx.select({ phone: customers.phone }).from(customers).where(eq(customers.id, order.customerId));
+  return applyCoupon(tx, tenant, input.couponCode, { ...totals, phone: customer?.phone ?? null, excludeOrderId: order.id });
 }
 
 /** Muda a etapa do pedido e registra no histórico. Cancelar exige motivo. */
@@ -262,6 +303,7 @@ export async function changeOrderStage(tx: Tx, tenantId: string, id: string, to:
     if (to === 'CANCELADO') await enqueueCalendarSync(tx, updated!, 'DELETE');
     else if (order.stage === 'CANCELADO') await enqueueCalendarSync(tx, updated!, 'UPSERT');
   }
+  await syncOrderFinance(tx, id);
   return updated!;
 }
 
@@ -273,5 +315,27 @@ export async function setOrderStatus(tx: Tx, tenantId: string, id: string, statu
   if (isScheduled(order.type) && order.stage !== 'CANCELADO') {
     await enqueueCalendarSync(tx, updated!, status ? 'UPSERT' : 'DELETE');
   }
+  await syncOrderFinance(tx, id);
+  return updated!;
+}
+
+/**
+ * Registra o pagamento de um pedido (forma + pago agora): a venda entra no caixa.
+ * `paid = false` desfaz (a entrada é estornada).
+ */
+export async function setOrderPayment(tx: Tx, tenantId: string, id: string, payment: { paid: boolean; method: PaymentMethod | null }) {
+  const order = await loadOrder(tx, tenantId, id);
+  if (!order.status) throw new DomainError('Restaure o pedido antes de registrar o pagamento.');
+  if (payment.paid && order.stage === 'CANCELADO') throw new DomainError('Pedido cancelado não recebe pagamento.');
+  const [updated] = await tx
+    .update(orders)
+    .set({
+      paid: payment.paid,
+      paidAt: payment.paid ? (order.paid ? order.paidAt : new Date()) : null,
+      paymentMethod: payment.method ?? order.paymentMethod,
+    })
+    .where(eq(orders.id, id))
+    .returning();
+  await syncOrderFinance(tx, id);
   return updated!;
 }

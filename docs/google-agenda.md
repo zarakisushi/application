@@ -56,7 +56,7 @@ a Google Calendar API não ativada no projeto.
 
 - Toda alteração de encomenda/festa grava um pedido de sincronização na fila (`calendar_sync_jobs`),
   na mesma transação do pedido — nada se perde se o Google estiver fora do ar.
-- A fila é processada logo após a resposta (`after()` do Next) e a cada 5 minutos pelo cron da Vercel
+- A fila é processada logo após a resposta (`after()` do Next) e de hora em hora pelo cron da Vercel (que reenvia o que falhou)
   (`/api/cron/calendar`, configurado em `apps/web/vercel.json`).
 - Falhas são tentadas de novo com espera crescente (2, 4, 8… minutos, até 6 h). Depois de 8 tentativas o
   pedido fica com o selo **Agenda: falhou** e o evento `CALENDAR_SYNC_FAILED` entra na auditoria.

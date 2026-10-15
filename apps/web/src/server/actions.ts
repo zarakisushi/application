@@ -1,5 +1,6 @@
 import 'server-only';
 import { DomainError, fieldErrors } from '@zaraki/core';
+import { closedMonthMessage } from '@zaraki/db';
 import type { z } from 'zod';
 
 /** Resultado padrão das Server Actions do painel. */
@@ -43,6 +44,9 @@ export async function attempt(fn: () => Promise<ActionResult | void>): Promise<A
     return (await fn()) ?? { ok: true };
   } catch (error) {
     if (error instanceof DomainError) return { error: error.message };
+    // O banco recusou mexer num mês fechado do financeiro (inclusive via edição de pedido).
+    const closed = closedMonthMessage(error);
+    if (closed) return { error: closed };
     throw error;
   }
 }

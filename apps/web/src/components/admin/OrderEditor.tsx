@@ -14,7 +14,8 @@ import {
   type OrderType,
 } from '@zaraki/core';
 import { Minus, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { previewCouponAction } from '@/server/order-actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,6 +38,7 @@ export type EditorOrder = {
   deliveryFeeCents: number;
   paymentMethod: string | null;
   paid: boolean;
+  couponCode: string | null;
   items: { productId: string; productName: string; unitPriceCents: number; qty: number }[];
 };
 
@@ -46,16 +48,26 @@ type Props = {
   /** Cardápio ativo. Itens que já estão no pedido mantêm o preço da época. */
   products: EditorProduct[];
   order?: EditorOrder;
+  /** Pedido em edição (a prévia do cupom usa o telefone do cliente e não conta o próprio pedido). */
+  orderId?: string;
   action: (form: FormData) => Promise<ActionResult>;
 };
 
-export function OrderEditor({ mode, defaultType, products, order, action }: Props) {
+export function OrderEditor({ mode, defaultType, products, order, orderId, action }: Props) {
   const { result, pending, onSubmit, errors } = useServerForm(action);
   const [type, setType] = useState<OrderType>(order?.type ?? defaultType);
   const [qty, setQty] = useState<Record<string, number>>(
     Object.fromEntries((order?.items ?? []).map((i) => [i.productId, i.qty])),
   );
-  const [discount, setDiscount] = useState(order?.discountCents ? centsToInput(order.discountCents) : '');
+  const formRef = useRef<HTMLFormElement>(null);
+  // Cupom já gravado no pedido: o desconto é recalculado no servidor ao salvar.
+  const [coupon, setCoupon] = useState<{ code: string; discountCents: number; saved: boolean } | null>(
+    order?.couponCode ? { code: order.couponCode, discountCents: order.discountCents, saved: true } : null,
+  );
+  const [couponInput, setCouponInput] = useState(order?.couponCode ?? '');
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponPending, setCouponPending] = useState(false);
+  const [discount, setDiscount] = useState(!order?.couponCode && order?.discountCents ? centsToInput(order.discountCents) : '');
   const [fee, setFee] = useState(order?.deliveryFeeCents ? centsToInput(order.deliveryFeeCents) : '');
 
   // Produtos do pedido (preço da época) + cardápio ativo (preço atual) para itens novos.
@@ -66,15 +78,48 @@ export function OrderEditor({ mode, defaultType, products, order, action }: Prop
 
   const items = catalog.filter((p) => qty[p.id]).map((p) => ({ productId: p.id, qty: qty[p.id]! }));
   const subtotal = catalog.reduce((s, p) => s + p.priceCents * (qty[p.id] ?? 0), 0);
-  const total = Math.max(0, subtotal - (parseMoneyToCents(discount) ?? 0) + (parseMoneyToCents(fee) ?? 0));
+  const tubes = items.reduce((s, i) => s + i.qty, 0);
+  const discountCents = coupon ? Math.min(coupon.discountCents, subtotal) : (parseMoneyToCents(discount) ?? 0);
+  const total = Math.max(0, subtotal - discountCents + (parseMoneyToCents(fee) ?? 0));
+
+  const applyCoupon = async (code = couponInput) => {
+    setCouponPending(true);
+    setCouponError(null);
+    const phone = (formRef.current?.elements.namedItem('phone') as HTMLInputElement | null)?.value;
+    const r = await previewCouponAction({ code, phone, orderId, subtotalCents: subtotal, tubes });
+    setCouponPending(false);
+    if (r.ok) {
+      setCoupon({ code: r.code, discountCents: r.discountCents, saved: false });
+      setCouponInput(r.code);
+      setDiscount('');
+    } else {
+      setCoupon(null);
+      setCouponError(r.error);
+    }
+  };
+
+  // Itens mudaram: confere de novo um cupom aplicado agora (o já gravado é recalculado ao salvar).
+  useEffect(() => {
+    if (!coupon || coupon.saved) return;
+    const timer = setTimeout(() => applyCoupon(coupon.code), 400);
+    return () => clearTimeout(timer);
+  }, [subtotal, tubes]);
+
+  const onCouponKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      applyCoupon();
+    }
+  };
   const scheduled = isScheduled(type);
   const delivery = type === 'DELIVERY';
   const add = (id: string, d: number) => setQty((s) => ({ ...s, [id]: Math.max(0, (s[id] ?? 0) + d) }));
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-6">
+    <form ref={formRef} onSubmit={onSubmit} className="grid gap-6">
       <FormError result={result} />
       <input type="hidden" name="items" value={JSON.stringify(items)} />
+      <input type="hidden" name="couponCode" value={coupon?.code ?? ''} />
       <input type="hidden" name="type" value={type} />
 
       {mode === 'create' && (
@@ -163,9 +208,63 @@ export function OrderEditor({ mode, defaultType, products, order, action }: Prop
         {errors.items && <p className="mt-2 text-sm text-destructive">{errors.items}</p>}
       </div>
 
+      <Field label="Cupom de desconto" htmlFor="couponInput" error={errors.couponCode ?? couponError ?? undefined}>
+        <div className="flex flex-wrap gap-2">
+          <Input
+            id="couponInput"
+            value={couponInput}
+            onChange={(e) => {
+              setCouponInput(e.target.value.toUpperCase());
+              setCouponError(null);
+            }}
+            onKeyDown={onCouponKey}
+            disabled={!!coupon}
+            placeholder="Código do cupom"
+            className="w-56 font-mono uppercase"
+            autoComplete="off"
+          />
+          {coupon ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setCoupon(null);
+                setCouponInput('');
+              }}
+            >
+              Remover cupom
+            </Button>
+          ) : (
+            <Button type="button" variant="secondary" onClick={() => applyCoupon()} disabled={couponPending || !couponInput.trim()}>
+              {couponPending ? 'Conferindo…' : 'Aplicar cupom'}
+            </Button>
+          )}
+        </div>
+        {coupon && (
+          <p className="text-sm text-emerald-700" role="status">
+            {coupon.saved
+              ? `Cupom ${coupon.code} aplicado neste pedido — o desconto é recalculado ao salvar.`
+              : `Cupom ${coupon.code} aplicado: − ${formatCents(discountCents)}`}
+          </p>
+        )}
+      </Field>
+
       <div className="grid gap-5 sm:grid-cols-4">
-        <Field label="Desconto (R$)" htmlFor="discount" error={errors.discount}>
-          <Input id="discount" name="discount" inputMode="decimal" value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="0,00" />
+        <Field
+          label="Desconto (R$)"
+          htmlFor="discount"
+          error={errors.discount}
+          hint={coupon ? 'Definido pelo cupom.' : undefined}
+        >
+          <Input
+            id="discount"
+            name="discount"
+            inputMode="decimal"
+            value={coupon ? '' : discount}
+            onChange={(e) => setDiscount(e.target.value)}
+            placeholder={coupon ? centsToInput(discountCents) : '0,00'}
+            disabled={!!coupon}
+          />
         </Field>
         <Field label="Taxa de entrega (R$)" htmlFor="deliveryFee" error={errors.deliveryFee}>
           <Input id="deliveryFee" name="deliveryFee" inputMode="decimal" value={fee} onChange={(e) => setFee(e.target.value)} placeholder="0,00" />

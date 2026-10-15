@@ -40,20 +40,19 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   const q = param(sp.q)?.trim() || undefined;
   const page = Number(param(sp.page)) || 1;
 
-  const [result, actors] = await withContext(dbCtx, (tx) =>
-    Promise.all([
-      listAuditLogs(tx, {
-        scope,
-        action: action && action in AUDIT_ACTION_LABEL ? action : undefined,
-        entity: entity && entity in AUDIT_ENTITY_LABEL ? entity : undefined,
-        actorUserId,
-        q,
-        from: days ? new Date(Date.now() - days * 86_400_000) : undefined,
-        page,
-      }),
-      listAuditActors(tx, scope),
-    ]),
-  );
+  // Em sequência: a transação usa uma única conexão, que executa uma consulta por vez.
+  const [result, actors] = await withContext(dbCtx, async (tx) => [
+    await listAuditLogs(tx, {
+      scope,
+      action: action && action in AUDIT_ACTION_LABEL ? action : undefined,
+      entity: entity && entity in AUDIT_ENTITY_LABEL ? entity : undefined,
+      actorUserId,
+      q,
+      from: days ? new Date(Date.now() - days * 86_400_000) : undefined,
+      page,
+    }),
+    await listAuditActors(tx, scope),
+  ] as const);
 
   const filters: ToolbarFilter[] = [
     {

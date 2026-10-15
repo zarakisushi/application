@@ -8,6 +8,7 @@ import {
   type PaymentMethod,
 } from './order';
 import { ROLE_LABEL, type Role } from './permissions';
+import { DRE_GROUP_LABEL, FINANCE_DIRECTION_LABEL, FINANCE_ORIGIN_LABEL, type DreGroup, type FinanceDirection, type FinanceOrigin } from './finance';
 import { formatBrPhone } from './phone';
 import { STAGE_LABEL, type OrderStage } from './stages';
 
@@ -25,7 +26,9 @@ export const AUDIT_ACTION_LABEL: Record<string, string> = {
   PERMISSION_DENIED: 'Acesso negado',
   CALENDAR_SYNC_FAILED: 'Falha na agenda',
   AUDIT_VERIFIED: 'Verificação de integridade',
+  COUPON_REJECTED: 'Cupom recusado',
   EXPORT: 'Exportação',
+  ROYALTIES_FAILED: 'Falha ao gerar royalties',
 };
 
 export const AUDIT_ENTITY_LABEL: Record<string, string> = {
@@ -34,6 +37,13 @@ export const AUDIT_ENTITY_LABEL: Record<string, string> = {
   order_stage_history: 'Etapa do pedido',
   customers: 'Cliente',
   products: 'Sabor do cardápio',
+  coupons: 'Cupom',
+  finance_entries: 'Lançamento financeiro',
+  finance_accounts: 'Conta financeira',
+  finance_categories: 'Categoria financeira',
+  royalty_charges: 'Cobrança de royalties',
+  finance_closings: 'Fechamento do mês',
+  finance_statements: 'Extrato bancário',
   users: 'Usuário',
   accounts: 'Credencial de acesso',
   memberships: 'Acesso à unidade',
@@ -44,7 +54,7 @@ export const AUDIT_ENTITY_LABEL: Record<string, string> = {
 };
 
 /** Campos técnicos que não ajudam a entender a mudança. */
-const HIDDEN = new Set(['id', 'tenant_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'order_id', 'user_id', 'customer_id', 'product_id', 'account_id', 'provider_id', 'google_event_id']);
+const HIDDEN = new Set(['id', 'tenant_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'order_id', 'user_id', 'customer_id', 'product_id', 'account_id', 'provider_id', 'google_event_id', 'coupon_id', 'category_id', 'transfer_id', 'series_id', 'royalty_charge_id', 'matriz_tenant_id', 'franchise_entry_id', 'matriz_entry_id', 'adjustment_entry_id']);
 
 const FIELD_LABEL: Record<string, string> = {
   status: 'Situação',
@@ -88,7 +98,7 @@ const FIELD_LABEL: Record<string, string> = {
   is_platform_admin: 'Administrador da rede',
   must_change_password: 'Troca de senha pendente',
   email_verified: 'E-mail verificado',
-  kind: 'Tipo de unidade',
+  kind: 'Tipo',
   cnpj: 'CNPJ',
   city: 'Cidade',
   domain: 'Domínio',
@@ -98,8 +108,51 @@ const FIELD_LABEL: Record<string, string> = {
   royalty_pct: 'Royalties (%)',
   order_code_prefix: 'Prefixo dos pedidos',
   permission: 'Permissão',
+  percent_off: 'Desconto (%)',
+  amount_off_cents: 'Desconto (R$)',
+  min_tubes: 'Mínimo de tubos',
+  min_subtotal_cents: 'Pedido mínimo',
+  starts_at: 'Válido a partir de',
+  ends_at: 'Válido até',
+  max_uses: 'Limite de usos',
+  active: 'Ativo',
+  coupon_code: 'Cupom',
+  direction: 'Tipo',
+  amount_cents: 'Valor',
+  competence_date: 'Competência',
+  due_date: 'Vencimento',
+  paid_on: 'Pago em',
+  paid_at: 'Pago em',
+  counterparty: 'Fornecedor/cliente',
+  attachment_id: 'Comprovante',
+  cmv: 'Entra no CMV',
+  month: 'Mês',
+  statement_date: 'Data do extrato',
+  balance_cents: 'Saldo do extrato',
+  attachment_ids: 'Arquivos',
+  revenue_cents: 'Faturamento',
+  royalty_due_day: 'Vencimento dos royalties (dia)',
+  origin: 'Origem',
+  installment: 'Parcela',
+  installments: 'Total de parcelas',
+  opening_balance_cents: 'Saldo inicial',
+  opening_date: 'Data do saldo inicial',
+  receives_methods: 'Recebe vendas em',
+  dre_group: 'Grupo',
+  system_key: 'Uso do sistema',
   error: 'Erro',
   attempts: 'Tentativas',
+};
+
+const KIND_LABEL: Record<string, string> = {
+  MATRIZ: 'Matriz',
+  FRANQUIA: 'Franquia',
+  PERCENT: 'Porcentagem',
+  FIXED: 'Valor em reais',
+  CAIXA: 'Caixa (dinheiro)',
+  BANCO: 'Conta bancária',
+  CARTEIRA_DIGITAL: 'Carteira digital',
+  OUTRO: 'Outra',
 };
 
 const CALENDAR_STATE_LABEL: Record<string, string> = {
@@ -123,8 +176,15 @@ export function formatAuditValue(field: string, value: unknown, timeZone: string
   if (field === 'stage' || field === 'from_stage' || field === 'to_stage') return STAGE_LABEL[value as OrderStage] ?? String(value);
   if (field === 'type' && typeof value === 'string' && value in ORDER_TYPE_LABEL) return ORDER_TYPE_LABEL[value as OrderType];
   if (field === 'role') return ROLE_LABEL[value as Role] ?? String(value);
+  if (field === 'kind') return KIND_LABEL[String(value)] ?? String(value);
   if (field === 'source') return ORDER_SOURCE_LABEL[value as OrderSource] ?? String(value);
   if (field === 'payment_method') return PAYMENT_METHOD_LABEL[value as PaymentMethod] ?? String(value);
+  if (field === 'attachment_id') return 'anexado';
+  if (field === 'attachment_ids' && Array.isArray(value)) return `${value.length} ${value.length === 1 ? 'arquivo' : 'arquivos'}`;
+  if (field === 'direction') return FINANCE_DIRECTION_LABEL[value as FinanceDirection] ?? String(value);
+  if (field === 'origin') return FINANCE_ORIGIN_LABEL[value as FinanceOrigin] ?? String(value);
+  if (field === 'dre_group') return DRE_GROUP_LABEL[value as DreGroup] ?? String(value);
+  if (field === 'receives_methods' && Array.isArray(value)) return value.map((m) => PAYMENT_METHOD_LABEL[m as PaymentMethod] ?? String(m)).join(', ') || '—';
   if (field === 'calendar_sync_state') return CALENDAR_STATE_LABEL[String(value)] ?? String(value);
   if ((field === 'phone' || field === 'whatsapp_number') && typeof value === 'string') return formatBrPhone(value);
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value.split('-').reverse().join('/');

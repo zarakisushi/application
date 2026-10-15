@@ -22,6 +22,7 @@ import { setOrderStatusAction, updateOrderAction } from '@/server/order-actions'
 import { ConfirmAction } from './ConfirmAction';
 import { CalendarRetryButton } from './CalendarRetryButton';
 import { CalendarSyncBadge, StageBadge, StatusBadge, TypeBadge } from './list';
+import { OrderPaymentButton } from './finance/OrderPaymentButton';
 import { OrderEditor } from './OrderEditor';
 import { PageHeader } from './PageHeader';
 import { RecordTabs } from './RecordTabs';
@@ -113,7 +114,9 @@ export async function OrderDetail({ ctx, id, section }: { ctx: AdminContext; id:
                   </TableRow>
                   {order.discountCents > 0 && (
                     <TableRow>
-                      <TableCell className="pl-6" colSpan={3}>Desconto</TableCell>
+                      <TableCell className="pl-6" colSpan={3}>
+                      {order.couponCode ? `Desconto (cupom ${order.couponCode})` : 'Desconto'}
+                    </TableCell>
                       <TableCell className="pr-6 text-right">− {formatCents(order.discountCents)}</TableCell>
                     </TableRow>
                   )}
@@ -153,9 +156,11 @@ export async function OrderDetail({ ctx, id, section }: { ctx: AdminContext; id:
                       deliveryFeeCents: order.deliveryFeeCents,
                       paymentMethod: order.paymentMethod,
                       paid: order.paid,
+                      couponCode: order.couponCode,
                       items: order.items,
                     }}
-                    action={updateOrderAction.bind(null, order.id)}
+                    orderId={order.id}
+                  action={updateOrderAction.bind(null, order.id)}
                   />
                 </CardContent>
               </Card>
@@ -169,7 +174,11 @@ export async function OrderDetail({ ctx, id, section }: { ctx: AdminContext; id:
                   <CardTitle>Etapa</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <StageControls orderId={order.id} stage={order.stage} />
+                  <StageControls
+                    orderId={order.id}
+                    stage={order.stage}
+                    payment={{ paid: order.paid, code: order.code, totalLabel: formatCents(order.totalCents), method: order.paymentMethod }}
+                  />
                   {order.cancelReason && (
                     <p className="mt-3 text-sm text-muted-foreground">Motivo do cancelamento: {order.cancelReason}</p>
                   )}
@@ -221,6 +230,11 @@ export async function OrderDetail({ ctx, id, section }: { ctx: AdminContext; id:
                   Pagamento: {order.paymentMethod ? PAYMENT_METHOD_LABEL[order.paymentMethod as PaymentMethod] : 'não informado'}
                   {order.paid ? ' · pago' : ' · em aberto'}
                 </div>
+                {canWrite && !order.paid && order.stage !== 'CANCELADO' && (
+                  <div>
+                    <OrderPaymentButton orderId={order.id} code={order.code} totalLabel={formatCents(order.totalCents)} method={order.paymentMethod} size="sm" />
+                  </div>
+                )}
                 {order.notes && <p className="rounded-md bg-muted p-3">{order.notes}</p>}
               </CardContent>
             </Card>

@@ -136,5 +136,18 @@ describe('pedido do site', () => {
     expect(n).toBeGreaterThanOrEqual(4);
     const other = await withContext(ctx(), (tx) => countRecentOrdersFromIp(tx, '10.0.0.1', 10), app);
     expect(other).toBe(0);
+
+    // Pedido lançado pela equipe no painel, da mesma rede, não conta para o limite do site.
+    const before = await withContext(ctx(), (tx) => countRecentOrdersFromIp(tx, '177.1.2.3', 10), app);
+    const panel = publicOrderSchema.parse({
+      type: 'DELIVERY',
+      name: 'Balcão',
+      phone: '62 97777-5555',
+      neighborhood: 'Centro',
+      address: 'Rua 5',
+      items: [{ productId: salmao.id, qty: 1 }],
+    });
+    await withContext(ctx(), (tx) => createOrder(tx, tenant, panel, { source: 'BALCAO', now: NOW }), app);
+    expect(await withContext(ctx(), (tx) => countRecentOrdersFromIp(tx, '177.1.2.3', 10), app)).toBe(before);
   });
 });

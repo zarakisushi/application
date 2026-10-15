@@ -15,6 +15,9 @@ export type OrderMessage = {
   guests?: number;
   notes?: string;
   lines: Pick<OrderLine, 'productName' | 'qty' | 'lineTotalCents'>[];
+  /** Cupom aplicado e o desconto que ele deu. */
+  couponCode?: string | null;
+  discountCents?: number;
   totalCents: number;
 };
 
@@ -34,6 +37,7 @@ export function buildOrderMessage(o: OrderMessage): string {
     o.type === 'FESTA' && o.guests ? `Convidados: ${o.guests}` : null,
     '',
     ...o.lines.map((l) => `• ${l.qty}x ${l.productName} (${formatCents(l.lineTotalCents)})`),
+    o.couponCode && o.discountCents ? `Cupom ${o.couponCode}: − ${formatCents(o.discountCents)}` : null,
     `Total estimado: ${formatCents(o.totalCents)}`,
     o.notes ? `\nObs: ${o.notes}` : null,
   ];

@@ -11,3 +11,6 @@ export * from './permissions';
 export * from './admin-schemas';
 export * from './audit';
 export * from './reports';
+export * from './coupons';
+export * from './finance';
+export * from './finance-health';

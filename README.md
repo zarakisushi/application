@@ -2,7 +2,8 @@
 
 Site do Push-Pop Sushi e plataforma de gestão da rede Zaraki (Matriz e franqueados): pedidos do site
 gravados e enviados ao WhatsApp, painel `/admin` com pedidos, encomendas (sincronizadas com a Google
-Agenda), clientes, cardápio, usuários, unidades, auditoria à prova de adulteração e relatórios.
+Agenda), clientes, cardápio, cupons, financeiro (fluxo de caixa, contas a pagar e receber, DRE, saúde
+financeira, royalties e fechamento de mês), usuários, unidades, auditoria à prova de adulteração e relatórios.
 
 ## Estrutura
 

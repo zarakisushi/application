@@ -25,3 +25,22 @@ export const calendarSyncState = pgEnum('calendar_sync_state', ['NAO_APLICA', 'P
 export const calendarJobOp = pgEnum('calendar_job_op', ['UPSERT', 'DELETE']);
 
 export const calendarJobState = pgEnum('calendar_job_state', ['PENDING', 'DONE', 'FAILED']);
+
+export const couponKind = pgEnum('coupon_kind', ['PERCENT', 'FIXED']);
+
+export const financeDirection = pgEnum('finance_direction', ['ENTRADA', 'SAIDA']);
+
+export const financeAccountKind = pgEnum('finance_account_kind', ['CAIXA', 'BANCO', 'CARTEIRA_DIGITAL', 'OUTRO']);
+
+export const financeDreGroup = pgEnum('finance_dre_group', [
+  'RECEITA',
+  'CUSTO_VARIAVEL',
+  'DESPESA_FIXA',
+  'IMPOSTOS',
+  'ROYALTIES',
+  'FINANCEIRO',
+  'INVESTIMENTO',
+  'OUTROS',
+]);
+
+export const financeOrigin = pgEnum('finance_origin', ['MANUAL', 'PEDIDO', 'ROYALTIES', 'AJUSTE', 'TRANSFERENCIA']);

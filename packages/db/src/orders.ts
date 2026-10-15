@@ -1,16 +1,21 @@
 import {
   OrderError,
+  evaluateCoupon,
   isScheduled,
   priceOrder,
+  todayInZone,
   zonedTimeToUtc,
+  type CouponCheck,
   type OrderInput,
   type PaymentMethod,
 } from '@zaraki/core';
-import { and, asc, count, eq, gt, inArray, sql } from 'drizzle-orm';
+import { and, asc, count, eq, gt, inArray, ne, sql } from 'drizzle-orm';
 import type { Tx } from './client';
+import { syncOrderFinance } from './finance/orders';
 import {
   auditLogs,
   calendarSyncJobs,
+  coupons,
   customers,
   orderCounters,
   orderItems,
@@ -47,7 +52,7 @@ export function listActiveMenu(tx: Tx) {
     .orderBy(asc(products.sortOrder), asc(products.name));
 }
 
-/** Quantos pedidos do site este IP criou nos últimos `minutes` minutos (lido da auditoria). */
+/** Quantos pedidos do site este IP criou nos últimos `minutes` minutos (lido da auditoria; ignora o painel). */
 export async function countRecentOrdersFromIp(tx: Tx, ip: string, minutes: number) {
   const [row] = await tx
     .select({ n: count() })
@@ -56,6 +61,35 @@ export async function countRecentOrdersFromIp(tx: Tx, ip: string, minutes: numbe
       and(
         eq(auditLogs.entity, 'orders'),
         eq(auditLogs.action, 'CREATE'),
+        eq(auditLogs.ip, ip),
+        // Só pedidos feitos pelo site: lançamentos da equipe no painel não bloqueiam clientes da mesma rede.
+        sql`${auditLogs.after} ->> 'source' = 'SITE'`,
+        gt(auditLogs.createdAt, sql`now() - make_interval(mins => ${minutes})`),
+      ),
+    );
+  return row?.n ?? 0;
+}
+
+/** Subtotal e tubos de uma lista de itens pelo cardápio ativo da unidade (prévia de cupom). */
+export async function priceItems(tx: Tx, tenantId: string, items: { productId: string; qty: number }[]) {
+  const ids = [...new Set(items.map((i) => i.productId))];
+  const menu = ids.length
+    ? await tx
+        .select({ id: products.id, name: products.name, priceCents: products.priceCents, costCents: products.costCents })
+        .from(products)
+        .where(and(eq(products.tenantId, tenantId), eq(products.status, true), inArray(products.id, ids)))
+    : [];
+  return priceOrder(menu, items);
+}
+
+/** Cupons recusados vindos de um IP na janela de tempo (base do bloqueio contra adivinhação de códigos). */
+export async function countRecentCouponRejections(tx: Tx, ip: string, minutes: number) {
+  const [row] = await tx
+    .select({ n: count() })
+    .from(auditLogs)
+    .where(
+      and(
+        eq(auditLogs.action, 'COUPON_REJECTED'),
         eq(auditLogs.ip, ip),
         gt(auditLogs.createdAt, sql`now() - make_interval(mins => ${minutes})`),
       ),
@@ -97,6 +131,60 @@ async function upsertCustomer(tx: Tx, tenantId: string, o: OrderInput) {
   };
   if (Object.keys(fill).length) await tx.update(customers).set(fill).where(eq(customers.id, existing.id));
   return existing;
+}
+
+export type CouponOrderContext = {
+  subtotalCents: number;
+  tubes: number;
+  /** Telefone (E.164) do cliente — exigido pelos cupons exclusivos. */
+  phone: string | null;
+  /** Pedido em edição: não conta como uso do próprio cupom. */
+  excludeOrderId?: string;
+};
+
+/** Usos atuais do cupom: pedidos ativos e não cancelados (cancelar devolve o uso). */
+async function couponUses(tx: Tx, couponId: string, excludeOrderId?: string) {
+  const [row] = await tx
+    .select({ n: count() })
+    .from(orders)
+    .where(
+      and(
+        eq(orders.couponId, couponId),
+        eq(orders.status, true),
+        ne(orders.stage, 'CANCELADO'),
+        excludeOrderId ? ne(orders.id, excludeOrderId) : undefined,
+      ),
+    );
+  return row?.n ?? 0;
+}
+
+/**
+ * Avalia um cupom pelo código, sem gravar nada (prévia do formulário do site e do painel).
+ * Com `lock`, trava a linha do cupom até o fim da transação: dois pedidos simultâneos não
+ * conseguem usar a mesma última vaga.
+ */
+export async function checkCouponCode(
+  tx: Tx,
+  tenant: Pick<TenantRef, 'id' | 'timezone'>,
+  code: string,
+  o: CouponOrderContext,
+  opts: { lock?: boolean } = {},
+): Promise<CouponCheck & { couponId?: string }> {
+  const query = tx
+    .select()
+    .from(coupons)
+    .where(and(eq(coupons.tenantId, tenant.id), eq(coupons.code, code), eq(coupons.status, true)));
+  const [coupon] = opts.lock ? await query.for('update') : await query;
+  const usesSoFar = coupon ? await couponUses(tx, coupon.id, o.excludeOrderId) : 0;
+  const check = evaluateCoupon(coupon ?? null, { ...o, usesSoFar, today: todayInZone(tenant.timezone) });
+  return check.ok ? { ...check, couponId: coupon!.id } : check;
+}
+
+/** Aplica o cupom num pedido em gravação; recusa com a mensagem do motivo. */
+export async function applyCoupon(tx: Tx, tenant: Pick<TenantRef, 'id' | 'timezone'>, code: string, o: CouponOrderContext) {
+  const check = await checkCouponCode(tx, tenant, code, o, { lock: true });
+  if (!check.ok) throw new OrderError('COUPON_REJECTED', check.message);
+  return { couponId: check.couponId!, couponCode: check.code, discountCents: check.discountCents };
 }
 
 export type CreateOrderOptions = {
@@ -141,6 +229,12 @@ export async function createOrder(tx: Tx, tenant: TenantRef, input: OrderInput, 
     throw new OrderError('SCHEDULE_IN_PAST', 'A data e o horário precisam ser no futuro.');
   }
 
+  const coupon = input.couponCode
+    ? await applyCoupon(tx, tenant, input.couponCode, { subtotalCents: priced.subtotalCents, tubes: priced.tubes, phone: input.phone })
+    : null;
+  // Com cupom, o desconto é o dele (o desconto manual do painel não se soma).
+  const discountCents = coupon ? coupon.discountCents : (opts.discountCents ?? 0);
+
   const customer = await upsertCustomer(tx, tenant.id, input);
   const code = await nextOrderCode(tx, tenant);
 
@@ -157,11 +251,14 @@ export async function createOrder(tx: Tx, tenant: TenantRef, input: OrderInput, 
       address: input.address || null,
       notes: input.notes || null,
       subtotalCents: priced.subtotalCents,
-      discountCents: opts.discountCents ?? 0,
+      discountCents,
+      couponId: coupon?.couponId ?? null,
+      couponCode: coupon?.couponCode ?? null,
       deliveryFeeCents: opts.deliveryFeeCents ?? 0,
-      totalCents: orderTotal(priced.subtotalCents, opts.discountCents, opts.deliveryFeeCents),
+      totalCents: orderTotal(priced.subtotalCents, discountCents, opts.deliveryFeeCents),
       paymentMethod: opts.paymentMethod ?? null,
       paid: opts.paid ?? false,
+      paidAt: opts.paid ? new Date() : null,
       source: opts.source,
       calendarSyncState: scheduled ? 'PENDENTE' : 'NAO_APLICA',
     })
@@ -172,6 +269,7 @@ export async function createOrder(tx: Tx, tenant: TenantRef, input: OrderInput, 
   if (scheduled) {
     await tx.insert(calendarSyncJobs).values({ tenantId: tenant.id, orderId: order!.id, op: 'UPSERT' });
   }
+  if (order!.paid) await syncOrderFinance(tx, order!.id);
 
   return { order: order!, customer, lines: priced.lines, tubes: priced.tubes };
 }

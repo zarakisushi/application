@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DomainError } from './domain';
 import { normalizeBrPhone } from './phone';
-import { parseMoneyToCents } from './text';
+import { normalizeCouponCode, parseMoneyToCents } from './text';
 
 export const ORDER_TYPES = ['DELIVERY', 'ENCOMENDA', 'FESTA'] as const;
 export type OrderType = (typeof ORDER_TYPES)[number];
@@ -18,7 +18,7 @@ export const isScheduled = (type: OrderType) => type !== 'DELIVERY';
 /** Erro de regra de negócio do pedido, com mensagem pronta para mostrar ao cliente. */
 export class OrderError extends DomainError {
   constructor(
-    public readonly code: 'PRODUCT_UNAVAILABLE' | 'SCHEDULE_IN_PAST' | 'RATE_LIMITED' | 'INVALID',
+    public readonly code: 'PRODUCT_UNAVAILABLE' | 'SCHEDULE_IN_PAST' | 'RATE_LIMITED' | 'INVALID' | 'COUPON_REJECTED',
     message: string,
   ) {
     super(message);
@@ -87,6 +87,8 @@ const orderDetails = {
     z.number('Número de convidados inválido').int().min(1, 'Informe o número de convidados').max(10_000).optional(),
   ),
   notes: optionalText(1000),
+  /** Cupom de desconto (opcional); validado no servidor dentro da transação do pedido. */
+  couponCode: z.string().max(40).default('').transform(normalizeCouponCode),
   items: z
     .array(z.object({ productId: z.uuid(), qty: z.number().int().min(1).max(500) }))
     .min(1, 'Adicione pelo menos um tubo ao pedido.')
@@ -136,7 +138,17 @@ const adminExtras = {
 };
 
 /** Edição de pedido pelo painel (o cliente não muda: edite-o em Clientes). */
-export const orderUpdateSchema = z.object({ ...orderDetails, ...adminExtras }).superRefine(refineOrder);
+/** No painel, o desconto vem do cupom ou é digitado — não os dois. */
+function refineAdminDiscount(v: { couponCode: string; discount: number }, ctx: z.RefinementCtx) {
+  if (v.couponCode && v.discount > 0) {
+    ctx.addIssue({ code: 'custom', path: ['discount'], message: 'Com cupom aplicado, deixe o desconto manual em branco.' });
+  }
+}
+
+export const orderUpdateSchema = z
+  .object({ ...orderDetails, ...adminExtras })
+  .superRefine(refineOrder)
+  .superRefine(refineAdminDiscount);
 export type OrderUpdate = z.output<typeof orderUpdateSchema>;
 
 /** Pedido lançado pelo painel (WhatsApp, balcão/telefone). */
@@ -148,11 +160,15 @@ export const adminOrderSchema = z
     phone: phoneField,
     source: z.enum(ADMIN_ORDER_SOURCES),
   })
-  .superRefine(refineOrder);
+  .superRefine(refineOrder)
+  .superRefine(refineAdminDiscount);
 export type AdminOrder = z.output<typeof adminOrderSchema>;
 
 /** Campos do pedido usados na criação (site e painel). */
-export type OrderInput = Pick<PublicOrder, 'type' | 'name' | 'phone' | 'date' | 'time' | 'neighborhood' | 'address' | 'guests' | 'notes' | 'items'>;
+export type OrderInput = Pick<
+  PublicOrder,
+  'type' | 'name' | 'phone' | 'date' | 'time' | 'neighborhood' | 'address' | 'guests' | 'notes' | 'items' | 'couponCode'
+>;
 
 export type PricedProduct = { id: string; name: string; priceCents: number; costCents?: number };
 

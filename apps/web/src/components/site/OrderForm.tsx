@@ -10,8 +10,8 @@ import {
   whatsappUrl,
   type OrderType,
 } from '@zaraki/core';
-import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { submitOrder } from '@/app/(site)/actions';
+import { useEffect, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react';
+import { checkCoupon, submitOrder } from '@/app/(site)/actions';
 
 export type OrderFormProduct = { id: string; name: string; priceCents: number };
 
@@ -67,9 +67,52 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState<Sent | null>(null);
+  const [couponInput, setCouponInput] = useState('');
+  const [coupon, setCoupon] = useState<{ code: string; discountCents: number } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponPending, setCouponPending] = useState(false);
 
   const items = products.filter((p) => qty[p.id]).map((p) => ({ productId: p.id, qty: qty[p.id]! }));
   const priced = priceOrder(products, items);
+  const discountCents = coupon ? Math.min(coupon.discountCents, priced.subtotalCents) : 0;
+  const totalCents = Math.max(0, priced.totalCents - discountCents);
+
+  /** Valida o cupom no servidor (prévia; o desconto definitivo é calculado ao gravar o pedido). */
+  const applyCoupon = async (code = couponInput) => {
+    if (!code.trim()) {
+      setCouponError('Informe o código do cupom.');
+      return;
+    }
+    setCouponPending(true);
+    setCouponError(null);
+    const r = await checkCoupon({ code, phone: fields.phone, items }).catch(() => ({
+      ok: false as const,
+      error: 'Não foi possível validar o cupom agora.',
+    }));
+    setCouponPending(false);
+    if (r.ok) {
+      setCoupon({ code: r.code, discountCents: r.discountCents });
+      setCouponInput(r.code);
+    } else {
+      setCoupon(null);
+      setCouponError(r.error);
+    }
+  };
+
+  // Mudou a quantidade de tubos ou o WhatsApp: o cupom aplicado é conferido de novo.
+  const itemsKey = JSON.stringify(items);
+  useEffect(() => {
+    if (!coupon) return;
+    const timer = setTimeout(() => applyCoupon(coupon.code), 400);
+    return () => clearTimeout(timer);
+  }, [itemsKey, fields.phone]);
+
+  const onCouponKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Enter aplica o cupom em vez de enviar o pedido
+      applyCoupon();
+    }
+  };
   const scheduled = isScheduled(type);
   const delivery = type === 'DELIVERY';
 
@@ -96,6 +139,7 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
     guests: type === 'FESTA' && fields.guests ? Number(fields.guests) : undefined,
     notes: fields.notes,
     items,
+    couponCode: coupon?.code ?? '',
     website: fields.website,
   });
 
@@ -103,7 +147,7 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
   const localWhatsappUrl = () =>
     whatsappUrl(
       whatsappNumber,
-      buildOrderMessage({ ...payload(), lines: priced.lines, totalCents: priced.totalCents }),
+      buildOrderMessage({ ...payload(), lines: priced.lines, couponCode: coupon?.code, discountCents, totalCents }),
     );
 
   const onSubmit = async (e: FormEvent) => {
@@ -141,6 +185,10 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
       win?.close();
       setError(result.error);
       setFieldErrors(result.fieldErrors ?? {});
+      if (result.fieldErrors?.couponCode) {
+        setCoupon(null);
+        setCouponError(result.fieldErrors.couponCode);
+      }
     }
   };
 
@@ -149,6 +197,9 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
     setQty({});
     setFields(EMPTY_FIELDS);
     setFieldErrors({});
+    setCoupon(null);
+    setCouponInput('');
+    setCouponError(null);
   };
 
   if (sent) {
@@ -285,14 +336,70 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
               </div>
             </div>
           ))}
+          {coupon && discountCents > 0 && (
+            <div className="lines__discount">
+              <span>
+                Cupom <strong>{coupon.code}</strong>
+              </span>
+              <span>− {formatCents(discountCents)}</span>
+            </div>
+          )}
           <div className="lines__total">
             <span>
               Total estimado <span>· {priced.tubes === 1 ? '1 tubo' : `${priced.tubes} tubos`}</span>
             </span>
-            <span>{formatCents(priced.totalCents)}</span>
+            <span>{formatCents(totalCents)}</span>
           </div>
         </div>
       </div>
+
+      {!offline && (
+        <div className="coupon">
+          <label className="field coupon__field">
+            Cupom de desconto
+            <input
+              name="couponCode"
+              value={couponInput}
+              onChange={(e) => {
+                setCouponInput(e.target.value.toUpperCase());
+                setCouponError(null);
+              }}
+              onKeyDown={onCouponKey}
+              autoComplete="off"
+              placeholder="Tem um cupom?"
+              aria-invalid={couponError ? true : undefined}
+              aria-describedby={couponError ? 'err-coupon' : undefined}
+              disabled={!!coupon}
+            />
+          </label>
+          {coupon ? (
+            <button
+              type="button"
+              className="coupon__btn coupon__btn--remove"
+              onClick={() => {
+                setCoupon(null);
+                setCouponInput('');
+              }}
+            >
+              Remover
+            </button>
+          ) : (
+            <button type="button" className="coupon__btn" onClick={() => applyCoupon()} disabled={couponPending}>
+              {couponPending ? 'Conferindo…' : 'Aplicar'}
+            </button>
+          )}
+          {couponError && (
+            <span className="field__error coupon__msg" id="err-coupon" role="alert">
+              {couponError}
+            </span>
+          )}
+          {coupon && (
+            <span className="coupon__msg coupon__msg--ok" role="status">
+              Cupom aplicado: − {formatCents(discountCents)}
+            </span>
+          )}
+        </div>
+      )}
 
       <label className="field">
         Observações

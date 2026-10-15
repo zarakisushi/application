@@ -19,6 +19,9 @@ describe('valores e textos', () => {
     ['R$ 60,00', 6000],
     ['1.234,56', 123456],
     ['12.5', 1250],
+    ['1.200', 120000],
+    ['3.500', 350000],
+    ['1.234.567', 123456700],
     ['0', 0],
   ])('converte "%s" para %i centavos', (input, cents) => {
     expect(parseMoneyToCents(input)).toBe(cents);

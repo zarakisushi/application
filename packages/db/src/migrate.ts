@@ -2,6 +2,9 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { fileURLToPath } from 'node:url';
 import { Client } from 'pg';
+import { createDb } from './client';
+import { withContext } from './context';
+import { backfillOrderFinance, ensureFinanceDefaultsForAll } from './finance';
 
 const migrationsFolder = fileURLToPath(new URL('../migrations', import.meta.url));
 
@@ -19,5 +22,22 @@ export async function runMigrations(ownerUrl: string, appPassword?: string) {
     }
   } finally {
     await client.end();
+  }
+  await prepareData(ownerUrl);
+}
+
+/**
+ * Dados derivados que acompanham as migrations (idempotente): contas e categorias do financeiro de cada
+ * unidade e as entradas no caixa dos pedidos que já estavam pagos.
+ */
+async function prepareData(ownerUrl: string) {
+  const db = createDb(ownerUrl, 1);
+  try {
+    await withContext({ platformAdmin: true, actorLabel: 'migrate' }, async (tx) => {
+      await ensureFinanceDefaultsForAll(tx);
+      await backfillOrderFinance(tx);
+    }, db);
+  } finally {
+    await db.$client.end();
   }
 }

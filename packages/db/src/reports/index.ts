@@ -1,5 +1,6 @@
 import { cardapioReports } from './cardapio';
 import { clientesReports } from './clientes';
+import { financeiroRedeReports, financeiroReports } from './financeiro';
 import { operacaoReports } from './operacao';
 import { franquiaReports, governancaReports } from './rede';
 import type { ReportDefinition } from './types';
@@ -15,7 +16,9 @@ export const REPORTS: ReportDefinition[] = [
   ...cardapioReports,
   ...clientesReports,
   ...operacaoReports,
+  ...financeiroReports,
   ...franquiaReports,
+  ...financeiroRedeReports,
   ...governancaReports,
 ];
 

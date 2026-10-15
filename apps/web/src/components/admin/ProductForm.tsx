@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Field, FormError, useServerForm, type ActionResult } from './form';
+import { compressImage } from '@/lib/image-compress';
 
 type Product = {
   name: string;
@@ -82,9 +83,9 @@ export function ProductForm({
                           const file = e.target.files?.[0];
                           e.target.value = '';
                           if (!file) return;
-                          const data = new FormData();
-                          data.set('file', file);
                           startUpload(async () => {
+                            const data = new FormData();
+                            data.set('file', await compressImage(file, { maxSide: 2000 }));
                             const r = await uploadAction(data);
                             if (r?.url) {
                               setImage(r.url);

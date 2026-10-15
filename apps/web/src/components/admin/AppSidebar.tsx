@@ -19,10 +19,17 @@ import {
   SidebarRail,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { NAV_GROUPS } from './nav';
+import { ALL_NAV_ITEMS, NAV_GROUPS } from './nav';
 
-function isActive(pathname: string, href: string) {
+function matches(pathname: string, href: string) {
   return href === '/admin' ? pathname === '/admin' : pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/** Item do menu da página atual: o mais específico que casa (Financeiro › Lançamentos, não a Visão geral). */
+function activeHref(pathname: string) {
+  return ALL_NAV_ITEMS.map((i) => i.href)
+    .filter((href) => matches(pathname, href))
+    .sort((a, b) => b.length - a.length)[0];
 }
 
 /** Alterna entre "ícones + textos" e "apenas ícones" (a preferência fica salva em cookie). */
@@ -45,6 +52,7 @@ function CollapseToggle() {
 
 export function AppSidebar({ allowed, tenantName }: { allowed: string[]; tenantName: string }) {
   const pathname = usePathname();
+  const current = activeHref(pathname);
   const { setOpenMobile } = useSidebar();
 
   return (
@@ -75,7 +83,7 @@ export function AppSidebar({ allowed, tenantName }: { allowed: string[]; tenantN
               <SidebarGroupContent>
                 <SidebarMenu>
                   {items.map((item) => {
-                    const active = isActive(pathname, item.href);
+                    const active = item.href === current;
                     return (
                       <SidebarMenuItem key={item.href}>
                         <SidebarMenuButton

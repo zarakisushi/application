@@ -6,7 +6,10 @@ import { todayInZone, zonedTimeToUtc, type OrderStage, type OrderType } from '@z
 import { and, eq, sql } from 'drizzle-orm';
 import { createDb } from '../src/client';
 import { withContext } from '../src/context';
-import { calendarSyncJobs, customers, orderCounters, orderItems, orders, orderStageHistory, products, tenants } from '../src/schema';
+import { addDays, addMonths } from '@zaraki/core';
+import type { Tx } from '../src/client';
+import { backfillOrderFinance, ensureFinanceDefaults } from '../src/finance';
+import { calendarSyncJobs, customers, financeAccounts, financeCategories, financeEntries, orderCounters, orderItems, orders, orderStageHistory, products, tenants } from '../src/schema';
 
 const url = requireEnv('DATABASE_URL');
 if (!/@(localhost|127\.0\.0\.1)[:/]/.test(url)) {
@@ -38,8 +41,8 @@ await withContext({ platformAdmin: true, actorLabel: 'demo', allowBackdate: true
   if (!tenant) throw new Error(`Unidade "${slug}" não encontrada: rode pnpm db:seed antes.`);
   const tz = tenant.timezone;
 
-  // Custos realistas (~40% do preço) para os relatórios de margem, se ainda não cadastrados.
-  await tx.update(products).set({ costCents: sql`round(${products.priceCents} * 0.4)` }).where(and(eq(products.tenantId, tenant.id), eq(products.costCents, 0)));
+  // Custos realistas (~32% do preço) para os relatórios de margem, se ainda não cadastrados.
+  await tx.update(products).set({ costCents: sql`round(${products.priceCents} * 0.32)` }).where(and(eq(products.tenantId, tenant.id), eq(products.costCents, 0)));
   const menu = await tx.select().from(products).where(and(eq(products.tenantId, tenant.id), eq(products.status, true)));
   if (!menu.length) throw new Error('Cardápio vazio: rode pnpm db:seed antes.');
 
@@ -117,6 +120,7 @@ await withContext({ platformAdmin: true, actorLabel: 'demo', allowBackdate: true
           source: weighted([['SITE', 55], ['WHATSAPP', 35], ['BALCAO', 10]]),
           paymentMethod: pick(['PIX', 'PIX', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'DINHEIRO'] as const),
           paid: stage === 'ENTREGUE',
+          paidAt: stage === 'ENTREGUE' ? when : null,
           cancelReason: stage === 'CANCELADO' ? pick(REASONS) : null,
           calendarSyncState: type === 'DELIVERY' ? 'NAO_APLICA' : 'PENDENTE',
           createdAt: receivedAt,
@@ -165,7 +169,109 @@ await withContext({ platformAdmin: true, actorLabel: 'demo', allowBackdate: true
     .insert(orderCounters)
     .values({ tenantId: tenant.id, lastValue: code })
     .onConflictDoUpdate({ target: orderCounters.tenantId, set: { lastValue: code } });
+  // Pedidos pagos entram no caixa (Financeiro).
+  const entries = await backfillOrderFinance(tx);
+  console.log(`Financeiro: ${entries} vendas lançadas no caixa.`);
+  console.log(`Financeiro: ${await seedDemoExpenses(tx, tenant.id, tz)} despesas de demonstração.`);
   console.log(`Demonstração criada: ${people.length} clientes e ${created} pedidos em ${tenant.name}.`);
 }, db);
 
 await db.$client.end();
+
+/**
+ * Despesas típicas de um restaurante japonês, proporcionais às vendas da demonstração:
+ * fixas mensais (aluguel, salários, energia...), compras semanais de insumos, impostos e um investimento
+ * parcelado. O que vence até hoje sai pago; o resto fica "a pagar". Uma conta fica vencida de propósito.
+ */
+async function seedDemoExpenses(tx: Tx, tenantId: string, tz: string) {
+  const [existing] = await tx.select({ id: financeEntries.id }).from(financeEntries).where(and(eq(financeEntries.tenantId, tenantId), eq(financeEntries.notes, 'demo')));
+  if (existing) return 0;
+  await ensureFinanceDefaults(tx, tenantId);
+  const today = todayInZone(tz);
+  const cats = await tx.select().from(financeCategories).where(and(eq(financeCategories.tenantId, tenantId), eq(financeCategories.status, true)));
+  const accs = await tx.select().from(financeAccounts).where(and(eq(financeAccounts.tenantId, tenantId), eq(financeAccounts.status, true)));
+  const cat = (name: string) => cats.find((c) => c.name === name)!.id;
+  const bank = accs.find((a) => a.kind === 'BANCO')!.id;
+  const cash = accs.find((a) => a.kind === 'CAIXA')!.id;
+
+  // Vendas entregues por semana (segunda-feira) e entregas de delivery, no fuso da unidade.
+  const weeks = (
+    await tx.execute<{ week: string; revenue: number; deliveries: number }>(sql`
+      select to_char(date_trunc('week', (coalesce(scheduled_at, created_at) at time zone ${tz})::date), 'YYYY-MM-DD') as week,
+             sum(total_cents)::float8 as revenue, count(*) filter (where type = 'DELIVERY')::int as deliveries
+        from orders where tenant_id = ${tenantId} and status and stage = 'ENTREGUE' group by 1 order by 1`)
+  ).rows;
+  if (!weeks.length) return 0;
+  const monthly = weeks.reduce((s, w) => s + w.revenue, 0) / Math.max(1, weeks.length / 4.33);
+
+  type Row = typeof financeEntries.$inferInsert;
+  const rows: Row[] = [];
+  const add = (r: { name: string; description: string; cents: number; competence: string; due: string; who?: string; account?: string }) => {
+    const paid = r.due <= today;
+    rows.push({
+      tenantId,
+      direction: 'SAIDA',
+      description: r.description,
+      amountCents: Math.max(100, Math.round(r.cents)),
+      categoryId: cat(r.name),
+      accountId: r.account ?? bank,
+      competenceDate: r.competence,
+      dueDate: r.due,
+      paidOn: paid ? r.due : null,
+      paymentMethod: paid ? (r.account === cash ? 'DINHEIRO' : 'PIX') : null,
+      counterparty: r.who ?? null,
+      notes: 'demo',
+    });
+  };
+
+  // Compras semanais, proporcionais às vendas da semana (pagas na segunda seguinte).
+  for (const w of weeks) {
+    const due = addDays(w.week, 7);
+    add({ name: 'Insumos: peixes e frutos do mar', description: 'Salmão, atum e camarão da semana', cents: w.revenue * (0.2 + rand() * 0.03), competence: w.week, due, who: 'Peixaria Goiás' });
+    add({ name: 'Insumos: arroz, nori e mercearia', description: 'Arroz japonês, nori, shoyu e mercearia', cents: w.revenue * 0.06, competence: w.week, due, who: 'Distribuidora Oriental' });
+    add({ name: 'Hortifrúti', description: 'Hortifrúti da semana', cents: w.revenue * 0.02, competence: w.week, due: w.week, who: 'Ceasa Goiânia', account: cash });
+    add({ name: 'Embalagens', description: 'Embalagens para delivery', cents: w.revenue * 0.03, competence: w.week, due, who: 'Embalagens Centro-Oeste' });
+    add({ name: 'Bebidas', description: 'Bebidas', cents: w.revenue * 0.02, competence: w.week, due, who: 'Distribuidora de Bebidas GO' });
+    if (w.deliveries) add({ name: 'Entregas e motoboys', description: `Entregas da semana (${w.deliveries})`, cents: w.deliveries * 700, competence: w.week, due, who: 'Motoboys', account: cash });
+  }
+
+  // Contas fixas mensais (do primeiro mês com vendas até o mês que vem).
+  const fixed: [string, string, number, number, string?][] = [
+    ['Aluguel', 'Aluguel do ponto', 0.1, 10, 'Imobiliária Goiânia'],
+    ['Salários e encargos', 'Folha de pagamento', 0.22, 5],
+    ['Pró-labore', 'Pró-labore dos sócios', 0.06, 5],
+    ['Energia', 'Conta de energia', 0.03, 15, 'Equatorial Goiás'],
+    ['Água', 'Conta de água', 0.006, 15, 'Saneago'],
+    ['Gás', 'Gás (cilindros)', 0.01, 20, 'Gás Goiano'],
+    ['Internet e telefone', 'Internet e telefone', 0.003, 12],
+    ['Contabilidade', 'Honorários contábeis', 0.012, 10, 'Contabilidade Silva'],
+    ['Sistemas e assinaturas', 'Sistemas e assinaturas', 0.004, 8],
+    ['Marketing', 'Anúncios e redes sociais', 0.02, 25],
+    ['Tarifas bancárias', 'Tarifa da conta', 0.001, 1],
+  ];
+  const first = `${weeks[0]!.week.slice(0, 7)}-01`;
+  // A loja já existia antes do período da demonstração: começa com reserva de ~2 meses de despesas fixas.
+  await tx
+    .update(financeAccounts)
+    .set({ openingBalanceCents: Math.round(monthly * 0.9), openingDate: addDays(first, -1) })
+    .where(eq(financeAccounts.id, bank));
+  for (let m = first; m <= addMonths(`${today.slice(0, 7)}-01`, 1); m = addMonths(m, 1)) {
+    for (const [name, description, share, day, who] of fixed) {
+      add({ name, description, cents: monthly * share * (0.95 + rand() * 0.1), competence: m, due: addDays(m, day - 1), who });
+    }
+    // Simples Nacional: ~6% das vendas do mês anterior, vence dia 20 (a partir do segundo mês).
+    if (m > first) add({ name: 'Simples Nacional (DAS)', description: 'DAS do mês anterior', cents: monthly * 0.06, competence: addMonths(m, -1), due: addDays(m, 19) });
+  }
+
+  // Investimento: freezer novo em 3 parcelas, a primeira há dois meses.
+  const freezer = addMonths(`${today.slice(0, 7)}-05`, -2);
+  for (let i = 0; i < 3; i++) {
+    add({ name: 'Equipamentos', description: `Freezer horizontal (${i + 1}/3)`, cents: 160000, competence: freezer, due: addMonths(freezer, i), who: 'Refrigeração Goiás' });
+  }
+  // Uma conta vencida e não paga, para o painel mostrar o alerta.
+  const late = addDays(today, -3);
+  rows.push({ tenantId, direction: 'SAIDA', description: 'Manutenção do ar-condicionado', amountCents: 45000, categoryId: cat('Manutenção e limpeza'), competenceDate: late, dueDate: late, counterparty: 'Clima Frio', notes: 'demo' });
+
+  for (let i = 0; i < rows.length; i += 200) await tx.insert(financeEntries).values(rows.slice(i, i + 200));
+  return rows.length;
+}

@@ -61,7 +61,7 @@ export type ExtraParam = {
 
 export type ReportDefinition = {
   slug: string;
-  group: 'Vendas' | 'Cardápio' | 'Clientes' | 'Operação' | 'Franquia' | 'Governança';
+  group: 'Vendas' | 'Cardápio' | 'Clientes' | 'Operação' | 'Financeiro' | 'Franquia' | 'Governança';
   title: string;
   description: string;
   permission: Permission;

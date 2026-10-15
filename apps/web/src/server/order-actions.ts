@@ -1,13 +1,23 @@
 'use server';
 
-import { adminOrderSchema, orderUpdateSchema, type OrderStage } from '@zaraki/core';
+import {
+  adminOrderSchema,
+  normalizeBrPhone,
+  normalizeCouponCode,
+  orderUpdateSchema,
+  PAYMENT_METHODS,
+  type OrderStage,
+  type PaymentMethod,
+} from '@zaraki/core';
 import {
   changeOrderStage,
+  checkCouponCode,
   createOrder,
   enqueueCalendarSync,
   getDb,
   getOrderDetail,
   getTenantById,
+  setOrderPayment,
   setOrderStatus,
   updateOrder,
   withContext,
@@ -42,6 +52,8 @@ function refresh(id?: string) {
   revalidatePath('/admin/pedidos');
   revalidatePath('/admin/encomendas');
   revalidatePath('/admin');
+  // Pedido pago vira entrada no caixa: as telas do financeiro também mudam.
+  revalidatePath('/admin/financeiro', 'layout');
   if (id) {
     revalidatePath(`/admin/pedidos/${id}`);
     revalidatePath(`/admin/encomendas/${id}`);
@@ -102,6 +114,24 @@ export async function setOrderStatusAction(id: string, status: boolean): Promise
   });
 }
 
+/**
+ * Registra (ou desfaz) o pagamento do pedido. Pago, a venda entra no caixa da unidade; desfeito, é estornada.
+ * Também usada ao avançar para "Entregue" (pergunta "Pagamento recebido?").
+ */
+export async function setOrderPaymentAction(id: string, paid: boolean, method?: string | null, then?: OrderStage): Promise<ActionResult> {
+  const ctx = await requireAdmin('orders:write');
+  const pm = method && (PAYMENT_METHODS as readonly string[]).includes(method) ? (method as PaymentMethod) : null;
+  if (paid && !pm) return { error: 'Escolha a forma de pagamento.' };
+  return attempt(async () => {
+    await withContext(ctx.db, async (tx) => {
+      if (then) await changeOrderStage(tx, ctx.tenant.id, id, then);
+      await setOrderPayment(tx, ctx.tenant.id, id, { paid, method: pm });
+    });
+    refresh(id);
+    return { ok: true, message: paid ? 'Pagamento registrado: a venda entrou no caixa.' : 'Pagamento desfeito: a entrada no caixa foi estornada.' };
+  });
+}
+
 /** Reenvia o pedido à Google Agenda agora (botão "Sincronizar agora" na ficha). */
 export async function retryCalendarSyncAction(id: string): Promise<ActionResult> {
   const ctx = await requireAdmin('orders:write');
@@ -117,4 +147,34 @@ export async function retryCalendarSyncAction(id: string): Promise<ActionResult>
   return summary.failed
     ? { error: 'O Google recusou a sincronização. Veja o erro na ficha; uma nova tentativa será feita automaticamente.' }
     : { ok: true, message: 'Agenda sincronizada.' };
+}
+
+export type CouponPreview = { ok: true; code: string; discountCents: number } | { ok: false; error: string };
+
+/**
+ * Prévia do cupom no editor do painel (não grava nada; o desconto definitivo é calculado ao salvar).
+ * Em pedido existente, o telefone é o do cliente do pedido e o próprio pedido não conta como uso.
+ */
+export async function previewCouponAction(input: {
+  code: string;
+  phone?: string;
+  orderId?: string;
+  subtotalCents: number;
+  tubes: number;
+}): Promise<CouponPreview> {
+  const ctx = await requireAdmin('orders:write');
+  const code = normalizeCouponCode(String(input.code ?? '')).slice(0, 40);
+  if (!code) return { ok: false, error: 'Informe o código do cupom.' };
+  const tenant = await tenantRef(ctx.tenant.id);
+  const check = await withContext(ctx.db, async (tx) => {
+    const order = input.orderId ? await getOrderDetail(tx, ctx.tenant.id, input.orderId) : null;
+    const phone = order ? order.customer.phone : normalizeBrPhone(input.phone ?? '');
+    return checkCouponCode(tx, tenant, code, {
+      subtotalCents: Math.max(0, Math.round(Number(input.subtotalCents) || 0)),
+      tubes: Math.max(0, Math.round(Number(input.tubes) || 0)),
+      phone,
+      excludeOrderId: order?.id,
+    });
+  });
+  return check.ok ? { ok: true, code: check.code, discountCents: check.discountCents } : { ok: false, error: check.message };
 }

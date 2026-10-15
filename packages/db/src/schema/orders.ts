@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { boolean, check, index, integer, pgTable, text, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { customers, products } from './catalog';
+import { coupons } from './coupons';
 import { baseColumns, id, ts } from './common';
 import {
   calendarJobOp,
@@ -36,11 +37,16 @@ export const orders = pgTable(
     notes: text(),
     subtotalCents: integer().notNull(),
     discountCents: integer().notNull().default(0),
+    /** Cupom aplicado; o código fica copiado para o histórico não depender do cadastro. */
+    couponId: uuid().references(() => coupons.id),
+    couponCode: text(),
     deliveryFeeCents: integer().notNull().default(0),
     totalCents: integer().notNull(),
     source: orderSource().notNull(),
     paymentMethod: paymentMethod(),
     paid: boolean().notNull().default(false),
+    /** Quando o pedido foi marcado como pago (data da entrada no caixa). */
+    paidAt: ts(),
     cancelReason: text(),
     googleEventId: text(),
     calendarSyncState: calendarSyncState().notNull().default('NAO_APLICA'),
@@ -52,6 +58,7 @@ export const orders = pgTable(
     index('orders_tenant_stage_idx').on(t.tenantId, t.stage),
     index('orders_tenant_scheduled_idx').on(t.tenantId, t.scheduledAt),
     index('orders_customer_idx').on(t.customerId),
+    index('orders_coupon_idx').on(t.couponId),
     check('orders_scheduled_ck', sql`${t.type} = 'DELIVERY' or ${t.scheduledAt} is not null`),
     check(
       'orders_money_ck',

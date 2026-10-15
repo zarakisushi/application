@@ -1,5 +1,6 @@
-import { formatReportValue } from '@zaraki/core';
-import { CalendarDays, ClipboardList, Hourglass } from 'lucide-react';
+import { formatReportValue, todayInZone } from '@zaraki/core';
+import { openSummary, totalBalance, withContext } from '@zaraki/db';
+import { CalendarDays, ClipboardList, Hourglass, Landmark } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CalendarSyncBadge, TypeBadge } from '@/components/admin/list';
@@ -34,6 +35,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     { label: 'Aguardando confirmação', value: operational.snapshot.awaitingConfirmation, icon: Hourglass, href: '/admin/pedidos?etapa=NOVO' },
     { label: 'Encomendas e festas (7 dias)', value: operational.snapshot.upcomingScheduled, icon: CalendarDays, href: '/admin/encomendas' },
   ];
+  // Resumo do caixa da unidade para quem vê o financeiro.
+  const finance = ctx.can('finance:read')
+    ? await withContext(ctx.db, async (tx) => ({
+        balance: await totalBalance(tx, ctx.tenant.id),
+        open: await openSummary(tx, ctx.tenant.id, todayInZone(timezone)),
+      }))
+    : null;
   const shortcuts = ALL_NAV_ITEMS.filter((i) => i.href !== '/admin' && (!i.permission || ctx.can(i.permission)));
 
   return (
@@ -64,6 +72,36 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </Link>
           ))}
         </section>
+      )}
+
+      {finance && (
+        <Link href="/admin/financeiro" className="group" aria-label="Financeiro: abrir a visão geral">
+          <Card className="transition-colors group-hover:border-brand-gold">
+            <CardHeader className="flex flex-row items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-2">
+                <Landmark className="size-5 text-brand-gold" /> Financeiro
+              </CardTitle>
+              <span className="text-sm underline">Ver saúde financeira</span>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-4" data-testid="home-finance">
+              {[
+                ['Saldo em caixa', formatCents(finance.balance), ''],
+                [
+                  'Contas vencidas',
+                  finance.open.payables.overdue.count ? formatCents(finance.open.payables.overdue.cents) : 'Nenhuma',
+                  finance.open.payables.overdue.count ? 'text-brand-red' : 'text-emerald-700',
+                ],
+                ['A pagar em 7 dias', formatCents(finance.open.payables.week.cents), ''],
+                ['A receber em 7 dias', formatCents(finance.open.receivables.week.cents + finance.open.unpaidOrders.cents), ''],
+              ].map(([label, value, cls]) => (
+                <div key={label}>
+                  <div className="text-sm text-muted-foreground">{label}</div>
+                  <div className={`font-display text-2xl font-bold tabular-nums ${cls}`}>{value}</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </Link>
       )}
 
       {sales && (

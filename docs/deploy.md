@@ -27,7 +27,7 @@ os backups).
 
 1. Em <https://vercel.com>, **Add New → Project** e importe o repositório do GitHub.
 2. **Root Directory:** `apps/web` (o resto é lido de `apps/web/vercel.json`: instalação com pnpm, migrations
-   no build, cron da agenda a cada 5 minutos).
+   no build, cron da agenda de hora em hora e cron do financeiro todo dia às 6h de Brasília).
 3. **Storage → Blob → Create** e conecte ao projeto (cria `BLOB_READ_WRITE_TOKEN` para as fotos do cardápio).
 4. **Settings → Environment Variables** — para **Production** (com os dados da branch `main` do Neon) e
    **Preview** (com os da branch `preview`):
@@ -102,9 +102,25 @@ auditoria continuou íntegra.
 ## 6. Monitoramento
 
 - **Saúde:** `https://<domínio>/api/health` responde `{"ok":true}` quando o site e o banco estão no ar
-  (503 se o banco cair). Cadastre-o num monitor gratuito (UptimeRobot, Better Stack) com alerta no WhatsApp/e-mail.
-- **Cron da agenda:** em **Vercel → Settings → Cron Jobs** aparece `/api/cron/calendar` a cada 5 minutos.
+  (503 se o banco cair). Cadastre-o num monitor gratuito (UptimeRobot, Better Stack) com alerta no WhatsApp/e-mail,
+  com intervalo de **15 minutos ou mais**: cada verificação acorda o banco (veja "Neon no plano gratuito" abaixo).
+- **Cron da agenda:** em **Vercel → Settings → Cron Jobs** aparece `/api/cron/calendar` de hora em hora. Cada
+  encomenda já vai para a agenda logo após ser salva; o cron só reenvia o que falhou (ex.: Google fora do ar).
+- **Cron do financeiro:** `/api/cron/finance` todo dia às 9h UTC (6h em Brasília). Gera os royalties do mês
+  anterior de cada franquia com percentual cadastrado (sem duplicar). Falhas ficam na Auditoria como
+  "Falha ao gerar royalties"; a Matriz também pode gerar à mão em **Financeiro → Royalties**.
 - **Logs:** Vercel → **Logs**. Avisos de configuração aparecem com o prefixo `[config]`; falhas da agenda, `[agenda]`.
+
+### Neon no plano gratuito
+
+O plano gratuito do Neon tem cota mensal de computação e o banco "dorme" após 5 minutos sem uso. Tudo o que
+consulta o banco com frequência impede que ele durma e consome a cota:
+
+- **Não** diminua o intervalo do cron da agenda (de hora em hora) nem o do monitor de saúde (15 minutos ou mais).
+- Comprovantes e extratos ficam guardados no banco: acompanhe o armazenamento no painel do Neon
+  (**Monitoring → Storage**) e passe para o plano pago quando se aproximar do limite ou quando as franquias entrarem.
+- A Vercel precisa estar no plano **Pro**: o Hobby é só para uso não comercial e não aceita cron mais de uma vez
+  por dia.
 
 ## 7. Integração contínua
 

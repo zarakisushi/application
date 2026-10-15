@@ -16,6 +16,7 @@ type Tenant = {
   calendarId: string | null;
   domain: string | null;
   royaltyPct: string;
+  royaltyDueDay: number;
   orderCodePrefix: string;
 };
 
@@ -77,8 +78,11 @@ export function TenantForm({
             <Field label="Prefixo dos pedidos" htmlFor="orderCodePrefix" error={errors.orderCodePrefix} hint="Ex.: ZK → ZK-000123">
               <Input id="orderCodePrefix" name="orderCodePrefix" defaultValue={tenant?.orderCodePrefix ?? 'ZK'} maxLength={4} required />
             </Field>
-            <Field label="Royalties (%)" htmlFor="royaltyPct" error={errors.royaltyPct} hint="Percentual sobre o faturamento (relatório de franquia).">
+            <Field label="Royalties (%)" htmlFor="royaltyPct" error={errors.royaltyPct} hint="Sobre o faturamento do mês; cobrado automaticamente no início do mês seguinte.">
               <Input id="royaltyPct" name="royaltyPct" inputMode="decimal" defaultValue={tenant?.royaltyPct?.replace('.', ',') ?? '0'} />
+            </Field>
+            <Field label="Vencimento dos royalties (dia)" htmlFor="royaltyDueDay" error={errors.royaltyDueDay} hint="Dia do mês seguinte (1 a 28).">
+              <Input id="royaltyDueDay" name="royaltyDueDay" type="number" min={1} max={28} defaultValue={tenant?.royaltyDueDay ?? 10} />
             </Field>
             <Field label="Domínio próprio" htmlFor="domain" error={errors.domain} hint="Opcional, para o site da unidade no futuro." className="sm:col-span-2">
               <Input id="domain" name="domain" defaultValue={tenant?.domain ?? ''} placeholder="bueno.zarakisushi.com.br" />
