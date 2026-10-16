@@ -90,7 +90,8 @@ export async function listEntries(tx: Tx, tenantId: string, params: EntryListPar
     .leftJoin(financeAccounts, eq(financeAccounts.id, financeEntries.accountId))
     .leftJoin(orders, eq(orders.id, financeEntries.orderId))
     .where(where)
-    .orderBy(desc(movementDate), desc(financeEntries.createdAt))
+    // Data do movimento crescente (mais antigo primeiro); no mesmo dia, na ordem em que foram lançados.
+    .orderBy(asc(movementDate), asc(financeEntries.createdAt))
     .limit(pageSize)
     .offset(offset);
 

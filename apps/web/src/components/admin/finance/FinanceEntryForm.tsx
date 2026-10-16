@@ -2,6 +2,7 @@
 
 import {
   centsToInput,
+  maskMoneyInput,
   DRE_GROUP_LABEL,
   DRE_GROUPS,
   formatCents,
@@ -23,6 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { compressImage } from '@/lib/image-compress';
 import { Field, FormError, useServerForm, type ActionResult } from '../form';
 import { formatDay } from './ui';
+import { MoneyInput } from '@/components/ui/money-input';
 
 export type CategoryOption = { id: string; name: string; direction: FinanceDirection; dreGroup: DreGroup; active: boolean };
 export type AccountChoice = { id: string; name: string; active: boolean };
@@ -64,7 +66,7 @@ export function FinanceEntryForm({ entry, direction: initialDirection = 'SAIDA',
   const [paid, setPaid] = useState(entry ? !!entry.paidOn : false);
   const [repeat, setRepeat] = useState<keyof typeof REPEAT_LABEL>('NAO');
   const [count, setCount] = useState('2');
-  const [amount, setAmount] = useState(entry ? centsToInput(entry.amountCents) : '');
+  const [amount, setAmount] = useState(entry ? maskMoneyInput(centsToInput(entry.amountCents)) : '');
   const [dueDate, setDueDate] = useState(entry?.dueDate ?? today);
   const [attachment, setAttachment] = useState(entry?.attachmentId ?? '');
   const [uploading, startUpload] = useTransition();
@@ -138,7 +140,7 @@ export function FinanceEntryForm({ entry, direction: initialDirection = 'SAIDA',
                 <Input id="description" name="description" defaultValue={entry?.description ?? ''} required aria-invalid={!!errors.description} />
               </Field>
               <Field label="Valor (R$)" htmlFor="amount" error={errors.amount}>
-                <Input id="amount" name="amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" required aria-invalid={!!errors.amount} />
+                <MoneyInput id="amount" name="amount" value={amount} onValueChange={setAmount} placeholder="0,00" required aria-invalid={!!errors.amount} />
               </Field>
             </div>
 

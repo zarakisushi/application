@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { compressImage } from '@/lib/image-compress';
 import { Field, type ActionResult } from '../form';
 import { FormSheet } from './FinanceSheets';
+import { MoneyInput } from '@/components/ui/money-input';
 
 type Uploaded = { id: string; name: string; image: boolean };
 
@@ -67,7 +68,7 @@ export function StatementSheet({
               <Input id="st-date" name="statementDate" type="date" defaultValue={today} max={today} required />
             </Field>
             <Field label="Saldo no extrato (R$)" htmlFor="st-balance" error={errors.balance} hint="Negativo com “-”.">
-              <Input id="st-balance" name="balance" inputMode="decimal" placeholder="0,00" required />
+              <MoneyInput id="st-balance" name="balance" allowNegative placeholder="0,00" required />
             </Field>
           </div>
           <div className="grid gap-2">

@@ -109,6 +109,7 @@ export default async function EntriesPage({ searchParams }: { searchParams: Prom
             <TableRow>
               <TableHead>Data</TableHead>
               <TableHead>Descrição</TableHead>
+              <TableHead>Fornecedor / cliente</TableHead>
               <TableHead>Categoria</TableHead>
               <TableHead>Conta</TableHead>
               <TableHead>Situação</TableHead>
@@ -122,12 +123,11 @@ export default async function EntriesPage({ searchParams }: { searchParams: Prom
                 <TableCell className="whitespace-nowrap text-sm">
                   {e.paidOn ? formatDay(e.paidOn) : <span className="text-muted-foreground">vence {formatDay(e.dueDate)}</span>}
                 </TableCell>
-                <TableCell>
+                <TableCell className="min-w-48 whitespace-normal">
                   <Link href={`/admin/financeiro/lancamentos/${e.id}`} className="font-medium hover:underline">
                     {e.description}
                   </Link>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    {e.counterparty && e.origin !== 'PEDIDO' && <span>{e.counterparty}</span>}
                     {e.installments && e.origin === 'MANUAL' && !/\(\d+\/\d+\)$/.test(e.description) && (
                       <span>
                         mês {e.installment} de {e.installments}
@@ -141,7 +141,8 @@ export default async function EntriesPage({ searchParams }: { searchParams: Prom
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-sm">{e.categoryName ?? '—'}</TableCell>
+                <TableCell className="min-w-32 text-sm whitespace-normal">{e.counterparty ?? <span className="text-muted-foreground">—</span>}</TableCell>
+                <TableCell className="min-w-32 text-sm whitespace-normal">{e.categoryName ?? '—'}</TableCell>
                 <TableCell className="text-sm">{e.accountName ?? '—'}</TableCell>
                 <TableCell>
                   <SituationBadge entry={e} today={today} />
@@ -158,7 +159,7 @@ export default async function EntriesPage({ searchParams }: { searchParams: Prom
                 )}
               </TableRow>
             ))}
-            {!page.rows.length && <EmptyRow colSpan={canWrite ? 7 : 6}>Nenhum lançamento neste filtro.</EmptyRow>}
+            {!page.rows.length && <EmptyRow colSpan={canWrite ? 8 : 7}>Nenhum lançamento neste filtro.</EmptyRow>}
           </TableBody>
         </Table>
       </Card>

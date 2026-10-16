@@ -6,6 +6,8 @@ import {
   fieldErrors,
   nextStage,
   parseMoneyToCents,
+  maskMoneyInput,
+  finishMoneyInput,
   productSchema,
   slugify,
   tenantSchema,
@@ -106,5 +108,35 @@ describe('formulários do painel', () => {
       items: [{ productId: '11111111-1111-4111-8111-111111111111', qty: 3 }],
     });
     expect(o).toMatchObject({ guests: 40, discount: 1000, deliveryFee: 1500, paymentMethod: 'PIX', paid: true });
+  });
+});
+
+describe('máscara de reais', () => {
+  it.each([
+    ['3500', '3.500'],
+    ['3500,5', '3.500,5'],
+    ['1234567,891', '1.234.567,89'],
+    ['1.200', '1.200'],
+    ['12.5', '12,5'],
+    ['12.50', '12,50'],
+    ['0050', '50'],
+    [',5', '0,5'],
+    ['R$ 60,00', '60,00'],
+    ['1,2,3', '1,23'],
+    ['abc', ''],
+  ])('digitando "%s" mostra "%s"', (raw, shown) => {
+    expect(maskMoneyInput(raw)).toBe(shown);
+  });
+
+  it('sinal de menos só quando o campo aceita negativo', () => {
+    expect(maskMoneyInput('-1200,5', { allowNegative: true })).toBe('-1.200,5');
+    expect(maskMoneyInput('-1200,5')).toBe('1.200,5');
+  });
+
+  it('ao sair do campo completa os centavos, e o valor continua válido', () => {
+    expect(finishMoneyInput('3.500')).toBe('3.500,00');
+    expect(finishMoneyInput('12,5')).toBe('12,50');
+    expect(finishMoneyInput('')).toBe('');
+    expect(parseMoneyToCents(finishMoneyInput(maskMoneyInput('1234567,8')))).toBe(123456780);
   });
 });
