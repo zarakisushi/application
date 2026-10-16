@@ -30,7 +30,7 @@ export const DRE_GROUP_LABEL: Record<DreGroup, string> = {
   OUTROS: 'Outros',
 };
 
-export const FINANCE_ORIGINS = ['MANUAL', 'PEDIDO', 'ROYALTIES', 'AJUSTE', 'TRANSFERENCIA'] as const;
+export const FINANCE_ORIGINS = ['MANUAL', 'PEDIDO', 'ROYALTIES', 'AJUSTE', 'TRANSFERENCIA', 'ESTOQUE'] as const;
 export type FinanceOrigin = (typeof FINANCE_ORIGINS)[number];
 export const FINANCE_ORIGIN_LABEL: Record<FinanceOrigin, string> = {
   MANUAL: 'Manual',
@@ -38,6 +38,7 @@ export const FINANCE_ORIGIN_LABEL: Record<FinanceOrigin, string> = {
   ROYALTIES: 'Royalties',
   AJUSTE: 'Ajuste de saldo',
   TRANSFERENCIA: 'Transferência',
+  ESTOQUE: 'Compra de estoque',
 };
 
 /** Categorias com papel no sistema (não podem ser excluídas nem desativadas). */

@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: 'Relatórios' };
 const GROUP_HINT: Record<string, string> = {
   Vendas: 'Faturamento realizado = pedidos entregues, pela data do pedido (ou da festa/evento).',
   Financeiro: 'A partir dos lançamentos do Financeiro. Na Matriz, “Todas as unidades” consolida a rede.',
+  Estoque: 'Saldos, entradas e saídas, e perdas avaliadas pelo custo médio de compra.',
   Franquia: 'Visão de toda a rede — exclusivo da Matriz.',
   Governança: 'Construídos a partir da auditoria.',
 };

@@ -104,10 +104,10 @@
   <img class="logo" src="../../apps/web/src/assets/symbol.png" alt="" />
   <div class="brand">ZARAKI</div>
   <h1 class="title">Manual do Sistema<br />de Gestão</h1>
-  <div class="subtitle">Site, painel administrativo, financeiro e acompanhamento da rede: tudo o que o sistema da Zaraki Sushi faz até agora, explicado para quem usa no dia a dia.</div>
+  <div class="subtitle">Site, painel administrativo, estoque, financeiro e acompanhamento da rede: tudo o que o sistema da Zaraki Sushi faz até agora, explicado para quem usa no dia a dia.</div>
   <div class="rule"></div>
   <div class="subtitle" style="font-size:10.5pt">Matriz · Franquias · Equipe</div>
-  <div class="meta"><span>Zaraki Sushi — Goiânia</span><span>Versão de 15 de outubro de 2026</span></div>
+  <div class="meta"><span>Zaraki Sushi — Goiânia</span><span>Versão de 16 de outubro de 2026</span></div>
 </section>
 
 <!-- ============================== SUMÁRIO ============================== -->
@@ -125,13 +125,14 @@
     <li><span class="n">8</span><span>Cardápio</span><span class="d">Sabores, preço, custo e fotos</span></li>
     <li><span class="n">9</span><span>Cupons de desconto</span><span class="d">Porcentagem, valor, limites, exclusivos</span></li>
     <li><span class="n">10</span><span>Financeiro</span><span class="d">Fluxo de caixa, contas, DRE, saúde financeira, extratos</span></li>
-    <li><span class="n">11</span><span>Relatórios</span><span class="d">32 relatórios com exportação CSV</span></li>
-    <li><span class="n">12</span><span>Usuários e unidades</span><span class="d">Equipe e cadastro de franquias</span></li>
-    <li><span class="n">13</span><span>Auditoria</span><span class="d">Histórico à prova de adulteração</span></li>
-    <li><span class="n">14</span><span>Como a Matriz acompanha as unidades</span><span class="d">Ferramentas da rede e rotina sugerida</span></li>
-    <li><span class="n">15</span><span>Rotinas automáticas</span><span class="d">O que o sistema faz sozinho</span></li>
-    <li><span class="n">16</span><span>Situação atual e próximos passos</span><span class="d">O que falta para publicar</span></li>
-    <li><span class="n">17</span><span>Glossário</span><span class="d">Termos usados no sistema</span></li>
+    <li><span class="n">11</span><span>Estoque</span><span class="d">Insumos, tubos e materiais; compras, perdas, contagem, ficha técnica</span></li>
+    <li><span class="n">12</span><span>Relatórios</span><span class="d">36 relatórios com exportação CSV</span></li>
+    <li><span class="n">13</span><span>Usuários e unidades</span><span class="d">Equipe e cadastro de franquias</span></li>
+    <li><span class="n">14</span><span>Auditoria</span><span class="d">Histórico à prova de adulteração</span></li>
+    <li><span class="n">15</span><span>Como a Matriz acompanha as unidades</span><span class="d">Ferramentas da rede e rotina sugerida</span></li>
+    <li><span class="n">16</span><span>Rotinas automáticas</span><span class="d">O que o sistema faz sozinho</span></li>
+    <li><span class="n">17</span><span>Situação atual e próximos passos</span><span class="d">O que falta para publicar</span></li>
+    <li><span class="n">18</span><span>Glossário</span><span class="d">Termos usados no sistema</span></li>
   </ol>
 </section>
 
@@ -139,7 +140,7 @@
 <section class="chapter">
   <div class="kicker">Capítulo 1</div>
   <h1>Visão geral do sistema</h1>
-  <p class="lead">O sistema da Zaraki reúne em um só lugar o <strong>site</strong> onde o cliente faz o pedido e o <strong>painel administrativo</strong> onde a equipe acompanha pedidos, festas e eventos, clientes, cardápio, cupons, dinheiro e relatórios. Foi desenhado desde o início para uma <strong>rede de franquias</strong>: a Matriz e cada franqueado operam no mesmo sistema, cada um com seus próprios dados.</p>
+  <p class="lead">O sistema da Zaraki reúne em um só lugar o <strong>site</strong> onde o cliente faz o pedido e o <strong>painel administrativo</strong> onde a equipe acompanha pedidos, festas e eventos, clientes, cardápio, cupons, estoque, dinheiro e relatórios. Foi desenhado desde o início para uma <strong>rede de franquias</strong>: a Matriz e cada franqueado operam no mesmo sistema, cada um com seus próprios dados.</p>
 
   <h2>Como está organizado</h2>
   <div class="grid2">
@@ -148,13 +149,13 @@
   </div>
 
   <h2>Unidades: Matriz e franquias</h2>
-  <p>Cada unidade (a Matriz e cada franquia) tem <strong>dados próprios e separados</strong>: pedidos, clientes, cardápio, cupons, financeiro e equipe. A pessoa que trabalha numa franquia só enxerga aquela franquia. A administração da Matriz pode alternar entre as unidades e ver a rede inteira (capítulo 14).</p>
+  <p>Cada unidade (a Matriz e cada franquia) tem <strong>dados próprios e separados</strong>: pedidos, clientes, cardápio, cupons, estoque, financeiro e equipe. A pessoa que trabalha numa franquia só enxerga aquela franquia. A administração da Matriz pode alternar entre as unidades e ver a rede inteira (capítulo 15).</p>
 
   <h2>Garantias de segurança e histórico</h2>
   <p>Como a Zaraki pretende crescer como franquia, preservar a história e ter controle sobre cada mudança é fundamental. Por isso três regras são garantidas pelo <strong>próprio banco de dados</strong>, e não só pelas telas:</p>
   <table>
     <tr><th style="width:32%">Regra</th><th>O que significa na prática</th></tr>
-    <tr><td><strong>Nada é apagado de verdade</strong></td><td>"Excluir" sempre deixa o registro <em>inativo</em> (exclusão lógica). Pedidos, clientes, sabores, cupons, lançamentos, usuários e unidades podem ser restaurados. O banco recusa qualquer tentativa de apagar dados definitivamente.</td></tr>
+    <tr><td><strong>Nada é apagado de verdade</strong></td><td>"Excluir" sempre deixa o registro <em>inativo</em> (exclusão lógica). Pedidos, clientes, sabores, cupons, itens de estoque, lançamentos, usuários e unidades podem ser restaurados. O banco recusa qualquer tentativa de apagar dados definitivamente.</td></tr>
     <tr><td><strong>Toda mudança fica registrada</strong></td><td>Cada criação, alteração, exclusão e restauração vai para a <strong>Auditoria</strong> com quem fez, quando, de onde e o que mudou, campo a campo. Os registros formam uma corrente verificável: qualquer adulteração é detectada.</td></tr>
     <tr><td><strong>Isolamento entre unidades</strong></td><td>O banco só entrega a cada pessoa os dados da unidade em que ela está trabalhando. Mesmo um erro de programação não faria uma franquia ver os dados de outra.</td></tr>
   </table>
@@ -185,12 +186,14 @@
     <tr><th>O que a pessoa pode fazer</th><th class="c">Atendente</th><th class="c">Gerente</th><th class="c">Administrador</th><th class="c">Adm. da rede</th></tr>
     <tr><td>Ver e lançar pedidos, festas e eventos; cadastrar clientes</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Ver o cardápio</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Estoque: ver saldos, registrar perdas, consumo e contagem</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Excluir pedidos e clientes; editar o cardápio</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Criar e editar cupons</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Estoque: registrar compras, cadastrar itens, fichas técnicas, desfazer movimentações</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Financeiro: ver e lançar entradas e saídas</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Financeiro: contas, categorias, excluir, fechar mês, conferir saldo</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Relatórios da unidade</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
-    <tr><td>Excluir sabores e cupons; usuários; auditoria</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+    <tr><td>Excluir sabores, cupons e itens de estoque; cancelar compras; usuários; auditoria</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
     <tr><td>Unidades, relatórios da rede, gerar royalties</td><td class="c no">—</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td></tr>
   </table>
   <p class="muted">Quem tenta abrir uma tela sem permissão vê um aviso, e a tentativa fica registrada na Auditoria.</p>
@@ -245,6 +248,7 @@
   <ul>
     <li><strong>Resumo do dia:</strong> pedidos de hoje, pedidos aguardando confirmação e festas e eventos dos próximos 7 dias. Cada número leva à lista correspondente.</li>
     <li><strong>Financeiro</strong> (para quem tem acesso): saldo em caixa, contas vencidas e o que vence em 7 dias.</li>
+    <li><strong>Estoque:</strong> aviso dos itens abaixo do mínimo, com atalho para a lista de reposição.</li>
     <li><strong>Indicadores do mês:</strong> faturamento, pedidos entregues, ticket médio e clientes novos, comparados ao mesmo período do mês passado.</li>
     <li><strong>Gráficos:</strong> faturamento dos últimos 30 dias, vendas por tipo e sabores mais vendidos.</li>
     <li><strong>Próximas festas e eventos</strong> e atalhos para todas as telas.</li>
@@ -298,6 +302,7 @@
   <figure><img src="img/09-cardapio.jpg" alt="" /><figcaption>Sabores do cardápio, com preço e custo.</figcaption></figure>
   <ul>
     <li>Cada sabor tem <strong>preço de venda</strong>, <strong>custo</strong> (base do CMV e da margem), foto, descrição, marcação de "especial" e ordem de exibição.</li>
+    <li><strong>Ficha técnica:</strong> na ficha de cada sabor, informe quanto de cada item vai em um tubo (arroz, nori, salmão, tubo, tampa, adesivo...). O sistema calcula o custo do tubo pelo custo médio das compras e baixa o estoque sozinho a cada pedido entregue (capítulo 11).</li>
     <li>A <strong>foto</strong> é enviada pelo próprio painel. Fotos grandes de celular são reduzidas automaticamente antes do envio.</li>
     <li>Excluir um sabor tira-o do site, sem afetar pedidos antigos, e ele pode ser restaurado. Mudanças de preço e custo ficam no relatório "Histórico de preços e custos".</li>
   </ul>
@@ -348,7 +353,7 @@
   <figure><img src="img/12-fin-lancamentos.jpg" alt="" /><figcaption>Lançamentos com filtros e totais do período.</figcaption></figure>
   <ul>
     <li>Lista de todas as entradas e saídas, filtrável por período, tipo, situação (pago, em aberto, vencido), categoria, conta e origem, com os <strong>totais de entradas, saídas e resultado</strong> do filtro.</li>
-    <li><strong>Origens automáticas:</strong> vendas de pedidos pagos, royalties, ajustes de conferência e transferências entre contas. Esses lançamentos são protegidos: a correção é feita na origem (no pedido, por exemplo).</li>
+    <li><strong>Origens automáticas:</strong> vendas de pedidos pagos, royalties, <strong>compras de estoque</strong>, ajustes de conferência e transferências entre contas. Esses lançamentos são protegidos: a correção é feita na origem (no pedido ou na compra, por exemplo). A conta de uma compra de estoque pode ser paga normalmente pelo Financeiro.</li>
   </ul>
   <figure><img src="img/13-fin-nova-saida.jpg" alt="" /><figcaption>Nova saída: categoria, fornecedor, vencimento, competência, pagamento, repetição e comprovante.</figcaption></figure>
   <ul>
@@ -370,7 +375,7 @@
 
   <h2>Royalties</h2>
   <figure><img src="img/16-fin-royalties.jpg" alt="" /><figcaption>Royalties na visão da Matriz.</figcaption></figure>
-  <p>Todo dia, às 6h, o sistema gera a cobrança do <strong>mês anterior</strong> de cada franquia que tem percentual cadastrado: percentual × faturamento entregue no mês, com vencimento no dia definido no cadastro da unidade. Cada cobrança vira uma <strong>saída na franquia</strong> ("Royalties à Matriz") e uma <strong>entrada a receber na Matriz</strong>. Detalhes no capítulo 14.</p>
+  <p>Todo dia, às 6h, o sistema gera a cobrança do <strong>mês anterior</strong> de cada franquia que tem percentual cadastrado: percentual × faturamento entregue no mês, com vencimento no dia definido no cadastro da unidade. Cada cobrança vira uma <strong>saída na franquia</strong> ("Royalties à Matriz") e uma <strong>entrada a receber na Matriz</strong>. Detalhes no capítulo 15.</p>
 
   <h2>Contas, categorias, fechamento e extratos</h2>
   <figure><img src="img/17-fin-contas.jpg" alt="" /><figcaption>Contas da unidade com saldo, último extrato e ações.</figcaption></figure>
@@ -388,8 +393,59 @@
 <!-- ============================== 11 ============================== -->
 <section class="chapter">
   <div class="kicker">Capítulo 11</div>
+  <h1>Estoque</h1>
+  <p class="lead">O Estoque controla <strong>tudo o que a operação consome</strong>: os insumos da produção (arroz, nori, salmão, camarão, cream cheese...), os <strong>tubos, tampas, adesivos e sacolas</strong> do Push Pop, os <strong>panfletos e adesivos da marca</strong> e o material operacional (luvas, filme plástico). Cada unidade tem o <strong>seu próprio estoque</strong> e faz as suas compras: ao trocar de unidade no seletor, o estoque muda junto.</p>
+
+  <figure class="tall"><img src="img/28-estoque.jpg" alt="" /><figcaption>Estoque: valor parado, itens a repor, perdas do mês e o saldo de cada item.</figcaption></figure>
+
+  <h2>Itens</h2>
+  <ul>
+    <li>Cada item tem <strong>nome</strong>, <strong>categoria</strong> (Insumos de produção, Tubos e embalagens, Marketing, Operacional ou Outros), <strong>unidade de medida</strong> (kg, g, litro, ml, unidade, pacote, caixa, folha, rolo, metro), <strong>estoque mínimo</strong>, fornecedor habitual e a <strong>categoria do Financeiro</strong> em que as compras dele entram.</li>
+    <li>Para começar rápido, o botão <strong>"Usar a lista sugerida"</strong> cadastra os itens típicos do Push Pop, já ligados às categorias certas do Financeiro. Depois é só ajustar os mínimos.</li>
+    <li>A lista mostra o <strong>saldo</strong>, o mínimo, a situação (<span class="pill g">Em dia</span>, <span class="pill a">Abaixo do mínimo</span>, <span class="pill r">Zerado</span>), o <strong>custo médio</strong> e o <strong>valor em estoque</strong> de cada item. O filtro "Nível do estoque → Abaixo do mínimo" vira a <strong>lista de compras</strong>.</li>
+    <li>A ficha do item mostra o <strong>extrato de movimentações</strong> (entradas e saídas, com saldo), quem fez cada uma e o histórico de alterações.</li>
+  </ul>
+  <div class="box"><span class="t">Como o saldo é calculado</span><p>O saldo nunca é digitado: ele é a soma de todas as movimentações do item (compras, saídas pelos pedidos, perdas, consumo e ajustes de contagem). Por isso é sempre possível explicar de onde veio cada número.</p></div>
+
+  <h2>Compras: estoque e Financeiro de uma vez só</h2>
+  <figure><img src="img/29-estoque-compra.jpg" alt="" /><figcaption>Registrar compra: fornecedor, itens, quantidades e valores; a conta a pagar vai para o Financeiro.</figcaption></figure>
+  <ul>
+    <li>Informe o <strong>fornecedor</strong>, a data, o <strong>vencimento</strong> e, linha a linha, o item, a quantidade e o valor pago. Pode anexar a <strong>nota fiscal</strong> (foto ou PDF) e marcar "Já foi paga", escolhendo a conta.</li>
+    <li>Ao registrar: as quantidades <strong>entram no estoque</strong>, o <strong>custo médio</strong> de cada item é atualizado e a <strong>conta a pagar entra no Financeiro</strong>, separada pela categoria de cada item (peixe em "Insumos: peixes e frutos do mar", panfleto em "Marketing" etc.). Assim o CMV e a DRE já saem certos.</li>
+    <li>No Financeiro, essa conta aparece com a origem <strong>"Compra de estoque"</strong>: dá para pagá-la normalmente, mas não editá-la por lá. Para corrigir, o administrador <strong>cancela a compra</strong>, que tira os itens do estoque e estorna as contas, e registra de novo.</li>
+  </ul>
+
+  <h2>Baixa automática pela ficha técnica</h2>
+  <figure class="tall"><img src="img/31-ficha-tecnica.jpg" alt="" /><figcaption>Ficha técnica do sabor: quanto de cada item vai em um tubo e o custo calculado.</figcaption></figure>
+  <ul>
+    <li>Em <strong>Cardápio</strong>, na ficha de cada sabor, a seção <strong>Ficha técnica (1 tubo)</strong> diz quanto de cada item vai em um tubo, incluindo o tubo, a tampa e o adesivo de lacre.</li>
+    <li>Quando um pedido é marcado como <strong>Entregue</strong>, o sistema <strong>baixa do estoque</strong> a quantidade de cada item: tubos vendidos × ficha técnica. Se o pedido for editado, a baixa é recalculada; se voltar de etapa ou for cancelado, o estoque <strong>volta</strong>.</li>
+    <li>A ficha mostra o <strong>custo do tubo</strong> pelo custo médio das compras. O botão <strong>"Usar o custo da ficha no sabor"</strong> atualiza o custo do sabor, que alimenta a margem, o CMV por sabor e o semáforo financeiro.</li>
+  </ul>
+
+  <h2>Saídas, perdas e contagem</h2>
+  <figure><img src="img/30-estoque-contagem.jpg" alt="" /><figcaption>Contagem: digite o que foi contado e o sistema mostra a diferença antes de lançar.</figcaption></figure>
+  <ul>
+    <li><strong>Saída ou perda:</strong> registre o que estragou ou venceu (<strong>Perda</strong>), o que foi usado fora dos pedidos, como degustação ou ação de marketing (<strong>Consumo interno</strong>), ou uma entrada sem compra, como uma doação (<strong>Outra entrada</strong>).</li>
+    <li><strong>Contagem:</strong> conte o estoque físico e digite as quantidades. Para cada item, a tela mostra se <span class="pill g">confere</span> ou qual a diferença. Ao registrar, o sistema lança só a diferença, como <strong>ajuste de contagem</strong>, e o saldo passa a ser o contado. Faltas na contagem entram como perda nos relatórios.</li>
+    <li>Uma movimentação lançada errada pode ser <strong>desfeita</strong> pelo gerente na ficha do item. Ela some do saldo, mas continua no histórico.</li>
+  </ul>
+
+  <h2>Quem faz o quê</h2>
+  <table>
+    <tr><th style="width:24%">Papel</th><th>No estoque</th></tr>
+    <tr><td><strong>Atendente</strong></td><td>Vê os saldos, registra perdas, consumo e a contagem. Não registra compras nem cadastra itens.</td></tr>
+    <tr><td><strong>Gerente</strong></td><td>Tudo do atendente, mais compras, cadastro de itens, fichas técnicas e desfazer movimentações.</td></tr>
+    <tr><td><strong>Administrador</strong></td><td>Tudo, inclusive excluir itens e cancelar compras.</td></tr>
+  </table>
+  <div class="box tip"><span class="t">Unidades separadas</span><p>Cada franquia tem os próprios itens, saldos, compras e fichas, e o banco impede que uma unidade use itens, compras ou contas de outra. Não há transferência de estoque entre unidades: cada uma compra o seu. A Matriz acompanha o estoque de todas pelo relatório <strong>"Estoque da rede"</strong> (capítulo 15).</p></div>
+</section>
+
+<!-- ============================== 12 ============================== -->
+<section class="chapter">
+  <div class="kicker">Capítulo 12</div>
   <h1>Relatórios</h1>
-  <p>São <strong>32 relatórios</strong>, todos com filtro de período, gráfico, tabela e <strong>exportação em CSV</strong> (que abre no Excel). Cada exportação fica registrada na auditoria.</p>
+  <p>São <strong>36 relatórios</strong>, todos com filtro de período, gráfico, tabela e <strong>exportação em CSV</strong> (que abre no Excel). Cada exportação fica registrada na auditoria.</p>
   <figure><img src="img/22-relatorio-faturamento.jpg" alt="" /><figcaption>Exemplo: relatório de faturamento, com comparação ao período anterior.</figcaption></figure>
   <table>
     <tr><th style="width:18%">Grupo</th><th>Relatórios</th></tr>
@@ -398,15 +454,16 @@
     <tr><td><strong>Clientes</strong></td><td>Clientes novos × recorrentes · Recompra e frequência · Segmentação RFM (campanhas) · Melhores clientes (LTV) · Aniversariantes do mês · Vendas por bairro</td></tr>
     <tr><td><strong>Operação</strong></td><td>Funil e tempo por etapa · Cancelamentos · Pedidos do site não confirmados · Previsão de produção (tubos por dia nas festas e eventos) · Festas</td></tr>
     <tr><td><strong>Financeiro</strong></td><td>DRE gerencial · Fluxo de caixa · Despesas por categoria · Gastos por fornecedor · Contas a pagar e a receber por atraso</td></tr>
-    <tr><td><strong>Franquia</strong> (Matriz)</td><td>Ranking de unidades · Royalties estimados · Comparativo entre unidades · Financeiro da rede</td></tr>
+    <tr><td><strong>Estoque</strong></td><td>Posição do estoque (saldo, mínimo, custo médio e valor parado) · Entradas e saídas por item · Perdas e desperdício</td></tr>
+    <tr><td><strong>Franquia</strong> (Matriz)</td><td>Ranking de unidades · Royalties estimados · Comparativo entre unidades · Financeiro da rede · Estoque da rede</td></tr>
     <tr><td><strong>Governança</strong></td><td>Atividade por usuário · Exclusões e restaurações</td></tr>
   </table>
   <p class="muted">Faturamento realizado = pedidos entregues, pela data do pedido (ou da festa/evento).</p>
 </section>
 
-<!-- ============================== 12 ============================== -->
+<!-- ============================== 13 ============================== -->
 <section class="chapter">
-  <div class="kicker">Capítulo 12</div>
+  <div class="kicker">Capítulo 13</div>
   <h1>Usuários e unidades</h1>
   <h2>Usuários</h2>
   <figure><img src="img/23-usuarios.jpg" alt="" /><figcaption>Equipe com acesso à unidade.</figcaption></figure>
@@ -425,9 +482,9 @@
   </ul>
 </section>
 
-<!-- ============================== 13 ============================== -->
+<!-- ============================== 14 ============================== -->
 <section class="chapter">
-  <div class="kicker">Capítulo 13</div>
+  <div class="kicker">Capítulo 14</div>
   <h1>Auditoria</h1>
   <figure><img src="img/25-auditoria.jpg" alt="" /><figcaption>Auditoria com verificação de integridade.</figcaption></figure>
   <ul>
@@ -439,14 +496,14 @@
   </ul>
 </section>
 
-<!-- ============================== 14 ============================== -->
+<!-- ============================== 15 ============================== -->
 <section class="chapter">
-  <div class="kicker">Capítulo 14 · Para a Matriz</div>
+  <div class="kicker">Capítulo 15 · Para a Matriz</div>
   <h1>Como a Matriz acompanha as unidades</h1>
   <p class="lead">A Matriz tem duas formas de olhar a rede. Ela pode <strong>entrar em uma unidade</strong> e ver exatamente o que o franqueado vê. Ou pode <strong>olhar todas juntas</strong>, lado a lado ou somadas. Tudo isso é feito com o acesso de <strong>administração da rede</strong>.</p>
 
   <h2>1. Entrar numa unidade (o "olhar do franqueado")</h2>
-  <p>No <strong>seletor de unidade</strong>, no topo do painel, escolha a franquia. A partir daí, todas as telas mostram os dados daquela unidade: pedidos do dia, festas e eventos, clientes, cardápio, cupons, lançamentos, contas, extratos, DRE e relatórios. É a forma de fazer uma <strong>visita virtual</strong> à unidade, sem pedir nada ao franqueado. Para voltar, escolha a Matriz no seletor.</p>
+  <p>No <strong>seletor de unidade</strong>, no topo do painel, escolha a franquia. A partir daí, todas as telas mostram os dados daquela unidade: pedidos do dia, festas e eventos, clientes, cardápio, cupons, estoque, lançamentos, contas, extratos, DRE e relatórios. É a forma de fazer uma <strong>visita virtual</strong> à unidade, sem pedir nada ao franqueado. Para voltar, escolha a Matriz no seletor.</p>
   <div class="box tip"><span class="t">Tudo registrado</span><p>O que a Matriz alterar dentro de uma franquia fica na auditoria daquela franquia, com o nome de quem alterou. A rede inteira tem o mesmo nível de rastreabilidade.</p></div>
 
   <h2>2. Ver a rede inteira</h2>
@@ -457,11 +514,13 @@
     <tr><td><strong>Ranking de unidades</strong></td><td>Faturamento, pedidos, ticket e clientes de cada unidade, com o <strong>crescimento</strong> sobre o período anterior.</td></tr>
     <tr><td><strong>Comparativo entre unidades</strong></td><td>Participação de delivery, festas e eventos em cada unidade, ticket médio e sabor mais vendido.</td></tr>
     <tr><td><strong>Financeiro da rede</strong></td><td>Receita, resultado operacional, margem, CMV, saldo em caixa e contas vencidas de cada unidade, <strong>lado a lado</strong>.</td></tr>
+    <tr><td><strong>Estoque da rede</strong></td><td>Valor em estoque, itens a repor e perdas do período de cada unidade, <strong>lado a lado</strong>. Para ver item por item, entre na unidade pelo seletor ou rode "Posição do estoque" com "Todas as unidades".</td></tr>
     <tr><td><strong>Royalties estimados</strong></td><td>O percentual de cada franquia aplicado ao faturamento de qualquer período, útil para projeções.</td></tr>
     <tr><td><strong>Atividade por usuário</strong> e <strong>Exclusões e restaurações</strong></td><td>Quem fez o quê em cada unidade, e tudo o que foi excluído e restaurado. Ajuda a perceber uso anormal.</td></tr>
     <tr><td><strong>Auditoria</strong></td><td>Entrando na unidade pelo seletor, a Matriz consulta a auditoria daquela unidade. O escopo <strong>"Rede: logins e acessos"</strong> mostra os acessos de toda a rede, e "Verificar integridade" confere a trilha.</td></tr>
   </table>
   <figure><img src="img/21-rede-financeiro.jpg" alt="" /><figcaption>Financeiro da rede: cada unidade lado a lado.</figcaption></figure>
+  <figure><img src="img/32-rede-estoque.jpg" alt="" /><figcaption>Estoque da rede: valor parado, itens a repor e perdas de cada unidade.</figcaption></figure>
   <figure><img src="img/20-rede-ranking.jpg" alt="" /><figcaption>Ranking de unidades, com crescimento sobre o período anterior.</figcaption></figure>
 
   <h2>3. Royalties: do faturamento ao recebimento</h2>
@@ -484,7 +543,7 @@
   <h2>4. O que cada franqueado vê</h2>
   <ul>
     <li>Só os dados da própria unidade. Ele não vê outras franquias nem os números da Matriz, e o banco garante isso.</li>
-    <li>O seu cardápio, que nasceu da Matriz e pode ser ajustado, os seus cupons, a sua equipe e o seu financeiro.</li>
+    <li>O seu cardápio, que nasceu da Matriz e pode ser ajustado, os seus cupons, o seu estoque, a sua equipe e o seu financeiro.</li>
     <li>As cobranças de royalties que deve, com valor e vencimento.</li>
   </ul>
 
@@ -501,13 +560,14 @@
         <li>Ranking de unidades (últimos 7 dias): quem cresceu e quem caiu.</li>
         <li>Financeiro da rede: contas vencidas e saldo de cada unidade.</li>
         <li>Cancelamentos e motivos, por unidade.</li>
+        <li>Estoque da rede: itens a repor e perdas de cada unidade.</li>
         <li>Previsão de produção: compra de peixe da rede.</li>
       </ul></div>
     <div class="card"><h3>Todo início de mês</h3>
       <ul class="check">
         <li>Royalties: conferir as cobranças geradas e os pagamentos do mês anterior.</li>
         <li>Financeiro da rede e DRE (todas as unidades) do mês fechado: margem e CMV de cada unidade.</li>
-        <li>Pedir a cada unidade o extrato bancário e o fechamento do mês.</li>
+        <li>Pedir a cada unidade o extrato bancário, a contagem do estoque e o fechamento do mês.</li>
         <li>Margem e CMV por sabor: ajustes de preço e de ficha.</li>
       </ul></div>
     <div class="card"><h3>Sempre que necessário</h3>
@@ -519,41 +579,43 @@
   </div>
 </section>
 
-<!-- ============================== 15 ============================== -->
+<!-- ============================== 16 ============================== -->
 <section class="chapter">
-  <div class="kicker">Capítulo 15</div>
+  <div class="kicker">Capítulo 16</div>
   <h1>Rotinas automáticas</h1>
   <table>
     <tr><th style="width:28%">Rotina</th><th style="width:22%">Quando</th><th>O que faz</th></tr>
     <tr><td>Google Agenda</td><td>Logo após cada mudança; o que falhar é reenviado de hora em hora</td><td>Envia, atualiza e remove festas e eventos na agenda; tenta de novo o que falhou.</td></tr>
     <tr><td>Royalties</td><td>Todo dia, às 6h (Brasília)</td><td>Gera as cobranças do mês anterior das franquias, sem duplicar.</td></tr>
     <tr><td>Vendas no caixa</td><td>Na hora</td><td>Pedido pago vira entrada no caixa; cancelado ou desmarcado é estornado.</td></tr>
+    <tr><td>Baixa do estoque</td><td>Na hora</td><td>Pedido entregue baixa os itens pela ficha técnica de cada sabor; editado é recalculado; cancelado ou de volta a uma etapa anterior devolve ao estoque.</td></tr>
+    <tr><td>Compra no Financeiro</td><td>Na hora</td><td>Compra de estoque vira conta a pagar, por categoria; compra cancelada estorna as contas.</td></tr>
     <tr><td>Backup do banco</td><td>Toda noite</td><td>Cópia completa do banco, incluindo comprovantes e extratos, em armazenamento externo (Cloudflare R2).</td></tr>
     <tr><td>Verificação de configuração</td><td>Ao iniciar o sistema</td><td>Lista no registro do servidor as configurações que faltam e impede a publicação com configuração inválida.</td></tr>
     <tr><td>Saúde do sistema</td><td>Sob demanda</td><td>Endereço /api/health, para um monitor externo avisar se o site ou o banco caírem.</td></tr>
   </table>
 </section>
 
-<!-- ============================== 16 ============================== -->
+<!-- ============================== 17 ============================== -->
 <section class="chapter">
-  <div class="kicker">Capítulo 16</div>
+  <div class="kicker">Capítulo 17</div>
   <h1>Situação atual e próximos passos</h1>
-  <p>Todas as funcionalidades deste manual estão prontas e testadas: 52 testes automáticos simulam o uso real do site e do painel, e 198 testes conferem as regras de negócio e o banco de dados. O sistema roda hoje no ambiente local. Para colocá-lo no ar, faltam itens que dependem da Zaraki:</p>
+  <p>Todas as funcionalidades deste manual estão prontas e testadas: 58 testes automáticos simulam o uso real do site e do painel, e 237 testes conferem as regras de negócio, o banco de dados e as integrações. O sistema já está publicado na Vercel (plano Pro, região de São Paulo) com o banco Neon, ainda protegido por login da Vercel enquanto o domínio não é configurado. Faltam itens que dependem da Zaraki:</p>
   <table>
     <tr><th style="width:5%">#</th><th style="width:35%">Item</th><th>O que é preciso</th></tr>
-    <tr><td>1</td><td>Guardar a versão atual</td><td>Autorizar o registro (commit) de todo o trabalho no repositório.</td></tr>
-    <tr><td>2</td><td>Hospedagem e banco</td><td>Contas na Vercel (plano Pro) e no Neon (Postgres). Passo a passo em <em>docs/deploy.md</em>.</td></tr>
-    <tr><td>3</td><td>Domínio</td><td>Endereço do site (ex.: zarakisushi.com.br).</td></tr>
-    <tr><td>4</td><td>Google Agenda</td><td>Conta de serviço com acesso à agenda zarakisushigo@gmail.com (<em>docs/google-agenda.md</em>).</td></tr>
-    <tr><td>5</td><td>Backup</td><td>Bucket no Cloudflare R2 e segredos no GitHub.</td></tr>
-    <tr><td>6</td><td>Dados reais</td><td>Custo de cada sabor; saldos iniciais reais das contas; percentual e vencimento dos royalties de cada franquia; primeiro administrador e usuários da equipe.</td></tr>
+    <tr><td>1</td><td>Guardar a versão atual</td><td>Autorizar o registro (commit) e a publicação do trabalho mais recente, incluindo o Estoque.</td></tr>
+    <tr><td>2</td><td>Domínio e abertura ao público</td><td>Endereço do site (ex.: zarakisushi.com.br) e liberar o acesso público na Vercel. Passo a passo em <em>docs/deploy.md</em>.</td></tr>
+    <tr><td>3</td><td>Google Agenda</td><td>Conta de serviço com acesso à agenda zarakisushigo@gmail.com (<em>docs/google-agenda.md</em>).</td></tr>
+    <tr><td>4</td><td>Backup</td><td>Bucket no Cloudflare R2 e segredos no GitHub.</td></tr>
+    <tr><td>5</td><td>Dados reais</td><td>Saldos iniciais reais das contas; percentual e vencimento dos royalties de cada franquia; usuários da equipe.</td></tr>
+    <tr><td>6</td><td>Estoque inicial</td><td>Cadastrar os itens (ou usar a lista sugerida) e ajustar os mínimos; fazer a <strong>primeira contagem</strong> para lançar os saldos atuais; montar a <strong>ficha técnica real</strong> de cada sabor e usar o custo da ficha no cardápio.</td></tr>
     <tr><td>7</td><td>Opcional</td><td>Ajustar as faixas do semáforo financeiro (CMV, margem, reserva) à realidade da Zaraki.</td></tr>
   </table>
 </section>
 
-<!-- ============================== 17 ============================== -->
+<!-- ============================== 18 ============================== -->
 <section class="chapter">
-  <div class="kicker">Capítulo 17</div>
+  <div class="kicker">Capítulo 18</div>
   <h1>Glossário</h1>
   <table>
     <tr><th style="width:26%">Termo</th><th>Significado</th></tr>
@@ -573,6 +635,10 @@
     <tr><td>Curva ABC</td><td>Classificação dos sabores: A = 80% do faturamento, B = os 15% seguintes, C = o restante.</td></tr>
     <tr><td>RFM</td><td>Segmentação de clientes por Recência, Frequência e Valor, útil para campanhas.</td></tr>
     <tr><td>Royalties</td><td>Percentual do faturamento que a franquia paga à Matriz.</td></tr>
+    <tr><td>Ficha técnica</td><td>Quanto de cada item de estoque vai em um tubo do sabor. Base da baixa automática e do custo do tubo.</td></tr>
+    <tr><td>Custo médio</td><td>Valor pago nas compras do item dividido pela quantidade comprada. Usado para avaliar o estoque e as perdas.</td></tr>
+    <tr><td>Estoque mínimo</td><td>Quantidade abaixo da qual o item entra na lista de reposição.</td></tr>
+    <tr><td>Contagem (inventário)</td><td>Conferência física do estoque; o sistema lança só a diferença.</td></tr>
     <tr><td>Fechamento do mês</td><td>Trava que impede mudar os números de um mês já conferido.</td></tr>
   </table>
   <p class="muted" style="margin-top:8mm">Manual gerado a partir do próprio sistema. As telas mostram dados de demonstração. Para atualizar este documento, veja <em>docs/manual/LEIA-ME.md</em>.</p>

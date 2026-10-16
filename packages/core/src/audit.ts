@@ -44,6 +44,10 @@ export const AUDIT_ENTITY_LABEL: Record<string, string> = {
   royalty_charges: 'Cobrança de royalties',
   finance_closings: 'Fechamento do mês',
   finance_statements: 'Extrato bancário',
+  stock_items: 'Item de estoque',
+  stock_movements: 'Movimentação de estoque',
+  stock_purchases: 'Compra de estoque',
+  product_recipes: 'Ficha técnica',
   users: 'Usuário',
   accounts: 'Credencial de acesso',
   memberships: 'Acesso à unidade',
@@ -54,7 +58,7 @@ export const AUDIT_ENTITY_LABEL: Record<string, string> = {
 };
 
 /** Campos técnicos que não ajudam a entender a mudança. */
-const HIDDEN = new Set(['id', 'tenant_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'order_id', 'user_id', 'customer_id', 'product_id', 'account_id', 'provider_id', 'google_event_id', 'coupon_id', 'category_id', 'transfer_id', 'series_id', 'royalty_charge_id', 'matriz_tenant_id', 'franchise_entry_id', 'matriz_entry_id', 'adjustment_entry_id']);
+const HIDDEN = new Set(['id', 'tenant_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'order_id', 'user_id', 'customer_id', 'product_id', 'account_id', 'provider_id', 'google_event_id', 'coupon_id', 'category_id', 'transfer_id', 'series_id', 'royalty_charge_id', 'matriz_tenant_id', 'franchise_entry_id', 'matriz_entry_id', 'adjustment_entry_id', 'item_id', 'purchase_id', 'finance_category_id']);
 
 const FIELD_LABEL: Record<string, string> = {
   status: 'Situação',
@@ -129,6 +133,12 @@ const FIELD_LABEL: Record<string, string> = {
   cmv: 'Entra no CMV',
   month: 'Mês',
   statement_date: 'Data do extrato',
+  min_qty: 'Estoque mínimo',
+  unit: 'Unidade',
+  supplier: 'Fornecedor',
+  occurred_on: 'Data',
+  purchased_on: 'Data da compra',
+  finance_entry_ids: 'Lançamentos no financeiro',
   balance_cents: 'Saldo do extrato',
   attachment_ids: 'Arquivos',
   revenue_cents: 'Faturamento',

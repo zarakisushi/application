@@ -5,4 +5,5 @@ export * from './catalog';
 export * from './coupons';
 export * from './orders';
 export * from './finance';
+export * from './stock';
 export * from './audit';

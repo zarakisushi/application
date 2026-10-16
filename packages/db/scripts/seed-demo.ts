@@ -9,6 +9,7 @@ import { withContext } from '../src/context';
 import { addDays, addMonths } from '@zaraki/core';
 import type { Tx } from '../src/client';
 import { backfillOrderFinance, ensureFinanceDefaults } from '../src/finance';
+import { backfillOrderStock, createStockMovement, createStockPurchase, createSuggestedStockItems, listStockItems, saveRecipe } from '../src/stock';
 import { calendarSyncJobs, customers, financeAccounts, financeCategories, financeEntries, orderCounters, orderItems, orders, orderStageHistory, products, tenants } from '../src/schema';
 
 const url = requireEnv('DATABASE_URL');
@@ -173,6 +174,7 @@ await withContext({ platformAdmin: true, actorLabel: 'demo', allowBackdate: true
   const entries = await backfillOrderFinance(tx);
   console.log(`Financeiro: ${entries} vendas lançadas no caixa.`);
   console.log(`Financeiro: ${await seedDemoExpenses(tx, tenant.id, tz)} despesas de demonstração.`);
+  console.log(`Estoque: ${await seedDemoStock(tx, tenant.id, tz)} itens com fichas técnicas, compras e baixas.`);
   console.log(`Demonstração criada: ${people.length} clientes e ${created} pedidos em ${tenant.name}.`);
 }, db);
 
@@ -274,4 +276,63 @@ async function seedDemoExpenses(tx: Tx, tenantId: string, tz: string) {
 
   for (let i = 0; i < rows.length; i += 200) await tx.insert(financeEntries).values(rows.slice(i, i + 200));
   return rows.length;
+}
+
+/**
+ * Estoque de demonstração: itens sugeridos, fichas técnicas dos sabores, baixa dos pedidos entregues e uma
+ * compra que repõe o consumo (alguns itens ficam abaixo do mínimo de propósito), mais algumas perdas.
+ */
+async function seedDemoStock(tx: Tx, tenantId: string, tz: string) {
+  const [already] = await tx.execute<{ n: number }>(sql`select count(*)::int as n from stock_items where tenant_id = ${tenantId}`).then((r) => r.rows);
+  if (already!.n) return 0;
+  await createSuggestedStockItems(tx, tenantId);
+  const items = (await listStockItems(tx, tenantId, { pageSize: 1000 })).rows;
+  const id = (name: string) => items.find((i) => i.name === name)!.id;
+  const base = [
+    { itemId: id('Arroz para sushi'), qty: 0.12 },
+    { itemId: id('Alga nori'), qty: 1 },
+    { itemId: id('Vinagre de arroz'), qty: 0.01 },
+    { itemId: id('Tubo Push Pop'), qty: 1 },
+    { itemId: id('Tampa do tubo'), qty: 1 },
+    { itemId: id('Adesivo de lacre'), qty: 1 },
+    { itemId: id('Shoyu (sachê)'), qty: 1 },
+  ];
+  const extra: Record<string, { itemId: string; qty: number }[]> = {
+    'uramaki-salmao-cream-cheese': [{ itemId: id('Salmão'), qty: 0.06 }, { itemId: id('Cream cheese'), qty: 0.025 }],
+    'uramaki-salmao-manga': [{ itemId: id('Salmão'), qty: 0.06 }, { itemId: id('Manga'), qty: 0.03 }],
+    'uramaki-camarao-cream-cheese': [{ itemId: id('Camarão'), qty: 0.05 }, { itemId: id('Cream cheese'), qty: 0.025 }],
+    'uramaki-especial-salmao-camarao': [{ itemId: id('Salmão'), qty: 0.05 }, { itemId: id('Camarão'), qty: 0.04 }, { itemId: id('Gergelim'), qty: 0.003 }],
+  };
+  const menu = await tx.select().from(products).where(and(eq(products.tenantId, tenantId), eq(products.status, true)));
+  for (const p of menu) await saveRecipe(tx, tenantId, p.id, { lines: [...base, ...(extra[p.slug] ?? [{ itemId: id('Salmão'), qty: 0.06 }])] });
+  await backfillOrderStock(tx, tenantId);
+
+  // Compra recente que cobre o consumo; alguns itens ficam abaixo do mínimo para o painel mostrar o alerta.
+  const today = todayInZone(tz);
+  const PRICE: Record<string, number> = { kg: 0, folha: 45, un: 55, l: 1200, cx: 3500, rolo: 2900 };
+  const unitPrice: Record<string, number> = { 'Salmão': 9200, 'Camarão': 7800, 'Arroz para sushi': 1450, 'Cream cheese': 4200, 'Manga': 900, 'Gergelim': 3800, 'Panfleto': 18, 'Adesivo da marca': 25, 'Sacola para delivery': 60 };
+  const short = new Set(['Camarão', 'Adesivo de lacre', 'Panfleto']);
+  const lines = [];
+  for (const i of (await listStockItems(tx, tenantId, { pageSize: 1000 })).rows) {
+    const target = i.minQty * (short.has(i.name) ? 0.6 : 1.8);
+    const qty = Math.round((Math.max(0, -i.balance) + target) * 100) / 100;
+    if (qty <= 0) continue;
+    const cents = Math.max(100, Math.round(qty * (unitPrice[i.name] ?? PRICE[i.unit] ?? 100)));
+    lines.push({ itemId: i.id, qty, totalCents: cents });
+  }
+  await createStockPurchase(tx, tenantId, {
+    supplier: 'Atacado Oriental (demonstração)',
+    purchasedOn: addDays(today, -3),
+    dueDate: addDays(today, 7),
+    paidOn: null,
+    accountId: null,
+    paymentMethod: null,
+    notes: 'demo',
+    attachmentId: null,
+    paid: false,
+    lines,
+  });
+  await createStockMovement(tx, tenantId, { itemId: id('Salmão'), kind: 'PERDA', qty: 0.4, occurredOn: addDays(today, -2), notes: 'Peixe passou da validade (demo)' });
+  await createStockMovement(tx, tenantId, { itemId: id('Tubo Push Pop'), kind: 'PERDA', qty: 12, occurredOn: addDays(today, -1), notes: 'Tubos danificados no transporte (demo)' });
+  return items.length;
 }

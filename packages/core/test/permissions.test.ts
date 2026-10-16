@@ -23,13 +23,15 @@ describe('permissões por papel', () => {
     }
   });
 
-  it('ATENDENTE cria e edita pedidos e clientes, sem excluir e sem relatórios', () => {
+  it('ATENDENTE cria e edita pedidos e clientes e registra no estoque, sem excluir e sem relatórios', () => {
     expect(allowed('ATENDENTE')).toEqual([
       'orders:read',
       'orders:write',
       'customers:read',
       'customers:write',
       'products:read',
+      'stock:read',
+      'stock:write',
     ]);
   });
 
