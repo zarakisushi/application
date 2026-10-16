@@ -21,6 +21,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Field, FormError, useServerForm, type ActionResult } from '../form';
+import { MoneyInput } from '@/components/ui/money-input';
 
 type Action = (form: FormData) => Promise<ActionResult>;
 
@@ -103,13 +104,7 @@ export function AccountSheet({ account, action, trigger, today }: { account?: Ac
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Saldo inicial (R$)" htmlFor="acc-opening" error={errors.openingBalance} hint="Negativo com “-”.">
-              <Input
-                id="acc-opening"
-                name="openingBalance"
-                inputMode="decimal"
-                defaultValue={account ? `${account.openingBalanceCents < 0 ? '-' : ''}${centsToInput(Math.abs(account.openingBalanceCents))}` : ''}
-                placeholder="0,00"
-              />
+              <MoneyInput id="acc-opening" name="openingBalance" allowNegative defaultValue={account ? `${account.openingBalanceCents < 0 ? '-' : ''}${centsToInput(Math.abs(account.openingBalanceCents))}` : ''} placeholder="0,00" />
             </Field>
             <Field label="Na data" htmlFor="acc-openingDate" error={errors.openingDate}>
               <Input id="acc-openingDate" name="openingDate" type="date" defaultValue={account?.openingDate ?? today} required />
@@ -233,7 +228,7 @@ export function TransferSheet({ accounts, action, trigger, today }: { accounts: 
           ))}
           <div className="grid grid-cols-2 gap-4">
             <Field label="Valor (R$)" htmlFor="tr-amount" error={errors.amount}>
-              <Input id="tr-amount" name="amount" inputMode="decimal" placeholder="0,00" required />
+              <MoneyInput id="tr-amount" name="amount" placeholder="0,00" required />
             </Field>
             <Field label="Data" htmlFor="tr-date" error={errors.date}>
               <Input id="tr-date" name="date" type="date" defaultValue={today} required />
@@ -260,7 +255,7 @@ export function ReconcileSheet({ account, action, trigger }: { account: { name: 
     >
       {(errors) => (
         <Field label="Saldo real hoje (R$)" htmlFor="realBalance" error={errors.realBalance} hint="Negativo com “-”.">
-          <Input id="realBalance" name="realBalance" inputMode="decimal" placeholder="0,00" required autoFocus />
+          <MoneyInput id="realBalance" name="realBalance" allowNegative placeholder="0,00" required autoFocus />
         </Field>
       )}
     </FormSheet>

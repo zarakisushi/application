@@ -29,3 +29,29 @@ export const centsToInput = (cents: number) => (cents / 100).toFixed(2).replace(
 
 /** Código de cupom como o sistema guarda: maiúsculas, sem espaços. */
 export const normalizeCouponCode = (code: string) => code.trim().toUpperCase().replace(/\s+/g, '');
+
+/**
+ * Máscara de reais enquanto a pessoa digita: "3500" → "3.500", "3500,5" → "3.500,5", "12.5" → "12,5".
+ * Ponto é separador de milhar (inserido sozinho); a vírgula abre os centavos (até 2 casas).
+ * O resultado continua aceito por `parseMoneyToCents`.
+ */
+export function maskMoneyInput(raw: string, opts: { allowNegative?: boolean } = {}): string {
+  const negative = !!opts.allowNegative && raw.trim().startsWith('-');
+  let s = raw.replace(/[^\d.,]/g, '');
+  // Sem vírgula, ".5" ou ".50" no fim só pode ser decimal digitado com ponto (milhar sempre tem 3 dígitos).
+  if (!s.includes(',')) s = s.replace(/\.(\d{1,2})$/, ',$1');
+  const comma = s.indexOf(',');
+  const intDigits = (comma === -1 ? s : s.slice(0, comma)).replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  const decDigits = comma === -1 ? null : s.slice(comma + 1).replace(/\D/g, '').slice(0, 2);
+  const sign = negative ? '-' : '';
+  if (!intDigits && decDigits === null) return sign;
+  const grouped = (intDigits || '0').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${sign}${grouped}${decDigits === null ? '' : `,${decDigits}`}`;
+}
+
+/** Ao sair do campo: completa os centavos ("3.500" → "3.500,00", "12,5" → "12,50"). */
+export function finishMoneyInput(value: string): string {
+  if (!value || value === '-') return '';
+  const [int, dec = ''] = value.split(',');
+  return `${int},${dec.padEnd(2, '0')}`;
+}

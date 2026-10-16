@@ -43,7 +43,11 @@ test('saída recorrente: aluguel em 3 meses, pagar o primeiro e ver o saldo da c
   // Espera a navegação terminar: preencher antes disso perderia o que foi digitado.
   await page.waitForURL(/novo\?tipo=SAIDA/);
   await page.getByLabel('Descrição').fill('Aluguel da loja');
-  await page.getByLabel('Valor (R$)').fill('3.500,00');
+  // Máscara de reais: digitando "3500" aparece "3.500"; ao sair do campo, completa "3.500,00".
+  await page.getByLabel('Valor (R$)').pressSequentially('3500');
+  await expect(page.getByLabel('Valor (R$)')).toHaveValue('3.500');
+  await page.getByLabel('Descrição').click();
+  await expect(page.getByLabel('Valor (R$)')).toHaveValue('3.500,00');
   await choose(page, 'Categoria', 'Aluguel');
   await page.getByLabel('Fornecedor (opcional)').fill('Imobiliária Centro');
   await choose(page, 'Repetir', 'Repete todo mês');
@@ -77,6 +81,8 @@ test('saída recorrente: aluguel em 3 meses, pagar o primeiro e ver o saldo da c
   await page.goto('/admin/financeiro/lancamentos?q=Aluguel+da+loja&periodo=tudo');
   await expect(page.getByRole('row', { name: /Aluguel da loja/ })).toHaveCount(3);
   await expect(page.getByTestId('total-saídas')).toContainText('R$ 10.500,00');
+  await expect(page.getByRole('columnheader', { name: 'Fornecedor / cliente' })).toBeVisible();
+  await expect(page.getByRole('row', { name: /Aluguel da loja/ }).first().getByRole('cell').nth(2)).toHaveText('Imobiliária Centro');
   await page.screenshot({ path: 'test-results/financeiro-lista.png', fullPage: true });
 });
 
@@ -283,7 +289,8 @@ test('royalties: a Matriz gera a cobrança do mês passado e a franquia vê o qu
   const row = page.getByRole('row', { name: /Zaraki Sushi — Royalties/ });
   await expect(row).toContainText('R$ 10.000,00');
   await expect(row).toContainText('R$ 600,00');
-  await expect(row).toContainText('Em aberto');
+  // Em aberto ou já vencida, conforme o dia em que o teste roda (o vencimento é o dia 15).
+  await expect(row).toContainText(/Em aberto|Vencido/);
   await page.screenshot({ path: 'test-results/financeiro-royalties.png', fullPage: true });
 
   // De novo: não duplica.
