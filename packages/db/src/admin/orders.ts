@@ -11,6 +11,7 @@ import {
 import { and, asc, desc, eq, gte, ilike, inArray, lt, ne, or, sql, type SQL } from 'drizzle-orm';
 import type { Tx } from '../client';
 import { syncOrderFinance } from '../finance/orders';
+import { syncOrderStock } from '../stock/recipes';
 import { applyCoupon, enqueueCalendarSync, orderTotal, type TenantRef } from '../orders';
 import { coupons, customers, orderItems, orders, orderStageHistory, products, users } from '../schema';
 import { contains, paging, statusWhere, toPage, type ListParams } from './common';
@@ -252,6 +253,7 @@ export async function updateOrder(tx: Tx, tenant: TenantRef, id: string, input: 
     else if (isScheduled(order.type)) await enqueueCalendarSync(tx, updated!, 'DELETE');
   }
   await syncOrderFinance(tx, id);
+  await syncOrderStock(tx, id);
   return updated!;
 }
 
@@ -305,6 +307,7 @@ export async function changeOrderStage(tx: Tx, tenantId: string, id: string, to:
     else if (order.stage === 'CANCELADO') await enqueueCalendarSync(tx, updated!, 'UPSERT');
   }
   await syncOrderFinance(tx, id);
+  await syncOrderStock(tx, id);
   return updated!;
 }
 
@@ -317,6 +320,7 @@ export async function setOrderStatus(tx: Tx, tenantId: string, id: string, statu
     await enqueueCalendarSync(tx, updated!, status ? 'UPSERT' : 'DELETE');
   }
   await syncOrderFinance(tx, id);
+  await syncOrderStock(tx, id);
   return updated!;
 }
 
@@ -338,5 +342,6 @@ export async function setOrderPayment(tx: Tx, tenantId: string, id: string, paym
     .where(eq(orders.id, id))
     .returning();
   await syncOrderFinance(tx, id);
+  await syncOrderStock(tx, id);
   return updated!;
 }

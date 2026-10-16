@@ -2,8 +2,10 @@
 
 Site do Push Pop Sushi e plataforma de gestão da rede Zaraki (Matriz e franqueados): pedidos do site
 gravados e enviados ao WhatsApp, painel `/admin` com pedidos, festas e eventos (sincronizados com a Google
-Agenda), clientes, cardápio, cupons, financeiro (fluxo de caixa, contas a pagar e receber, DRE, saúde
-financeira, royalties e fechamento de mês), usuários, unidades, auditoria à prova de adulteração e relatórios.
+Agenda), clientes, cardápio, cupons, estoque (insumos, tubos e materiais, com compras integradas ao financeiro e
+baixa automática pela ficha técnica dos sabores), financeiro (fluxo de caixa, contas a pagar e receber, DRE,
+saúde financeira, royalties e fechamento de mês), usuários, unidades, auditoria à prova de adulteração e
+relatórios.
 
 ## Estrutura
 
@@ -12,7 +14,7 @@ apps/web               Next.js 16: landing (src/app/(site)), painel (src/app/(ad
 packages/core          Regras de negócio puras: validações, preços, permissões, formatos, relatórios (CSV)
 packages/db            Banco: schema Drizzle, migrations (segurança no SQL), consultas, relatórios
 packages/integrations  Google Agenda (cliente, agenda simulada e sincronizador)
-docs/                  Publicação, backup e Google Agenda
+docs/                  Publicação, backup, Google Agenda e manual do sistema (docs/manual, em PDF)
 ```
 
 Regras garantidas pelo próprio Postgres: **exclusão só lógica** (`status = false`; DELETE é bloqueado),

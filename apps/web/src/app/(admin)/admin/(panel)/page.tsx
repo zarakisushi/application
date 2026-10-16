@@ -1,6 +1,6 @@
 import { formatReportValue, todayInZone } from '@zaraki/core';
-import { openSummary, totalBalance, withContext } from '@zaraki/db';
-import { CalendarDays, ClipboardList, Hourglass, Landmark } from 'lucide-react';
+import { openSummary, stockSummary, totalBalance, withContext } from '@zaraki/db';
+import { Boxes, CalendarDays, ClipboardList, Hourglass, Landmark } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CalendarSyncBadge, TypeBadge } from '@/components/admin/list';
@@ -42,6 +42,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         open: await openSummary(tx, ctx.tenant.id, todayInZone(timezone)),
       }))
     : null;
+  // Itens do estoque abaixo do mínimo (para quem vê o estoque).
+  const stock = ctx.can('stock:read')
+    ? await withContext(ctx.db, (tx) => stockSummary(tx, ctx.tenant.id, `${todayInZone(timezone).slice(0, 7)}-01`))
+    : null;
   const shortcuts = ALL_NAV_ITEMS.filter((i) => i.href !== '/admin' && (!i.permission || ctx.can(i.permission)));
 
   return (
@@ -72,6 +76,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </Link>
           ))}
         </section>
+      )}
+
+      {stock && stock.toRestock > 0 && (
+        <Link href="/admin/estoque?situacao=repor" className="group" data-testid="home-stock">
+          <Card className="border-amber-500/40 transition-colors group-hover:border-brand-gold">
+            <CardHeader className="flex flex-row items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-2">
+                <Boxes className="size-5 text-amber-700" /> {stock.toRestock} {stock.toRestock === 1 ? 'item do estoque precisa' : 'itens do estoque precisam'} de reposição
+              </CardTitle>
+              <span className="text-sm underline">Ver itens</span>
+            </CardHeader>
+          </Card>
+        </Link>
       )}
 
       {finance && (

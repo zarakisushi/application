@@ -179,12 +179,14 @@ export async function createEntries(tx: Tx, tenantId: string, input: FinanceEntr
   return rows;
 }
 
-async function loadEditable(tx: Tx, tenantId: string, id: string) {
+/** `payment`: só registrar/desfazer pagamento (permitido também nas compras de estoque). */
+async function loadEditable(tx: Tx, tenantId: string, id: string, opts: { payment?: boolean } = {}) {
   const [entry] = await tx.select().from(financeEntries).where(and(eq(financeEntries.tenantId, tenantId), eq(financeEntries.id, id)));
   if (!entry) throw new DomainError('Lançamento não encontrado.');
   if (!entry.status) throw new DomainError('Restaure o lançamento antes de alterá-lo.');
   if (entry.origin === 'PEDIDO') throw new DomainError('Este lançamento vem de um pedido: altere o pedido (valor, pagamento ou cancelamento).');
   if (entry.origin === 'TRANSFERENCIA') throw new DomainError('Transferências não são editadas: exclua e lance de novo.');
+  if (entry.origin === 'ESTOQUE' && !opts.payment) throw new DomainError('Este lançamento vem de uma compra de estoque: para corrigir, cancele a compra no Estoque e lance de novo.');
   return entry;
 }
 
@@ -246,7 +248,7 @@ export async function updateEntry(tx: Tx, tenantId: string, id: string, input: F
 
 /** Marca como pago/recebido. */
 export async function payEntry(tx: Tx, tenantId: string, id: string, input: PayEntryInput) {
-  const entry = await loadEditable(tx, tenantId, id);
+  const entry = await loadEditable(tx, tenantId, id, { payment: true });
   if (entry.paidOn) throw new DomainError('Este lançamento já está pago.');
   await assertAccount(tx, tenantId, input.accountId, { mustBeActive: true });
   const [row] = await tx
@@ -259,7 +261,7 @@ export async function payEntry(tx: Tx, tenantId: string, id: string, input: PayE
 
 /** Desfaz o pagamento (o lançamento volta a ficar em aberto). */
 export async function unpayEntry(tx: Tx, tenantId: string, id: string) {
-  const entry = await loadEditable(tx, tenantId, id);
+  const entry = await loadEditable(tx, tenantId, id, { payment: true });
   if (!entry.paidOn) return entry;
   const [row] = await tx.update(financeEntries).set({ paidOn: null }).where(eq(financeEntries.id, id)).returning();
   return row!;
@@ -271,6 +273,7 @@ export async function setEntryStatus(tx: Tx, tenantId: string, id: string, statu
   if (!entry) throw new DomainError('Lançamento não encontrado.');
   if (entry.origin === 'PEDIDO') throw new DomainError('Este lançamento vem de um pedido: para estornar, desmarque o pagamento ou cancele o pedido.');
   if (entry.origin === 'ROYALTIES') throw new DomainError('Lançamento de royalties: para corrigir, use "Recalcular" na tela de Royalties.');
+  if (entry.origin === 'ESTOQUE') throw new DomainError('Este lançamento vem de uma compra de estoque: para excluir, cancele a compra no Estoque.');
   if (entry.status === status) return entry;
   const where = entry.transferId ? and(eq(financeEntries.tenantId, tenantId), eq(financeEntries.transferId, entry.transferId)) : eq(financeEntries.id, id);
   const rows = await tx.update(financeEntries).set({ status }).where(where).returning();

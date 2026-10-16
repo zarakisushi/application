@@ -4,6 +4,7 @@ import {
   CalendarDays,
   ChartColumn,
   ArrowLeftRight,
+  Boxes,
   CalendarClock,
   ChartNoAxesCombined,
   ClipboardList,
@@ -37,6 +38,7 @@ export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { href: '/admin/clientes', label: 'Clientes', icon: Users, permission: 'customers:read' },
       { href: '/admin/cardapio', label: 'Cardápio', icon: UtensilsCrossed, permission: 'products:read' },
       { href: '/admin/cupons', label: 'Cupons', icon: TicketPercent, permission: 'coupons:read' },
+      { href: '/admin/estoque', label: 'Estoque', icon: Boxes, permission: 'stock:read' },
     ],
   },
   {

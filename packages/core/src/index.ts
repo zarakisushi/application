@@ -14,3 +14,4 @@ export * from './reports';
 export * from './coupons';
 export * from './finance';
 export * from './finance-health';
+export * from './stock';

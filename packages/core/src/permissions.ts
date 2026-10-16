@@ -23,6 +23,10 @@ export const PERMISSIONS = [
   'finance:read',
   'finance:write',
   'finance:manage',
+  'stock:read',
+  'stock:write',
+  'stock:manage',
+  'stock:delete',
   'users:manage',
   'reports:read',
   'audit:read',
@@ -45,9 +49,12 @@ const GRANTS: Record<Role, readonly Permission[]> = {
     'coupons:write',
     'finance:read',
     'finance:write',
+    'stock:read',
+    'stock:write',
+    'stock:manage',
     'reports:read',
   ],
-  ATENDENTE: ['orders:read', 'orders:write', 'customers:read', 'customers:write', 'products:read'],
+  ATENDENTE: ['orders:read', 'orders:write', 'customers:read', 'customers:write', 'products:read', 'stock:read', 'stock:write'],
 };
 
 export type Actor = {

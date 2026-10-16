@@ -99,6 +99,20 @@
       "when": 1792070037567,
       "tag": "0013_order_address_reference",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792163554771,
+      "tag": "0014_stock",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1792163555194,
+      "tag": "0015_stock_security",
+      "breakpoints": true
     }
   ]
 }

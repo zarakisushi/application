@@ -43,4 +43,8 @@ export const financeDreGroup = pgEnum('finance_dre_group', [
   'OUTROS',
 ]);
 
-export const financeOrigin = pgEnum('finance_origin', ['MANUAL', 'PEDIDO', 'ROYALTIES', 'AJUSTE', 'TRANSFERENCIA']);
+export const financeOrigin = pgEnum('finance_origin', ['MANUAL', 'PEDIDO', 'ROYALTIES', 'AJUSTE', 'TRANSFERENCIA', 'ESTOQUE']);
+
+export const stockKind = pgEnum('stock_kind', ['INSUMO', 'EMBALAGEM', 'MARKETING', 'OPERACIONAL', 'OUTRO']);
+
+export const stockMovementKind = pgEnum('stock_movement_kind', ['COMPRA', 'PEDIDO', 'PERDA', 'CONSUMO', 'AJUSTE', 'ENTRADA']);

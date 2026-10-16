@@ -168,6 +168,71 @@ test('capturas do manual', async ({ page }) => {
   await page.waitForTimeout(2500);
   await shot(page, '18-fin-extratos', 750);
 
+  // Estoque
+  await page.goto('/admin/estoque');
+  await expect(page.getByRole('row', { name: /Tubo Push Pop/ })).toBeVisible();
+  await shot(page, '28-estoque', 1200);
+  await page.goto('/admin/estoque/compras/nova');
+  await page.getByLabel('Fornecedor').fill('Peixaria Goiás');
+  await page.getByRole('combobox', { name: 'Item 1' }).click();
+  await page.getByRole('option', { name: 'Salmão', exact: true }).click();
+  await page.getByTestId('purchase-line').nth(0).getByLabel(/Quantidade/).fill('5');
+  await page.getByTestId('purchase-line').nth(0).getByLabel('Valor da linha').fill('460,00');
+  await page.getByRole('button', { name: 'Adicionar item' }).click();
+  await page.getByRole('combobox', { name: 'Item 2' }).click();
+  await page.getByRole('option', { name: 'Camarão', exact: true }).click();
+  await page.getByTestId('purchase-line').nth(1).getByLabel(/Quantidade/).fill('2');
+  await page.getByTestId('purchase-line').nth(1).getByLabel('Valor da linha').fill('156,00');
+  await page.locator('body').click({ position: { x: 5, y: 5 } });
+  await expect(page.getByTestId('purchase-total')).toHaveText('R$ 616,00');
+  await shot(page, '29-estoque-compra', 1100);
+  await page.goto('/admin/estoque/contagem');
+  await page.getByLabel('Contado: Alga nori').fill('175');
+  await page.getByLabel('Contado: Salmão').fill('8,6');
+  await page.locator('body').click({ position: { x: 5, y: 5 } });
+  await shot(page, '30-estoque-contagem', 1000);
+  await page.goto('/admin/cardapio');
+  await page.getByRole('link', { name: 'Uramaki de Salmão e Manga' }).click();
+  await expect(page.getByTestId('recipe-cost')).toBeVisible();
+  await shot(page, '31-ficha-tecnica', 1520);
+
+  // Estoque na franquia, para o relatório da rede comparar as unidades
+  const switchTo = async (name: string) => {
+    await page.getByRole('button', { name: 'Trocar de unidade' }).click();
+    await page.getByRole('menuitem', { name: new RegExp(name) }).click();
+    await expect(page.getByRole('button', { name: 'Trocar de unidade' })).toContainText(name);
+  };
+  await page.goto('/admin/estoque');
+  await switchTo('Setor Bueno');
+  await page.getByRole('button', { name: 'Criar lista sugerida' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Criar itens' }).click();
+  await expect(page.getByRole('row', { name: /Tubo Push Pop/ })).toBeVisible();
+  await page.goto('/admin/estoque/compras/nova');
+  await page.getByLabel('Fornecedor').fill('Atacado Oriental');
+  const buy = [
+    ['Salmão', '6', '540,00'],
+    ['Arroz para sushi', '10', '145,00'],
+    ['Tubo Push Pop', '300', '165,00'],
+  ];
+  for (const [i, [name, qty, total]] of buy.entries()) {
+    if (i) await page.getByRole('button', { name: 'Adicionar item' }).click();
+    await page.getByRole('combobox', { name: `Item ${i + 1}` }).click();
+    await page.getByRole('option', { name, exact: true }).click();
+    await page.getByTestId('purchase-line').nth(i).getByLabel(/Quantidade/).fill(qty!);
+    await page.getByTestId('purchase-line').nth(i).getByLabel('Valor da linha').fill(total!);
+  }
+  await page.getByRole('button', { name: 'Registrar compra' }).click();
+  await expect(page.getByRole('heading', { name: 'Compra · Atacado Oriental' })).toBeVisible();
+  await page.goto('/admin/estoque');
+  await page.getByRole('button', { name: 'Saída ou perda' }).click();
+  await page.getByRole('combobox', { name: 'Item' }).click();
+  await page.getByRole('option', { name: 'Salmão', exact: true }).click();
+  await page.getByLabel(/Quantidade/).fill('0,4');
+  await page.getByLabel('Observação (opcional)').fill('Freezer desligou');
+  await page.getByRole('button', { name: 'Registrar', exact: true }).click();
+  await expect(page.getByText('Saída registrada.')).toBeVisible();
+  await switchTo('Matriz');
+
   // Relatórios e rede
   await page.goto('/admin/relatorios');
   await shot(page, '19-relatorios', 1700);
@@ -177,6 +242,8 @@ test('capturas do manual', async ({ page }) => {
   await shot(page, '21-rede-financeiro', 1100);
   await page.goto('/admin/relatorios/faturamento?periodo=90d');
   await shot(page, '22-relatorio-faturamento', 1100);
+  await page.goto('/admin/relatorios/estoque-rede?periodo=30d');
+  await shot(page, '32-rede-estoque', 1000);
 
   // Gestão
   await page.goto('/admin/usuarios');
