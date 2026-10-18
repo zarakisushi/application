@@ -75,6 +75,11 @@ export async function stockSummary(tx: Tx, tenantId: string, monthStart: string)
     items: active.length,
     valueCents: active.reduce((s, r) => s + (r.valueCents ?? 0), 0),
     toRestock: active.filter((r) => r.situation !== 'OK').length,
+    /** Itens a repor, zerados primeiro (para o aviso da página inicial). */
+    restock: active
+      .filter((r) => r.situation !== 'OK')
+      .sort((x, y) => Number(y.situation === 'ZERADO') - Number(x.situation === 'ZERADO') || x.name.localeCompare(y.name, 'pt-BR'))
+      .map((r) => ({ id: r.id, name: r.name, situation: r.situation })),
     lossesCents: Math.round(losses?.cents ?? 0),
   };
 }

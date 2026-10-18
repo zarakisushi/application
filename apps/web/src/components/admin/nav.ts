@@ -4,6 +4,7 @@ import {
   CalendarDays,
   ChartColumn,
   ArrowLeftRight,
+  BookOpen,
   Boxes,
   CalendarClock,
   ChartNoAxesCombined,
@@ -60,6 +61,10 @@ export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { href: '/admin/auditoria', label: 'Auditoria', icon: ScrollText, permission: 'audit:read' },
       { href: '/admin/unidades', label: 'Unidades', icon: Building2, permission: 'tenants:manage' },
     ],
+  },
+  {
+    label: 'Ajuda',
+    items: [{ href: '/admin/manual', label: 'Manual do sistema', icon: BookOpen }],
   },
 ];
 
