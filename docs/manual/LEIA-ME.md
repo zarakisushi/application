@@ -5,6 +5,10 @@
 - **`img/`**: capturas de tela, geradas a partir do sistema com dados de demonstração.
 - **`gerar-pdf.mjs`**: converte o `manual.html` em PDF.
 
+O manual também aparece **dentro do sistema**, em **Ajuda → Manual do sistema** (`/admin/manual`), com
+sumário, busca e download do PDF. A página lê estes mesmos arquivos (`manual.html`, `img/` e o PDF), que
+entram na publicação: depois de editar, gere o PDF de novo e publique.
+
 ## Atualizar o manual
 
 1. **Se as telas mudaram, gere as capturas de novo** (sobe um banco temporário com dados de demonstração e

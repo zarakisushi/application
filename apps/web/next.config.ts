@@ -19,6 +19,14 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   transpilePackages: ['@zaraki/core', '@zaraki/db', '@zaraki/integrations'],
   poweredByHeader: false,
+  // Monorepo: o rastreamento parte da raiz para incluir o manual do sistema (docs/manual), lido em
+  // tempo de execução pela página /admin/manual e pela rota dos arquivos dele (PDF e imagens).
+  outputFileTracingRoot: resolve(process.cwd(), '../..'),
+  outputFileTracingIncludes: {
+    // A página lê o texto e as dimensões das imagens; a rota serve o PDF e as imagens.
+    '**/manual': ['../../docs/manual/manual.html', '../../docs/manual/img/*'],
+    '/api/manual/**': ['../../docs/manual/Zaraki-Manual-do-Sistema.pdf', '../../docs/manual/img/*'],
+  },
   // Indicador do Next (só em desenvolvimento) no canto direito, longe do rodapé do menu lateral.
   devIndicators: { position: 'bottom-right' },
   // Envio de fotos e PDFs pelo painel (até 4 MB por arquivo, validado em server/uploads.ts). O padrão do

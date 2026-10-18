@@ -1,6 +1,6 @@
 import { formatReportValue, todayInZone } from '@zaraki/core';
 import { openSummary, stockSummary, totalBalance, withContext } from '@zaraki/db';
-import { Boxes, CalendarDays, ClipboardList, Hourglass, Landmark } from 'lucide-react';
+import { ArrowRight, Boxes, CalendarDays, ClipboardList, Hourglass, Landmark } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CalendarSyncBadge, TypeBadge } from '@/components/admin/list';
@@ -60,6 +60,41 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </p>
       </section>
 
+      {stock && stock.toRestock > 0 && (
+        <Link
+          href="/admin/estoque?situacao=repor"
+          data-testid="home-stock"
+          className="group block rounded-xl bg-brand-red px-5 py-5 text-[#f3e2c7] shadow-lg shadow-brand-red/25 ring-1 ring-black/10 transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-gold md:px-8"
+        >
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <span className="relative mt-0.5 flex size-12 shrink-0 items-center justify-center rounded-full bg-[#f3e2c7]/15 ring-1 ring-[#f3e2c7]/30">
+                <span className="absolute inline-flex size-full rounded-full bg-[#f3e2c7]/20 motion-safe:animate-ping" aria-hidden />
+                <Boxes className="relative size-6" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#e9c99a]">Atenção ao estoque</p>
+                <p className="mt-1 font-display text-xl font-bold leading-tight md:text-2xl">
+                  {stock.toRestock} {stock.toRestock === 1 ? 'item do estoque precisa' : 'itens do estoque precisam'} de reposição
+                </p>
+                <ul className="mt-3 flex flex-wrap gap-2" aria-label="Itens a repor">
+                  {stock.restock.slice(0, 6).map((i) => (
+                    <li key={i.id} className="rounded-full bg-[#f3e2c7]/15 px-3 py-1 text-sm ring-1 ring-[#f3e2c7]/25">
+                      {i.name}
+                      {i.situation === 'ZERADO' && <span className="ml-1.5 font-semibold text-[#ffd9a8]">· zerado</span>}
+                    </li>
+                  ))}
+                  {stock.restock.length > 6 && <li className="px-1 py-1 text-sm text-[#e9c99a]">e mais {stock.restock.length - 6}</li>}
+                </ul>
+              </div>
+            </div>
+            <span className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#f3e2c7] px-4 py-2.5 text-sm font-semibold text-brand-red transition group-hover:bg-white md:shrink-0">
+              Ver itens para repor <ArrowRight className="size-4" />
+            </span>
+          </div>
+        </Link>
+      )}
+
       {stats && (
         <section className="grid gap-4 sm:grid-cols-3" aria-label="Resumo da operação">
           {stats.map((s) => (
@@ -78,18 +113,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </section>
       )}
 
-      {stock && stock.toRestock > 0 && (
-        <Link href="/admin/estoque?situacao=repor" className="group" data-testid="home-stock">
-          <Card className="border-amber-500/40 transition-colors group-hover:border-brand-gold">
-            <CardHeader className="flex flex-row items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-2">
-                <Boxes className="size-5 text-amber-700" /> {stock.toRestock} {stock.toRestock === 1 ? 'item do estoque precisa' : 'itens do estoque precisam'} de reposição
-              </CardTitle>
-              <span className="text-sm underline">Ver itens</span>
-            </CardHeader>
-          </Card>
-        </Link>
-      )}
 
       {finance && (
         <Link href="/admin/financeiro" className="group" aria-label="Financeiro: abrir a visão geral">
