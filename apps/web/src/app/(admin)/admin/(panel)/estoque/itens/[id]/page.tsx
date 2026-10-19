@@ -144,7 +144,7 @@ export default async function StockItemPage({ params }: { params: Promise<{ id: 
               </Table>
             </CardContent>
           </Card>
-          <StockItemForm item={item} categories={categories} suppliers={suppliers} action={saveStockItem.bind(null, item.id)} readOnly={!canManage} />
+          <StockItemForm item={item} categories={categories} suppliers={suppliers.map((s) => s.name)} action={saveStockItem.bind(null, item.id)} readOnly={!canManage} />
         </div>
       </RecordTabs>
     </>

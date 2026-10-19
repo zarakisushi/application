@@ -40,7 +40,17 @@ test('compra: entra no estoque, atualiza o custo e vira conta a pagar no Finance
   const salmao = await balance('Salmão');
   const panfleto = await balance('Panfleto');
   await page.goto('/admin/estoque/compras/nova');
-  await page.getByLabel('Fornecedor').fill('Peixaria Goiás');
+  // Ao clicar, aparecem os fornecedores cadastrados; digitar filtra a lista.
+  const supplier = page.getByRole('combobox', { name: 'Fornecedor' });
+  await supplier.click();
+  const listbox = page.getByRole('listbox', { name: 'Fornecedores' });
+  await expect(listbox.getByRole('option', { name: /^Atacado Oriental Mercearia/ })).toBeVisible(); // cadastrado
+  await expect(listbox.getByRole('option', { name: 'Atacado Oriental (demonstração)' })).toBeVisible(); // usado em compra
+  await supplier.fill('peixa');
+  await expect(listbox.getByRole('option')).toHaveCount(1);
+  await listbox.getByRole('option', { name: /Peixaria Goiás/ }).click();
+  await expect(supplier).toHaveValue('Peixaria Goiás');
+  await expect(page.getByText(/Fornecedor cadastrado · Peixes e frutos do mar · Marcos/)).toBeVisible();
   const lines = page.getByTestId('purchase-line');
   await choose(page, 'Item 1', 'Salmão');
   await lines.nth(0).getByLabel(/Quantidade/).fill('2');
@@ -68,6 +78,27 @@ test('compra: entra no estoque, atualiza o custo e vira conta a pagar no Finance
   ]);
   await page.goto('/admin/financeiro/lancamentos?q=Peixaria+Goi%C3%A1s&periodo=tudo&origem=ESTOQUE');
   await expect(page.getByRole('row', { name: /Compra · Peixaria Goiás/ })).toHaveCount(2);
+});
+
+test('compra com fornecedor ainda não cadastrado: fica só o nome, com atalho para cadastrar depois', async ({ page }) => {
+  await loginGestor(page);
+  await page.goto('/admin/estoque/compras/nova');
+  const supplier = page.getByRole('combobox', { name: 'Fornecedor' });
+  await supplier.fill('Distribuidora Nova Era');
+  await expect(page.getByRole('listbox', { name: 'Fornecedores' })).toHaveCount(0);
+  const hint = page.getByTestId('supplier-not-registered');
+  await expect(hint).toContainText('Ainda não cadastrado');
+  await expect(hint.getByRole('link', { name: 'Cadastrar depois' })).toHaveAttribute('href', '/admin/fornecedores/novo?nome=Distribuidora%20Nova%20Era');
+  await page.getByRole('combobox', { name: 'Item 1' }).click();
+  await page.getByRole('option', { name: 'Gergelim', exact: true }).click();
+  await page.getByTestId('purchase-line').nth(0).getByLabel(/Quantidade/).fill('1');
+  await page.getByTestId('purchase-line').nth(0).getByLabel('Valor da linha').fill('38');
+  await page.getByRole('button', { name: 'Registrar compra' }).click();
+  await expect(page.getByRole('heading', { name: 'Compra · Distribuidora Nova Era' })).toBeVisible();
+
+  // Depois, o cadastro abre com o nome já preenchido.
+  await page.goto('/admin/fornecedores/novo?nome=Distribuidora%20Nova%20Era');
+  await expect(page.getByLabel('Nome do fornecedor')).toHaveValue('Distribuidora Nova Era');
 });
 
 test('saída por perda e contagem ajustam o saldo', async ({ page }) => {

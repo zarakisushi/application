@@ -100,13 +100,7 @@ export function TaskList({
 
   return (
     <div className="flex flex-col gap-6">
-      {open.length > 0 && (
-        <ul className="flex flex-col gap-2" aria-label="Tarefas em aberto">
-          {open.map((t) => (
-            <TaskItem key={t.id} task={t} ctx={ctx} onToggle={toggle} compact={compact} />
-          ))}
-        </ul>
-      )}
+      {/* Feitas no topo (as mais recentes primeiro); as pendentes logo abaixo. */}
       {done.length > 0 && !compact && (
         <section aria-label="Tarefas feitas">
           <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-emerald-800">
@@ -115,6 +109,20 @@ export function TaskList({
           <ul className="flex flex-col gap-2">
             {done.map((t) => (
               <TaskItem key={t.id} task={t} ctx={ctx} onToggle={toggle} />
+            ))}
+          </ul>
+        </section>
+      )}
+      {open.length > 0 && (
+        <section aria-label="Tarefas pendentes">
+          {done.length > 0 && !compact && (
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Circle className="size-4 text-muted-foreground" /> Pendentes ({open.length})
+            </h2>
+          )}
+          <ul className="flex flex-col gap-2" aria-label="Tarefas em aberto">
+            {open.map((t) => (
+              <TaskItem key={t.id} task={t} ctx={ctx} onToggle={toggle} compact={compact} />
             ))}
           </ul>
         </section>

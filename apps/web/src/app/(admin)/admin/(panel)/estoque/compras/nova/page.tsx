@@ -18,7 +18,15 @@ export default async function NewPurchasePage() {
     <>
       <PageHeader title="Registrar compra" description="Os itens entram no estoque e a conta a pagar vai para o Financeiro." />
       {items.length ? (
-        <PurchaseForm items={items} accounts={accounts} suppliers={suppliers} today={todayInZone(ctx.tenant.timezone)} action={savePurchaseAction} upload={uploadAttachmentAction} />
+        <PurchaseForm
+          items={items}
+          accounts={accounts}
+          suppliers={suppliers}
+          canRegisterSupplier={ctx.can('suppliers:write')}
+          today={todayInZone(ctx.tenant.timezone)}
+          action={savePurchaseAction}
+          upload={uploadAttachmentAction}
+        />
       ) : (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">

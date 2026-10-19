@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { compressImage } from '@/lib/image-compress';
 import { Field, FormError, useServerForm, type ActionResult } from '../form';
+import { SupplierCombobox, type SupplierOption } from '../suppliers/SupplierCombobox';
 import type { StockItemOption } from './ui';
 
 type Line = { key: number; itemId: string; qty: string; total: string };
@@ -24,13 +25,16 @@ export function PurchaseForm({
   items,
   accounts,
   suppliers,
+  canRegisterSupplier = false,
   today,
   action,
   upload,
 }: {
   items: StockItemOption[];
   accounts: { id: string; name: string }[];
-  suppliers: string[];
+  suppliers: SupplierOption[];
+  /** Pode abrir o cadastro de fornecedores (link "Cadastrar depois"). */
+  canRegisterSupplier?: boolean;
   today: string;
   action: (form: FormData) => Promise<ActionResult>;
   upload: (form: FormData) => Promise<ActionResult>;
@@ -67,12 +71,7 @@ export function PurchaseForm({
           <FormError result={result} />
           <fieldset disabled={pending} className="grid gap-5 sm:grid-cols-3">
             <Field label="Fornecedor" htmlFor="supplier" error={errors.supplier}>
-              <Input id="supplier" name="supplier" list="purchase-suppliers" autoComplete="off" required placeholder="Ex.: Peixaria Goiás" />
-              <datalist id="purchase-suppliers">
-                {suppliers.map((s) => (
-                  <option key={s} value={s} />
-                ))}
-              </datalist>
+              <SupplierCombobox id="supplier" name="supplier" options={suppliers} canRegister={canRegisterSupplier} required invalid={!!errors.supplier} />
             </Field>
             <Field label="Data da compra" htmlFor="purchasedOn" error={errors.purchasedOn}>
               <Input id="purchasedOn" name="purchasedOn" type="date" defaultValue={today} required />
