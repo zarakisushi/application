@@ -35,16 +35,44 @@ test('tarefas: adicionar com Enter, concluir com ícone e cor, desfazer pelo avi
   await expect(done).toHaveClass(/bg-emerald-50/);
   await expect(done).toContainText(/Feita por Gestora às \d{2}:\d{2}/);
   await expect(done.getByRole('button', { name: 'Desmarcar "Comprar gelo para o evento"' })).toHaveAttribute('aria-pressed', 'true');
-  // As feitas ficam acima das pendentes.
-  const doneTop = (await page.getByRole('region', { name: 'Tarefas feitas' }).boundingBox())!.y;
-  const pendingTop = (await page.getByRole('region', { name: 'Tarefas pendentes' }).boundingBox())!.y;
-  expect(doneTop).toBeLessThan(pendingTop);
+  // No computador, lado a lado: pendentes à esquerda e feitas à direita.
+  const doneBox = (await page.getByRole('region', { name: 'Tarefas feitas' }).boundingBox())!;
+  const pendingBox = (await page.getByRole('region', { name: 'Tarefas pendentes' }).boundingBox())!;
+  expect(doneBox.x).toBeGreaterThan(pendingBox.x + pendingBox.width - 1);
   await expect(page.getByRole('heading', { name: /^Pendentes \(\d+\)/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Desfazer' }).click();
   await expect(page.getByRole('list', { name: 'Tarefas em aberto' }).getByText('Comprar gelo para o evento')).toBeVisible();
   await page.reload();
   await expect(task(page, 'Comprar gelo para o evento')).not.toHaveAttribute('data-done');
+});
+
+test('celular: as feitas ficam num accordion fechado, com a contagem, das mais recentes para as mais antigas', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await loginGestor(page);
+  await page.goto('/admin/tarefas');
+  await page.getByRole('textbox', { name: 'Nova tarefa' }).fill('Primeira concluída');
+  await page.getByRole('textbox', { name: 'Nova tarefa' }).press('Enter');
+  await page.getByRole('textbox', { name: 'Nova tarefa' }).fill('Segunda concluída');
+  await page.getByRole('textbox', { name: 'Nova tarefa' }).press('Enter');
+  await expect(task(page, 'Segunda concluída')).toBeVisible();
+  await task(page, 'Primeira concluída').getByRole('button', { name: /como feita/ }).click();
+  await expect(page.getByText('Tarefa concluída').first()).toBeVisible();
+  await task(page, 'Segunda concluída').getByRole('button', { name: /como feita/ }).click();
+
+  const accordion = page.getByRole('button', { name: /^Feitas \d+/ });
+  await expect(accordion).toHaveAttribute('aria-expanded', 'false');
+  const doneList = page.getByRole('list', { name: 'Tarefas concluídas' });
+  await expect(doneList).toBeHidden();
+  const count = await page.getByRole('region', { name: 'Tarefas feitas' }).getByTestId('task').count();
+  await expect(accordion).toContainText(String(count));
+
+  await accordion.click();
+  await expect(accordion).toHaveAttribute('aria-expanded', 'true');
+  await expect(doneList).toBeVisible();
+  // A mais recente primeiro.
+  await expect(doneList.getByTestId('task').first()).toContainText('Segunda concluída');
+  await expect(doneList.getByTestId('task').nth(1)).toContainText('Primeira concluída');
 });
 
 test('tarefas: prazo da semana, responsável, edição e "Minhas tarefas"', async ({ page }) => {

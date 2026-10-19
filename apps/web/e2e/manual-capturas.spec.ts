@@ -42,7 +42,7 @@ test('capturas do manual', async ({ page }) => {
   await shot(page, '33-tarefas', 1050);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/admin/tarefas');
-  await expect(page.getByTestId('task').first()).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Tarefas em aberto' }).getByTestId('task').first()).toBeVisible();
   await page.waitForTimeout(400);
   await page.screenshot({ path: `${OUT}/34-tarefas-celular.jpg`, type: 'jpeg', quality: 82 });
 
