@@ -101,7 +101,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
 
       {counts.late > 0 && view !== 'feitas' && (
         <p className="mb-3 text-sm font-medium text-red-700" role="status">
-          {counts.late === 1 ? '1 tarefa atrasada' : `${counts.late} tarefas atrasadas`}: elas ficam no topo até serem feitas.
+          {counts.late === 1 ? '1 tarefa atrasada' : `${counts.late} tarefas atrasadas`}: elas vêm primeiro entre as pendentes, até serem feitas.
         </p>
       )}
 

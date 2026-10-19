@@ -13,7 +13,7 @@ export default async function NewStockItemPage() {
   return (
     <>
       <PageHeader title="Novo item de estoque" description="Insumo, embalagem, material de marketing ou operacional." />
-      <StockItemForm categories={categories} suppliers={suppliers} action={saveStockItem.bind(null, null)} />
+      <StockItemForm categories={categories} suppliers={suppliers.map((s) => s.name)} action={saveStockItem.bind(null, null)} />
     </>
   );
 }

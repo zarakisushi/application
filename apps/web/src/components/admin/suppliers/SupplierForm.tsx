@@ -123,8 +123,11 @@ export function SupplierForm({
   action,
   readOnly = false,
   canShare = false,
+  defaultName,
 }: {
   supplier?: SupplierValues;
+  /** Nome sugerido para um cadastro novo (ex.: vindo de uma compra). */
+  defaultName?: string;
   action: (form: FormData) => Promise<ActionResult>;
   readOnly?: boolean;
   /** Matriz: pode compartilhar o fornecedor com as franquias. */
@@ -148,7 +151,7 @@ export function SupplierForm({
       <fieldset disabled={off} className="grid gap-6">
         <Section title="Identificação">
           <Field label="Nome do fornecedor" htmlFor="name" error={errors.name} hint="Como a equipe conhece (nome fantasia).">
-            <Input id="name" name="name" defaultValue={v?.name} required maxLength={120} aria-invalid={!!errors.name} />
+            <Input id="name" name="name" defaultValue={v?.name ?? defaultName} required maxLength={120} aria-invalid={!!errors.name} />
           </Field>
           <Field label="Razão social (opcional)" htmlFor="legalName" error={errors.legalName}>
             <Input id="legalName" name="legalName" defaultValue={v?.legalName ?? ''} maxLength={160} />

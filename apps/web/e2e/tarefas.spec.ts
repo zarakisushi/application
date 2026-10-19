@@ -23,7 +23,7 @@ test('tarefas: adicionar com Enter, concluir com ícone e cor, desfazer pelo avi
   const first = page.getByRole('list', { name: 'Tarefas em aberto' }).getByTestId('task').first();
   await expect(first).toContainText('Pedir salmão para sexta');
   await expect(first).toContainText(/Atrasada · \d+ dias?/);
-  await expect(page.getByText(/1 tarefa atrasada/)).toBeVisible();
+  await expect(page.getByText(/1 tarefa atrasada: elas vêm primeiro entre as pendentes/)).toBeVisible();
 
   await addTask(page, 'Comprar gelo para o evento');
   const item = task(page, 'Comprar gelo para o evento');
@@ -35,6 +35,11 @@ test('tarefas: adicionar com Enter, concluir com ícone e cor, desfazer pelo avi
   await expect(done).toHaveClass(/bg-emerald-50/);
   await expect(done).toContainText(/Feita por Gestora às \d{2}:\d{2}/);
   await expect(done.getByRole('button', { name: 'Desmarcar "Comprar gelo para o evento"' })).toHaveAttribute('aria-pressed', 'true');
+  // As feitas ficam acima das pendentes.
+  const doneTop = (await page.getByRole('region', { name: 'Tarefas feitas' }).boundingBox())!.y;
+  const pendingTop = (await page.getByRole('region', { name: 'Tarefas pendentes' }).boundingBox())!.y;
+  expect(doneTop).toBeLessThan(pendingTop);
+  await expect(page.getByRole('heading', { name: /^Pendentes \(\d+\)/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Desfazer' }).click();
   await expect(page.getByRole('list', { name: 'Tarefas em aberto' }).getByText('Comprar gelo para o evento')).toBeVisible();
