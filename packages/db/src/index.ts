@@ -7,6 +7,8 @@ export * from './dashboard';
 export * from './admin';
 export * from './finance';
 export * from './stock';
+export * from './tasks';
+export * from './suppliers';
 export * from './calendar';
 export * from './audit-admin';
 export * from './reports';

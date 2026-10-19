@@ -6,4 +6,6 @@ export * from './coupons';
 export * from './orders';
 export * from './finance';
 export * from './stock';
+export * from './tasks';
+export * from './suppliers';
 export * from './audit';

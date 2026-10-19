@@ -1,12 +1,13 @@
 import { formatReportValue, todayInZone } from '@zaraki/core';
-import { openSummary, stockSummary, totalBalance, withContext } from '@zaraki/db';
-import { ArrowRight, Boxes, CalendarDays, ClipboardList, Hourglass, Landmark } from 'lucide-react';
+import { listTasks, openSummary, stockSummary, taskCounts, totalBalance, withContext } from '@zaraki/db';
+import { ArrowRight, Boxes, CalendarDays, ClipboardList, Hourglass, Landmark, ListChecks } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CalendarSyncBadge, TypeBadge } from '@/components/admin/list';
 import { ALL_NAV_ITEMS } from '@/components/admin/nav';
 import { ReportChart } from '@/components/admin/reports/ReportChart';
 import { SummaryTiles } from '@/components/admin/reports/ReportView';
+import { TaskList } from '@/components/admin/tasks/Tasks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCents, formatDateTime } from '@/lib/format';
@@ -45,6 +46,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   // Itens do estoque abaixo do mínimo (para quem vê o estoque).
   const stock = ctx.can('stock:read')
     ? await withContext(ctx.db, (tx) => stockSummary(tx, ctx.tenant.id, `${todayInZone(timezone).slice(0, 7)}-01`))
+    : null;
+  // Tarefas de hoje em aberto (atrasadas primeiro), para concluir direto da página inicial.
+  const todayIso = todayInZone(timezone);
+  const todo = ctx.can('tasks:read')
+    ? await withContext(ctx.db, async (tx) => ({
+        tasks: (await listTasks(tx, ctx.tenant.id, { view: 'hoje', today: todayIso, timezone })).filter((t) => !t.doneAt).slice(0, 5),
+        counts: await taskCounts(tx, ctx.tenant.id, todayIso, ctx.user.id),
+      }))
     : null;
   const shortcuts = ALL_NAV_ITEMS.filter((i) => i.href !== '/admin' && (!i.permission || ctx.can(i.permission)));
 
@@ -93,6 +102,38 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </span>
           </div>
         </Link>
+      )}
+
+      {todo && (
+        <Card data-testid="home-tasks">
+          <CardHeader className="flex flex-row items-center justify-between gap-2">
+            <CardTitle className="flex items-center gap-2">
+              <ListChecks className="size-5 text-brand-gold" /> Tarefas de hoje
+              {todo.counts.today > 0 && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  {todo.counts.today} em aberto
+                  {todo.counts.late > 0 && <span className="font-medium text-red-700"> · {todo.counts.late} {todo.counts.late === 1 ? 'atrasada' : 'atrasadas'}</span>}
+                </span>
+              )}
+            </CardTitle>
+            <Link href="/admin/tarefas" className="text-sm underline">
+              Ver todas
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <TaskList
+              compact
+              tasks={todo.tasks}
+              today={todayIso}
+              timezone={timezone}
+              me={{ id: ctx.user.id, name: ctx.user.name }}
+              canManage={false}
+              assignees={[]}
+              emptyTitle="Tudo feito por hoje 🎉"
+              emptyText="Nenhuma tarefa em aberto para hoje."
+            />
+          </CardContent>
+        </Card>
       )}
 
       {stats && (

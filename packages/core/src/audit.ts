@@ -48,6 +48,8 @@ export const AUDIT_ENTITY_LABEL: Record<string, string> = {
   stock_movements: 'Movimentação de estoque',
   stock_purchases: 'Compra de estoque',
   product_recipes: 'Ficha técnica',
+  tasks: 'Tarefa',
+  suppliers: 'Fornecedor',
   users: 'Usuário',
   accounts: 'Credencial de acesso',
   memberships: 'Acesso à unidade',
@@ -58,9 +60,36 @@ export const AUDIT_ENTITY_LABEL: Record<string, string> = {
 };
 
 /** Campos técnicos que não ajudam a entender a mudança. */
-const HIDDEN = new Set(['id', 'tenant_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'order_id', 'user_id', 'customer_id', 'product_id', 'account_id', 'provider_id', 'google_event_id', 'coupon_id', 'category_id', 'transfer_id', 'series_id', 'royalty_charge_id', 'matriz_tenant_id', 'franchise_entry_id', 'matriz_entry_id', 'adjustment_entry_id', 'item_id', 'purchase_id', 'finance_category_id']);
+const HIDDEN = new Set(['id', 'tenant_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'order_id', 'user_id', 'customer_id', 'product_id', 'account_id', 'provider_id', 'google_event_id', 'coupon_id', 'category_id', 'transfer_id', 'series_id', 'royalty_charge_id', 'matriz_tenant_id', 'franchise_entry_id', 'matriz_entry_id', 'adjustment_entry_id', 'item_id', 'purchase_id', 'finance_category_id', 'copied_from_id']);
 
 const FIELD_LABEL: Record<string, string> = {
+  title: 'Tarefa',
+  person_kind: 'Tipo de pessoa',
+  legal_name: 'Razão social',
+  document: 'CNPJ/CPF',
+  state_registration: 'Inscrição estadual',
+  categories: 'Categorias',
+  contact_name: 'Contato',
+  whatsapp: 'WhatsApp',
+  website: 'Site ou Instagram',
+  cep: 'CEP',
+  street: 'Logradouro',
+  number: 'Número',
+  complement: 'Complemento',
+  district: 'Bairro',
+  state: 'UF',
+  delivery_days: 'Dias de entrega',
+  min_order_cents: 'Pedido mínimo',
+  payment_terms: 'Prazo de pagamento',
+  payment_methods: 'Formas de pagamento',
+  pix_key: 'Chave Pix',
+  bank_details: 'Dados bancários',
+  rating: 'Avaliação',
+  network_shared: 'Compartilhado com a rede',
+  important: 'Importante',
+  assignee_user_id: 'Responsável',
+  done_at: 'Concluída em',
+  done_by: 'Concluída por',
   status: 'Situação',
   name: 'Nome',
   slug: 'Identificador',
@@ -243,7 +272,7 @@ export function auditChanges(entry: AuditEntry, timeZone: string): AuditChange[]
 /** Nome curto do registro afetado (nome, código ou e-mail), quando houver. */
 export function auditRecordTitle(entry: Pick<AuditEntry, 'before' | 'after'>): string | null {
   const data = { ...asRecord(entry.before), ...asRecord(entry.after) };
-  const title = data.code ?? data.name ?? data.product_name ?? data.email;
+  const title = data.code ?? data.name ?? data.title ?? data.product_name ?? data.email;
   return typeof title === 'string' ? title : null;
 }
 
