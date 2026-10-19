@@ -107,6 +107,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
 
       <TaskList
         {...listCtx}
+        split={view !== 'feitas'}
         tasks={tasks}
         emptyTitle={q ? `Nada encontrado para "${q}"` : mine ? 'Nenhuma tarefa sua aqui' : EMPTY[view][0]}
         emptyText={q ? 'Tente outra palavra.' : mine ? 'Tarefas com você como responsável aparecem aqui.' : EMPTY[view][1]}

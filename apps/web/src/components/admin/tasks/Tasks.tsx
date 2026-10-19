@@ -1,7 +1,7 @@
 'use client';
 
 import { TASK_DUE_PRESET_LABEL, TASK_DUE_PRESETS, taskDueInfo, type TaskDuePreset } from '@zaraki/core';
-import { Circle, CircleCheck, NotebookPen, Plus, Star, Trash2, UserRound } from 'lucide-react';
+import { ChevronDown, Circle, CircleCheck, NotebookPen, Plus, Star, Trash2, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useOptimistic, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -71,9 +71,18 @@ export function TaskList({
   emptyTitle,
   emptyText,
   compact = false,
+  split = false,
   ...ctx
-}: ListContext & { tasks: TaskItemData[]; emptyTitle: string; emptyText?: string; compact?: boolean }) {
+}: ListContext & {
+  tasks: TaskItemData[];
+  emptyTitle: string;
+  emptyText?: string;
+  compact?: boolean;
+  /** Pendentes e feitas lado a lado (computador); no celular, as feitas num accordion fechado. */
+  split?: boolean;
+}) {
   const [, startTransition] = useTransition();
+  const [doneOpen, setDoneOpen] = useState(false);
   const [optimistic, apply] = useOptimistic(tasks, (state, change: { id: string; done: boolean }) =>
     state.map((t) => (t.id === change.id ? { ...t, doneAt: change.done ? new Date() : null, doneByName: change.done ? ctx.me.name : null } : t)),
   );
@@ -98,35 +107,79 @@ export function TaskList({
     );
   }
 
+  const doneList = (
+    <ul className="flex flex-col gap-2" aria-label="Tarefas concluídas">
+      {done.map((t) => (
+        <TaskItem key={t.id} task={t} ctx={ctx} onToggle={toggle} />
+      ))}
+    </ul>
+  );
+  const openList = (
+    <ul className="flex flex-col gap-2" aria-label="Tarefas em aberto">
+      {open.map((t) => (
+        <TaskItem key={t.id} task={t} ctx={ctx} onToggle={toggle} compact={compact} />
+      ))}
+    </ul>
+  );
+
+  // Página inicial: só as pendentes. Aba "Feitas" (ou sem divisão): uma lista só, feitas mais recentes primeiro.
+  if (compact) return open.length ? openList : null;
+  if (!split) {
+    return (
+      <div className="flex flex-col gap-2">
+        {open.length > 0 && openList}
+        {done.length > 0 && doneList}
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* Feitas no topo (as mais recentes primeiro); as pendentes logo abaixo. */}
-      {done.length > 0 && !compact && (
-        <section aria-label="Tarefas feitas">
-          <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-emerald-800">
-            <CircleCheck className="size-4" /> Feitas ({done.length})
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {done.map((t) => (
-              <TaskItem key={t.id} task={t} ctx={ctx} onToggle={toggle} />
-            ))}
-          </ul>
-        </section>
-      )}
-      {open.length > 0 && (
-        <section aria-label="Tarefas pendentes">
-          {done.length > 0 && !compact && (
-            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Circle className="size-4 text-muted-foreground" /> Pendentes ({open.length})
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
+      {/* Feitas: à direita no computador; no celular, accordion fechado acima das pendentes. */}
+      <section aria-label="Tarefas feitas" className="lg:sticky lg:top-20 lg:order-2 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:pb-2">
+        {done.length > 0 ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setDoneOpen((o) => !o)}
+              aria-expanded={doneOpen}
+              aria-controls="tarefas-feitas"
+              className="flex w-full items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left font-semibold text-emerald-900 lg:hidden"
+            >
+              <span className="flex items-center gap-2">
+                <CircleCheck className="size-5 text-emerald-600" /> Feitas
+                <span className="rounded-full bg-emerald-600 px-2 text-xs text-white tabular-nums">{done.length}</span>
+              </span>
+              <ChevronDown className={cn('size-5 transition-transform', doneOpen && 'rotate-180')} />
+            </button>
+            <h2 className="mb-2 hidden items-center gap-2 text-sm font-semibold text-emerald-800 lg:flex">
+              <CircleCheck className="size-4" /> Feitas ({done.length})
             </h2>
-          )}
-          <ul className="flex flex-col gap-2" aria-label="Tarefas em aberto">
-            {open.map((t) => (
-              <TaskItem key={t.id} task={t} ctx={ctx} onToggle={toggle} compact={compact} />
-            ))}
-          </ul>
-        </section>
-      )}
+            <div id="tarefas-feitas" className={cn('mt-2 lg:mt-0 lg:block', !doneOpen && 'hidden')}>
+              {doneList}
+            </div>
+          </>
+        ) : (
+          <div className="hidden rounded-xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground lg:block">
+            <CircleCheck className="mx-auto mb-2 size-6 text-emerald-600/50" />
+            As tarefas concluídas aparecem aqui.
+          </div>
+        )}
+      </section>
+
+      <section aria-label="Tarefas pendentes" className="lg:order-1">
+        <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Circle className="size-4 text-muted-foreground" /> Pendentes ({open.length})
+        </h2>
+        {open.length > 0 ? (
+          openList
+        ) : (
+          <div className="rounded-xl border border-dashed bg-card px-6 py-8 text-center">
+            <p className="font-display text-lg font-bold">Tudo feito por aqui 🎉</p>
+            <p className="mt-1 text-sm text-muted-foreground">Nenhuma tarefa pendente nesta lista.</p>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
@@ -328,17 +381,33 @@ function TaskOptions({
 export function TaskQuickAdd(ctx: ListContext) {
   const title = useRef<HTMLInputElement>(null);
   const [key, setKey] = useState(0);
-  const { result, pending, onSubmit, errors } = useServerForm((form) => saveTaskAction(null, form), {
-    onSuccess: () => {
-      if (title.current) title.current.value = '';
-      title.current?.focus();
-      toast.success('Tarefa adicionada.');
-      setKey((k) => k + 1); // volta prazo, responsável e importante ao padrão
-    },
-  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [, startTransition] = useTransition();
+
+  // O campo esvazia na hora (dá para digitar a próxima enquanto a anterior é salva); se der erro, o texto volta.
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const text = String(form.get('title') ?? '').trim();
+    if (!text) return;
+    if (title.current) title.current.value = '';
+    title.current?.focus();
+    setKey((k) => k + 1); // volta prazo, responsável e importante ao padrão
+    startTransition(async () => {
+      const r = await saveTaskAction(null, form);
+      if (r?.ok) {
+        setErrors({});
+        toast.success('Tarefa adicionada.');
+        return;
+      }
+      if (title.current && !title.current.value) title.current.value = text;
+      setErrors(r?.fieldErrors ?? {});
+      if (r?.error) toast.error(r.fieldErrors ? `Não foi possível adicionar "${text}": confira os campos.` : r.error);
+    });
+  };
+
   return (
     <form onSubmit={onSubmit} className="mb-6 rounded-xl border bg-card p-3 shadow-sm" aria-label="Nova tarefa">
-      <FormError result={result} />
       <div className="flex gap-2">
         <Input
           ref={title}
@@ -351,7 +420,7 @@ export function TaskQuickAdd(ctx: ListContext) {
           autoComplete="off"
           required
         />
-        <Button type="submit" className="h-11" disabled={pending}>
+        <Button type="submit" className="h-11">
           <Plus /> <span className="hidden sm:inline">Adicionar</span>
         </Button>
       </div>
