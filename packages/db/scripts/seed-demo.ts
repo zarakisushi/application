@@ -10,7 +10,7 @@ import { addDays, addMonths } from '@zaraki/core';
 import type { Tx } from '../src/client';
 import { backfillOrderFinance, ensureFinanceDefaults } from '../src/finance';
 import { backfillOrderStock, createStockMovement, createStockPurchase, createSuggestedStockItems, listStockItems, saveRecipe } from '../src/stock';
-import { calendarSyncJobs, customers, financeAccounts, financeCategories, financeEntries, orderCounters, orderItems, orders, orderStageHistory, products, tenants } from '../src/schema';
+import { calendarSyncJobs, customers, financeAccounts, financeCategories, financeEntries, memberships, orderCounters, orderItems, orders, orderStageHistory, products, suppliers, tasks, tenants, users } from '../src/schema';
 
 const url = requireEnv('DATABASE_URL');
 if (!/@(localhost|127\.0\.0\.1)[:/]/.test(url)) {
@@ -175,6 +175,8 @@ await withContext({ platformAdmin: true, actorLabel: 'demo', allowBackdate: true
   console.log(`Financeiro: ${entries} vendas lançadas no caixa.`);
   console.log(`Financeiro: ${await seedDemoExpenses(tx, tenant.id, tz)} despesas de demonstração.`);
   console.log(`Estoque: ${await seedDemoStock(tx, tenant.id, tz)} itens com fichas técnicas, compras e baixas.`);
+  console.log(`Tarefas: ${await seedDemoTasks(tx, tenant.id, tz)} afazeres da equipe.`);
+  console.log(`Fornecedores: ${await seedDemoSuppliers(tx, tenant.id)} cadastros.`);
   console.log(`Demonstração criada: ${people.length} clientes e ${created} pedidos em ${tenant.name}.`);
 }, db);
 
@@ -335,4 +337,78 @@ async function seedDemoStock(tx: Tx, tenantId: string, tz: string) {
   await createStockMovement(tx, tenantId, { itemId: id('Salmão'), kind: 'PERDA', qty: 0.4, occurredOn: addDays(today, -2), notes: 'Peixe passou da validade (demo)' });
   await createStockMovement(tx, tenantId, { itemId: id('Tubo Push Pop'), kind: 'PERDA', qty: 12, occurredOn: addDays(today, -1), notes: 'Tubos danificados no transporte (demo)' });
   return items.length;
+}
+
+/** Afazeres típicos da equipe: um atrasado, alguns de hoje (um já feito) e outros da semana. */
+async function seedDemoTasks(tx: Tx, tenantId: string, tz: string) {
+  const [existing] = await tx.select({ n: sql<number>`count(*)`.mapWith(Number) }).from(tasks).where(eq(tasks.tenantId, tenantId));
+  if (existing!.n > 0) return 0;
+  const team = await tx
+    .select({ id: users.id })
+    .from(memberships)
+    .innerJoin(users, eq(users.id, memberships.userId))
+    .where(and(eq(memberships.tenantId, tenantId), eq(memberships.status, true), eq(users.status, true)))
+    .orderBy(users.name);
+  const person = (i: number) => team[i % Math.max(team.length, 1)]?.id ?? null;
+  const today = todayInZone(tz);
+  const dow = new Date(`${today}T12:00:00Z`).getUTCDay();
+  const sunday = addDays(today, dow === 0 ? 0 : 7 - dow);
+  const demo: { title: string; due: string; important?: boolean; assignee?: string | null; notes?: string; done?: boolean }[] = [
+    { title: 'Pedir salmão para sexta', due: addDays(today, -1), important: true, assignee: person(0), notes: 'Peixaria Goiás: 8 kg. Confirmar o horário de entrega.' },
+    { title: 'Conferir a validade do cream cheese', due: today, assignee: person(2) },
+    { title: 'Postar story do Push Pop da semana', due: today },
+    { title: 'Abrir o caixa e conferir o troco', due: today, assignee: person(0), done: true },
+    { title: 'Limpar o freezer', due: sunday },
+    { title: 'Repor panfletos no balcão', due: sunday, assignee: person(2) },
+  ];
+  for (const t of demo) {
+    const [row] = await tx
+      .insert(tasks)
+      .values({ tenantId, title: t.title, notes: t.notes ?? null, dueDate: t.due, important: t.important ?? false, assigneeUserId: t.assignee ?? null })
+      .returning({ id: tasks.id });
+    const doneBy = person(0);
+    if (t.done && doneBy) await tx.update(tasks).set({ doneAt: new Date(), doneBy }).where(eq(tasks.id, row!.id));
+  }
+  return demo.length;
+}
+
+/** Fornecedores típicos de um delivery de sushi em Goiânia (a Peixaria fica compartilhada com a rede). */
+async function seedDemoSuppliers(tx: Tx, tenantId: string) {
+  const [existing] = await tx.select({ n: sql<number>`count(*)`.mapWith(Number) }).from(suppliers).where(eq(suppliers.tenantId, tenantId));
+  if (existing!.n > 0) return 0;
+  const base = { personKind: 'PJ', state: 'GO', paymentMethods: ['PIX', 'BOLETO'] };
+  const demo: (typeof suppliers.$inferInsert)[] = [
+    {
+      ...base, tenantId, name: 'Peixaria Goiás', legalName: 'Peixaria Goiás Comércio de Pescados Ltda.', document: '12345678000195',
+      categories: ['PEIXES'], contactName: 'Marcos', whatsapp: '+5562981234567', phone: '+556232410001', email: 'vendas@peixariagoias.com.br',
+      cep: '74230010', street: 'Avenida T-9', number: '1500', district: 'Setor Bueno', city: 'Goiânia',
+      deliveryDays: [2, 5], minOrderCents: 50000, paymentTerms: '14 dias', rating: 5, networkShared: true,
+      notes: 'Pedido até 16h para entrega no dia seguinte. Salmão chileno toda terça.',
+    },
+    {
+      ...base, tenantId, name: 'Atacado Oriental', legalName: 'Oriental Distribuidora de Alimentos Ltda.', document: '23456789000195',
+      categories: ['MERCEARIA', 'EMBALAGENS'], contactName: 'Akemi', whatsapp: '+5562982345678', email: 'pedidos@atacadooriental.com.br',
+      street: 'Rua 44', number: '320', district: 'Setor Norte Ferroviário', city: 'Goiânia',
+      deliveryDays: [1, 4], minOrderCents: 30000, paymentTerms: '28 dias', rating: 4,
+      notes: 'Arroz, nori, shoyu, gergelim e hashi.',
+    },
+    {
+      ...base, tenantId, name: 'Embalagens Cerrado', document: '34567890000130', categories: ['EMBALAGENS', 'LIMPEZA'],
+      contactName: 'Rafaela', whatsapp: '+5562983456789', phone: '+556232420002', city: 'Aparecida de Goiânia',
+      deliveryDays: [3], minOrderCents: 20000, paymentTerms: 'à vista', rating: 4, paymentMethods: ['PIX'],
+      notes: 'Tubos Push Pop, tampas e sacolas. Prazo de produção de 10 dias para tubos personalizados.',
+    },
+    {
+      ...base, tenantId, name: 'Gráfica Rápida', document: '45678901000175', categories: ['GRAFICA'], contactName: 'Diego',
+      whatsapp: '+5562984567890', email: 'orcamento@graficarapida.com.br', city: 'Goiânia', paymentTerms: '50% no pedido', rating: 3,
+      paymentMethods: ['PIX', 'CARTAO'], notes: 'Panfletos, adesivos de lacre e cardápios.',
+    },
+    {
+      ...base, tenantId, name: 'Hortifruti Central', categories: ['HORTIFRUTI'], contactName: 'Seu Zé', whatsapp: '+5562985678901',
+      city: 'Goiânia', district: 'Ceasa', deliveryDays: [1, 3, 5], paymentTerms: 'à vista', paymentMethods: ['PIX', 'DINHEIRO'], rating: 5,
+      notes: 'Manga, cebolinha e pepino japonês.',
+    },
+  ];
+  await tx.insert(suppliers).values(demo);
+  return demo.length;
 }

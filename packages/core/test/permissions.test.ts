@@ -18,12 +18,15 @@ describe('permissões por papel', () => {
     expect(p).toContain('reports:read');
     expect(p).toContain('orders:delete');
     expect(p).toContain('products:write');
+    expect(p).toContain('tasks:manage');
+    expect(p).toContain('suppliers:write');
+    expect(p).not.toContain('suppliers:delete');
     for (const denied of ['users:manage', 'audit:read', 'products:delete', 'tenants:manage'] as Permission[]) {
       expect(p).not.toContain(denied);
     }
   });
 
-  it('ATENDENTE cria e edita pedidos e clientes e registra no estoque, sem excluir e sem relatórios', () => {
+  it('ATENDENTE cria e edita pedidos e clientes, registra no estoque e cuida das tarefas, sem excluir e sem relatórios', () => {
     expect(allowed('ATENDENTE')).toEqual([
       'orders:read',
       'orders:write',
@@ -32,6 +35,8 @@ describe('permissões por papel', () => {
       'products:read',
       'stock:read',
       'stock:write',
+      'tasks:read',
+      'tasks:write',
     ]);
   });
 

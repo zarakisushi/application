@@ -15,3 +15,5 @@ export * from './coupons';
 export * from './finance';
 export * from './finance-health';
 export * from './stock';
+export * from './tasks';
+export * from './suppliers';

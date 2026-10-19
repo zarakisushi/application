@@ -17,6 +17,10 @@ export function auditRecordHref(entity: string, entityId: string | null, data: u
     case 'memberships':
     case 'accounts':
       return typeof record.user_id === 'string' ? `/admin/usuarios/${record.user_id}` : null;
+    case 'suppliers':
+      return entityId && `/admin/fornecedores/${entityId}`;
+    case 'tasks':
+      return '/admin/tarefas?aba=todas';
     case 'tenants':
       return entityId && `/admin/unidades/${entityId}`;
     default:

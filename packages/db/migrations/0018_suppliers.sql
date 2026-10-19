@@ -1,0 +1,50 @@
+CREATE TABLE "suppliers" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"tenant_id" uuid NOT NULL,
+	"person_kind" text DEFAULT 'PJ' NOT NULL,
+	"name" text NOT NULL,
+	"legal_name" text,
+	"document" text,
+	"state_registration" text,
+	"categories" text[] DEFAULT '{}'::text[] NOT NULL,
+	"contact_name" text,
+	"whatsapp" text,
+	"phone" text,
+	"email" text,
+	"website" text,
+	"cep" text,
+	"street" text,
+	"number" text,
+	"complement" text,
+	"district" text,
+	"city" text,
+	"state" text,
+	"delivery_days" smallint[] DEFAULT '{}'::smallint[] NOT NULL,
+	"min_order_cents" integer DEFAULT 0 NOT NULL,
+	"payment_terms" text,
+	"payment_methods" text[] DEFAULT '{}'::text[] NOT NULL,
+	"pix_key" text,
+	"bank_details" text,
+	"rating" smallint,
+	"notes" text,
+	"network_shared" boolean DEFAULT false NOT NULL,
+	"copied_from_id" uuid,
+	"status" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_by" uuid,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_by" uuid,
+	CONSTRAINT "suppliers_person_kind_ck" CHECK ("suppliers"."person_kind" in ('PJ', 'PF')),
+	CONSTRAINT "suppliers_name_ck" CHECK (length("suppliers"."name") between 1 and 120),
+	CONSTRAINT "suppliers_document_ck" CHECK ("suppliers"."document" is null or "suppliers"."document" ~ '^[0-9]{11}$|^[0-9]{14}$'),
+	CONSTRAINT "suppliers_state_ck" CHECK ("suppliers"."state" is null or "suppliers"."state" ~ '^[A-Z]{2}$'),
+	CONSTRAINT "suppliers_rating_ck" CHECK ("suppliers"."rating" is null or "suppliers"."rating" between 1 and 5),
+	CONSTRAINT "suppliers_delivery_days_ck" CHECK ("suppliers"."delivery_days" <@ '{0,1,2,3,4,5,6}'::smallint[]),
+	CONSTRAINT "suppliers_min_order_ck" CHECK ("suppliers"."min_order_cents" >= 0)
+);
+--> statement-breakpoint
+ALTER TABLE "suppliers" ADD CONSTRAINT "suppliers_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "suppliers" ADD CONSTRAINT "suppliers_copied_from_id_suppliers_id_fk" FOREIGN KEY ("copied_from_id") REFERENCES "public"."suppliers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE UNIQUE INDEX "suppliers_tenant_document_uq" ON "suppliers" USING btree ("tenant_id","document") WHERE "suppliers"."status" and "suppliers"."document" is not null;--> statement-breakpoint
+CREATE INDEX "suppliers_tenant_name_idx" ON "suppliers" USING btree ("tenant_id","name") WHERE "suppliers"."status";--> statement-breakpoint
+CREATE INDEX "suppliers_network_idx" ON "suppliers" USING btree ("network_shared") WHERE "suppliers"."status" and "suppliers"."network_shared";

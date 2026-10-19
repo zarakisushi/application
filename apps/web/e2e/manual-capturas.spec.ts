@@ -36,6 +36,16 @@ test('capturas do manual', async ({ page }) => {
   await loginGestor(page);
   await shot(page, '04-inicio', 1500);
 
+  // Tarefas da equipe
+  await page.goto('/admin/tarefas?aba=semana');
+  await expect(page.getByTestId('task').first()).toBeVisible();
+  await shot(page, '33-tarefas', 1050);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/admin/tarefas');
+  await expect(page.getByTestId('task').first()).toBeVisible();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${OUT}/34-tarefas-celular.jpg`, type: 'jpeg', quality: 82 });
+
   // Operação
   await page.goto('/admin/pedidos');
   await shot(page, '05-pedidos', 900);
@@ -232,6 +242,19 @@ test('capturas do manual', async ({ page }) => {
   await page.getByRole('button', { name: 'Registrar', exact: true }).click();
   await expect(page.getByText('Saída registrada.')).toBeVisible();
   await switchTo('Matriz');
+
+  // Fornecedores
+  await page.goto('/admin/fornecedores');
+  await expect(page.getByTestId('supplier-row').first()).toBeVisible();
+  await shot(page, '35-fornecedores', 820);
+  await page.getByRole('link', { name: 'Peixaria Goiás', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Peixaria Goiás' })).toBeVisible();
+  await shot(page, '36-fornecedor-ficha', 1000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/admin/fornecedores');
+  await expect(page.getByTestId('supplier-card').first()).toBeVisible();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${OUT}/37-fornecedores-celular.jpg`, type: 'jpeg', quality: 82 });
 
   // Relatórios e rede
   await page.goto('/admin/relatorios');
