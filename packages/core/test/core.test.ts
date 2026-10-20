@@ -176,3 +176,19 @@ describe('mensagem do WhatsApp', () => {
     expect(whatsappUrl('+55 (62) 98109-2799', 'Olá & tchau')).toBe('https://wa.me/5562981092799?text=Ol%C3%A1%20%26%20tchau');
   });
 });
+
+describe('antecedência de festas e eventos no site', () => {
+  it('aceita a partir do 3º dia corrido, inclusive na virada do mês e do ano', async () => {
+    const { earliestScheduledDate, scheduledDateError } = await import('../src');
+    expect(earliestScheduledDate('2026-10-20')).toBe('2026-10-23');
+    expect(earliestScheduledDate('2026-10-30')).toBe('2026-11-02');
+    expect(earliestScheduledDate('2026-12-30')).toBe('2027-01-02');
+    expect(scheduledDateError('2026-10-23', '2026-10-20')).toBeNull();
+    expect(scheduledDateError('2026-11-15', '2026-10-20')).toBeNull();
+    expect(scheduledDateError('2026-10-22', '2026-10-20')).toBe(
+      'Para festas e eventos, escolha uma data a partir de 23/10/2026: precisamos de 3 dias para preparar tudo.',
+    );
+    expect(scheduledDateError('2026-10-20', '2026-10-20')).not.toBeNull();
+    expect(scheduledDateError('', '2026-10-20')).toBeNull();
+  });
+});

@@ -140,6 +140,48 @@ test('tipos no site: Delivery, Festa e Evento (evento com convidados opcionais)'
   expect(wa.text).not.toContain('Convidados');
 });
 
+test('festa e evento: só a partir de 3 dias corridos; data digitada antes disso é recusada', async ({ page }) => {
+  await page.goto('/#encomendas');
+  const form = page.locator('form.form');
+  await form.getByRole('button', { name: 'Festa', exact: true }).click();
+
+  // Hoje e o 3º dia no fuso de Goiânia.
+  const spDay = (days: number) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date(Date.now() + days * 86_400_000));
+  const min = spDay(3);
+  const br = (d: string) => d.split('-').reverse().join('/');
+  const date = form.getByLabel('Data');
+  await expect(date).toHaveAttribute('min', min); // o calendário não oferece datas anteriores
+  await expect(form.getByText(`A partir de ${br(min)}: precisamos de 3 dias para preparar tudo.`)).toBeVisible();
+
+  // Digitada à mão (amanhã): o aviso aparece na hora e o pedido não sai.
+  await form.getByLabel('Nome').fill('Cliente Apressado');
+  await form.getByLabel('WhatsApp').fill('62988886666');
+  await date.fill(spDay(1));
+  const message = `Para festas e eventos, escolha uma data a partir de ${br(min)}: precisamos de 3 dias para preparar tudo.`;
+  await expect(form.getByText(message)).toBeVisible();
+  await expect(date).toHaveAttribute('aria-invalid', 'true');
+  await form.getByLabel('Horário').fill('19:00');
+  await form.getByLabel('Número de convidados').fill('20');
+  await addTubes(page, 'Uramaki de Salmão e Manga', 2);
+  await form.getByRole('button', { name: 'Pix', exact: true }).click();
+  let popup = false;
+  page.on('popup', () => (popup = true));
+  // Sem a validação nativa do navegador, para provar que o formulário também barra.
+  await form.evaluate((f) => f.setAttribute('novalidate', ''));
+  await page.getByRole('button', { name: 'Enviar pelo WhatsApp' }).click();
+  await expect(date).toBeFocused();
+  expect(popup).toBe(false);
+  const { rows } = await db.query(`select count(*)::int as n from customers where phone = '+5562988886666'`);
+  expect(rows[0].n).toBe(0);
+
+  // No 3º dia, vale (o envio com data válida é coberto pelos testes acima; aqui não envia, para não somar
+  // pedidos do mesmo aparelho no limite anti-abuso do site).
+  await date.fill(min);
+  await expect(form.getByText(message)).toHaveCount(0);
+  await expect(date).not.toHaveAttribute('aria-invalid');
+  await expect(form.getByText(`A partir de ${br(min)}`)).toBeVisible();
+});
+
 test('sem nenhum tubo, avisa e não abre o WhatsApp', async ({ page }) => {
   await page.goto('/#encomendas');
   const form = page.locator('form.form');

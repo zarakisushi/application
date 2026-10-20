@@ -1,9 +1,12 @@
 'use server';
 
 import {
+  DEFAULT_TIMEZONE,
   OrderError,
   buildOrderMessage,
   isScheduled,
+  scheduledDateError,
+  todayInZone,
   normalizeBrPhone,
   normalizeCouponCode,
   publicOrderSchema,
@@ -84,6 +87,13 @@ export async function submitOrder(raw: PublicOrderInput): Promise<SubmitOrderRes
   }
   const input = parsed.data;
   if (input.website) return { ok: false, error: 'Não foi possível enviar o pedido.' };
+
+  // Festas e eventos: só a partir de 3 dias corridos (tempo de preparo). Conferido aqui também, porque o
+  // bloqueio do navegador pode ser contornado. O fuso é o da rede (Goiânia), mesmo com o banco fora do ar.
+  if (isScheduled(input.type)) {
+    const dateError = scheduledDateError(input.date, todayInZone(DEFAULT_TIMEZONE));
+    if (dateError) return { ok: false, error: dateError, fieldErrors: { date: dateError } };
+  }
 
   const meta = await requestMeta();
   const { ip } = meta;

@@ -1,5 +1,5 @@
 import 'server-only';
-import { DEFAULT_MENU, formatBrPhone, todayInZone, DEFAULT_TIMEZONE } from '@zaraki/core';
+import { DEFAULT_MENU, DEFAULT_TIMEZONE, earliestScheduledDate, formatBrPhone, todayInZone } from '@zaraki/core';
 import { findTenantBySlug, getDb, listActiveMenu, withContext } from '@zaraki/db';
 import { unstable_cache } from 'next/cache';
 
@@ -60,7 +60,7 @@ export async function getSiteData() {
       offline: false,
       menu,
       whatsapp: siteWhatsapp(tenant),
-      minDate: todayInZone(tenant.timezone),
+      minDate: earliestScheduledDate(todayInZone(tenant.timezone)),
     };
   } catch (error) {
     console.error('[site] banco indisponível; landing em modo contingência', error);
@@ -68,7 +68,7 @@ export async function getSiteData() {
       offline: true,
       menu: DEFAULT_MENU.map((m, i): MenuItem => ({ ...m, id: `offline-${i + 1}` })),
       whatsapp: siteWhatsapp(),
-      minDate: todayInZone(DEFAULT_TIMEZONE),
+      minDate: earliestScheduledDate(todayInZone(DEFAULT_TIMEZONE)),
     };
   }
 }

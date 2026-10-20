@@ -19,6 +19,26 @@ export const ORDER_TYPE_LABEL: Record<OrderType, string> = {
 /** Festas e eventos têm data/horário marcados e vão para a Google Agenda. */
 export const isScheduled = (type: OrderType) => type !== 'DELIVERY';
 
+/** Festas e eventos pedidos pelo site: antecedência mínima, em dias corridos, para preparar a encomenda. */
+export const SCHEDULED_LEAD_DAYS = 3;
+
+/** Primeira data aceita no site para festa ou evento ("AAAA-MM-DD"): hoje + 3 dias corridos. */
+export function earliestScheduledDate(today: string): string {
+  const [y, m, d] = today.split('-').map(Number) as [number, number, number];
+  return new Date(Date.UTC(y, m - 1, d + SCHEDULED_LEAD_DAYS)).toISOString().slice(0, 10);
+}
+
+/** Mensagem para uma data de festa/evento antes do prazo mínimo (null = data aceita). */
+export function scheduledDateError(date: string, today: string): string | null {
+  return minScheduledDateError(date, earliestScheduledDate(today));
+}
+
+/** Mesma regra, a partir da primeira data aceita (o formulário do site já a recebe pronta). */
+export function minScheduledDateError(date: string, min: string): string | null {
+  if (!date || date >= min) return null;
+  return `Para festas e eventos, escolha uma data a partir de ${min.split('-').reverse().join('/')}: precisamos de ${SCHEDULED_LEAD_DAYS} dias para preparar tudo.`;
+}
+
 /** Erro de regra de negócio do pedido, com mensagem pronta para mostrar ao cliente. */
 export class OrderError extends DomainError {
   constructor(
