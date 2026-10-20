@@ -1,14 +1,20 @@
 'use client';
 
 import {
+  DEFAULT_TIMEZONE,
   ORDER_TYPES,
   ORDER_TYPE_LABEL,
   PAYMENT_METHOD_LABEL,
   SITE_PAYMENT_METHODS,
   buildOrderMessage,
   formatCents,
+  SCHEDULED_LEAD_DAYS,
+  earliestScheduledDate,
+  formatDateBr,
   isScheduled,
+  minScheduledDateError,
   priceOrder,
+  todayInZone,
   whatsappUrl,
   type OrderType,
   type SitePaymentMethod,
@@ -21,7 +27,7 @@ export type OrderFormProduct = { id: string; name: string; priceCents: number };
 type Props = {
   products: OrderFormProduct[];
   whatsappNumber: string;
-  /** Data mínima para festas e eventos ("hoje" no fuso da unidade). */
+  /** Primeira data aceita para festas e eventos (hoje + 3 dias corridos, no fuso da unidade). */
   minDate: string;
   /** Banco indisponível: o pedido vai direto para o WhatsApp, sem ser gravado. */
   offline: boolean;
@@ -64,9 +70,15 @@ function goTo(win: Window | null, url: string) {
   else window.location.href = url;
 }
 
-export function OrderForm({ products, whatsappNumber, minDate, offline }: Props) {
+export function OrderForm({ products, whatsappNumber, minDate: serverMinDate, offline }: Props) {
   const [type, setType] = useState<OrderType>('DELIVERY');
   const [fields, setFields] = useState<Fields>(EMPTY_FIELDS);
+  // A página pode vir do cache: no navegador, a data mínima é recalculada com o relógio de agora.
+  const [minDate, setMinDate] = useState(serverMinDate);
+  useEffect(() => {
+    const now = earliestScheduledDate(todayInZone(DEFAULT_TIMEZONE));
+    if (now > serverMinDate) setMinDate(now);
+  }, [serverMinDate]);
   const [qty, setQty] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -125,7 +137,11 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
   const onField = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFields((s) => ({ ...s, [name]: value }));
-    setFieldErrors(({ [name]: _, ...rest }) => rest);
+    // Data digitada à mão antes do prazo mínimo: o aviso aparece na hora.
+    const dateError = name === 'date' ? minScheduledDateError(value, minDate) : null;
+    setFieldErrors(({ [name]: _, ...rest }) => (dateError ? { ...rest, date: dateError } : rest));
+    // Data corrigida: some também o aviso geral do envio (a mensagem só depende da data mínima).
+    if (name === 'date' && !dateError) setError((current) => (current === minScheduledDateError('0000-01-01', minDate) ? null : current));
   };
 
   const add = (id: string, d: number) => {
@@ -167,6 +183,13 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
     }
     if (!payment) {
       setError('Escolha a forma de pagamento.');
+      return;
+    }
+    const dateError = scheduled ? minScheduledDateError(fields.date, minDate) : null;
+    if (dateError) {
+      setFieldErrors((f) => ({ ...f, date: dateError }));
+      setError(dateError);
+      document.querySelector<HTMLInputElement>('form.form input[name="date"]')?.focus();
       return;
     }
     if (offline) {
@@ -292,7 +315,11 @@ export function OrderForm({ products, whatsappNumber, minDate, offline }: Props)
             <label className="field">
               Data
               <input {...inputProps('date')} type="date" required min={minDate} />
-              {fieldError('date')}
+              {fieldError('date') ?? (
+                <span className="field__hint">
+                  A partir de {formatDateBr(minDate)}: precisamos de {SCHEDULED_LEAD_DAYS} dias para preparar tudo.
+                </span>
+              )}
             </label>
             <label className="field">
               Horário
