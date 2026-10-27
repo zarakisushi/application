@@ -21,6 +21,7 @@ import {
 } from '@zaraki/core';
 import { useEffect, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react';
 import { checkCoupon, submitOrder } from '@/app/(site)/actions';
+import { WhatsappIcon } from './WhatsappIcon';
 
 export type OrderFormProduct = { id: string; name: string; priceCents: number };
 
@@ -493,7 +494,13 @@ export function OrderForm({ products, whatsappNumber, minDate: serverMinDate, of
       )}
 
       <button type="submit" className="form__submit" disabled={pending}>
-        {pending ? 'Enviando…' : 'Enviar pelo WhatsApp'}
+        {pending ? (
+          'Enviando…'
+        ) : (
+          <>
+            Concluir pedido <WhatsappIcon className="form__submit-icon" />
+          </>
+        )}
       </button>
     </form>
   );

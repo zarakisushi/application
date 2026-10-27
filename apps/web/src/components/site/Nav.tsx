@@ -14,7 +14,7 @@ export function Nav() {
           <a href="#qualidade">Qualidade</a>
           <a href="#cardapio">Cardápio</a>
         </div>
-        <a href="#encomendas" className="nav__cta">Encomendar</a>
+        <a href="#encomendas" className="nav__cta">Fazer pedido</a>
       </div>
     </nav>
   );

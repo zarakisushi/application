@@ -559,7 +559,12 @@ input, select, textarea, button { font-family: inherit; }
   text-transform: uppercase;
   font-size: 15px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
+.form__submit-icon { width: 22px; height: 22px; flex-shrink: 0; }
 .form__submit:hover { background: var(--red-hover); }
 .form__submit:disabled { opacity: 0.7; cursor: progress; }
 .field__error { font-size: 13px; font-weight: 500; letter-spacing: 0; text-transform: none; color: #a33a22; }

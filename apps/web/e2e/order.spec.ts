@@ -20,7 +20,7 @@ async function addTubes(page: Page, flavor: string, n: number) {
 /** Envia o formulário e devolve a mensagem que foi para o WhatsApp. */
 async function submitAndReadWhatsapp(page: Page) {
   const popup = page.waitForEvent('popup');
-  await page.getByRole('button', { name: 'Enviar pelo WhatsApp' }).click();
+  await page.getByRole('button', { name: 'Concluir pedido' }).click();
   const wa = await popup;
   await wa.waitForURL(/wa\.me/);
   const url = new URL(wa.url());
@@ -92,7 +92,7 @@ test('delivery: exige endereço, recalcula o total no servidor e usa o mesmo cli
   await addTubes(page, 'Uramaki de Salmão e Manga', 1);
 
   // Sem bairro/endereço o navegador não deixa enviar.
-  await page.getByRole('button', { name: 'Enviar pelo WhatsApp' }).click();
+  await page.getByRole('button', { name: 'Concluir pedido' }).click();
   expect(await form.getByLabel('Bairro').evaluate((el: HTMLInputElement) => el.validity.valueMissing)).toBe(true);
 
   await form.getByLabel('Bairro').fill('Setor Bueno');
@@ -100,7 +100,7 @@ test('delivery: exige endereço, recalcula o total no servidor e usa o mesmo cli
   await form.getByLabel('Ponto de referência').fill('Portão azul, ao lado da padaria');
 
   // A forma de pagamento é obrigatória.
-  await page.getByRole('button', { name: 'Enviar pelo WhatsApp' }).click();
+  await page.getByRole('button', { name: 'Concluir pedido' }).click();
   await expect(form.getByRole('alert')).toHaveText('Escolha a forma de pagamento.');
   await form.getByRole('button', { name: 'Cartão de débito', exact: true }).click();
   await expect(form.getByRole('button', { name: 'Cartão de débito', exact: true })).toHaveAttribute('aria-pressed', 'true');
@@ -168,7 +168,7 @@ test('festa e evento: só a partir de 3 dias corridos; data digitada antes disso
   page.on('popup', () => (popup = true));
   // Sem a validação nativa do navegador, para provar que o formulário também barra.
   await form.evaluate((f) => f.setAttribute('novalidate', ''));
-  await page.getByRole('button', { name: 'Enviar pelo WhatsApp' }).click();
+  await page.getByRole('button', { name: 'Concluir pedido' }).click();
   await expect(date).toBeFocused();
   expect(popup).toBe(false);
   const { rows } = await db.query(`select count(*)::int as n from customers where phone = '+5562988886666'`);
@@ -192,7 +192,7 @@ test('sem nenhum tubo, avisa e não abre o WhatsApp', async ({ page }) => {
 
   let opened = false;
   page.on('popup', () => (opened = true));
-  await page.getByRole('button', { name: 'Enviar pelo WhatsApp' }).click();
+  await page.getByRole('button', { name: 'Concluir pedido' }).click();
   await expect(form.getByRole('alert')).toHaveText('Adicione pelo menos um tubo ao pedido.');
   expect(opened).toBe(false);
 });
