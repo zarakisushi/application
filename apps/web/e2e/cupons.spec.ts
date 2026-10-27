@@ -38,7 +38,7 @@ async function applyOnSite(page: Page, code: string) {
 
 async function submitAndReadWhatsapp(page: Page) {
   const popup = page.waitForEvent('popup');
-  await page.getByRole('button', { name: 'Enviar pelo WhatsApp' }).click();
+  await page.getByRole('button', { name: 'Concluir pedido' }).click();
   const wa = await popup;
   await wa.waitForURL(/wa\.me/);
   return new URL(wa.url()).searchParams.get('text') ?? '';
