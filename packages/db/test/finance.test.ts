@@ -257,11 +257,11 @@ describe('lançamentos manuais', () => {
     await expect(run(async (tx) => createEntries(tx, tenant.id, await entry({ description: 'Errado', amount: '10', categoryId: vendas.id })))).rejects.toThrow('categoria de saída');
   });
 
-  it('lista em ordem crescente pela data do movimento (pagamento ou vencimento)', async () => {
+  it('lista da mais recente para a mais antiga, pela data do movimento (pagamento ou vencimento)', async () => {
     const page = await run((tx) => listEntries(tx, tenant.id, { pageSize: 100, today: TODAY }));
     const dates = page.rows.map((r) => r.paidOn ?? r.dueDate);
     expect(dates.length).toBeGreaterThan(3);
-    expect(dates).toEqual([...dates].sort());
+    expect(dates).toEqual([...dates].sort().reverse());
   });
 
   it('filtros e totais da lista', async () => {
