@@ -91,7 +91,8 @@ export async function listEntries(tx: Tx, tenantId: string, params: EntryListPar
     .leftJoin(orders, eq(orders.id, financeEntries.orderId))
     .where(where)
     // Data do movimento crescente (mais antigo primeiro); no mesmo dia, na ordem em que foram lançados.
-    .orderBy(asc(movementDate), asc(financeEntries.createdAt))
+    // Mais recentes primeiro (data do pagamento ou, em aberto, do vencimento); no mesmo dia, o último lançado em cima.
+    .orderBy(desc(movementDate), desc(financeEntries.createdAt))
     .limit(pageSize)
     .offset(offset);
 
